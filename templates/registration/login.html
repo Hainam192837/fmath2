@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title_row %}
+{% endblock title_row %}
+
+{% block title_ruler %}
+{% endblock title_ruler %}
+
+{% block body %}
+    <section class="relative overflow-hidden rounded-[2rem] border border-app-border bg-app-panel-elevated/90 px-5 py-6 dark:border-app-dark-border dark:bg-app-dark-panel-elevated/90 sm:px-8 sm:py-8 lg:px-10">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,184,0,0.16),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(14,165,233,0.14),_transparent_30%)]"></div>
+
+        <div class="relative grid gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(22rem,0.9fr)] lg:items-center">
+            <div class="space-y-6">
+                <div class="inline-flex w-fit items-center gap-3 rounded-full border border-app-border/80 bg-app-panel/70 px-4 py-2 text-app-text dark:border-app-dark-border/80 dark:bg-app-dark-panel/70 dark:text-app-dark-text">
+                    <img class="h-8 w-8" src="{{ static('icons/logo.svg') }}" alt="FMATH">
+                    <div class="leading-none">
+                        <div class="text-sm font-semibold uppercase tracking-[0.24em]">FMATH</div>
+                        <div class="mt-1 text-xs text-app-text-secondary dark:text-app-dark-text-secondary">{{ _('Competitive programming workspace') }}</div>
+                    </div>
+                </div>
+
+                <div class="max-w-2xl space-y-4">
+                    <h1 class="text-3xl font-semibold leading-tight text-app-text dark:text-app-dark-text sm:text-4xl lg:text-5xl">
+                        {{ _('Sign in and continue your next focused practice session.') }}
+                    </h1>
+                    <p class="max-w-xl text-sm leading-7 text-app-text-muted dark:text-app-dark-text-muted sm:text-base">
+                        {{ _('Track submissions, join contests, and keep your progress in one place with the same clean workflow used across the platform.') }}
+                    </p>
+                </div>
+
+                <div class="grid gap-3 sm:grid-cols-3">
+                    <div class="rounded-2xl border border-app-border/80 bg-app-panel/80 p-4 dark:border-app-dark-border/80 dark:bg-app-dark-panel/80">
+                        <div class="text-xs font-semibold uppercase tracking-[0.16em] text-app-text-secondary dark:text-app-dark-text-secondary">{{ _('Practice') }}</div>
+                        <p class="mt-2 text-sm leading-6 text-app-text-muted dark:text-app-dark-text-muted">
+                            {{ _('Resume problem solving with your saved history and rating context.') }}
+                        </p>
+                    </div>
+                    <div class="rounded-2xl border border-app-border/80 bg-app-panel/80 p-4 dark:border-app-dark-border/80 dark:bg-app-dark-panel/80">
+                        <div class="text-xs font-semibold uppercase tracking-[0.16em] text-app-text-secondary dark:text-app-dark-text-secondary">{{ _('Contests') }}</div>
+                        <p class="mt-2 text-sm leading-6 text-app-text-muted dark:text-app-dark-text-muted">
+                            {{ _('Enter live rounds faster without losing your current destination.') }}
+                        </p>
+                    </div>
+                    <div class="rounded-2xl border border-app-border/80 bg-app-panel/80 p-4 dark:border-app-dark-border/80 dark:bg-app-dark-panel/80">
+                        <div class="text-xs font-semibold uppercase tracking-[0.16em] text-app-text-secondary dark:text-app-dark-text-secondary">{{ _('Community') }}</div>
+                        <p class="mt-2 text-sm leading-6 text-app-text-muted dark:text-app-dark-text-muted">
+                            {{ _('Access profile, blog, and organization features from a single account.') }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rounded-[1.75rem] border border-app-border bg-app-panel/95 p-5 shadow-[0_18px_60px_rgba(15,23,42,0.12)] dark:border-app-dark-border dark:bg-app-dark-panel/95 sm:p-7">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-app-text-secondary dark:text-app-dark-text-secondary">{{ _('Account access') }}</p>
+                        <h2 class="mt-2 text-2xl font-semibold text-app-text dark:text-app-dark-text">{{ _('Welcome back') }}</h2>
+                        <p class="mt-2 text-sm leading-6 text-app-text-muted dark:text-app-dark-text-muted">
+                            {{ _('Use your username and password to continue.') }}
+                        </p>
+                    </div>
+                    <span class="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900">
+                        <i class="fa-duotone fa-right-to-bracket text-lg"></i>
+                    </span>
+                </div>
+
+                <form class="mt-6 space-y-5" action="" method="POST">
+                    {% csrf_token %}
+                    <input type="submit" value="{{ _('Sign in') }}" class="hidden" tabindex="-1" aria-hidden="true">
+
+                    {% if form.errors %}
+                    <div id="form-errors" class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700 dark:border-rose-900/70 dark:bg-rose-950/30 dark:text-rose-200">
+                        {{ _('Invalid username or password.') }}
+                    </div>
+                    {% endif %}
+
+                    <div class="space-y-4">
+                        <div>
+                            <label for="username" class="mb-2 block text-sm font-semibold text-app-text dark:text-app-dark-text">{{ _('Username') }}</label>
+                            <div class="relative">
+                                <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-app-text-secondary dark:text-app-dark-text-secondary">
+                                    <i class="fa-duotone fa-user"></i>
+                                </span>
+                                <input id="username" name="username" type="text" autocomplete="username" required class="block w-full rounded-2xl border border-app-border bg-white/90 py-3 pr-4 pl-11 text-sm text-app-text shadow-sm outline-none transition placeholder:text-app-text-muted focus:border-app-accent focus:ring-4 focus:ring-sky-100 dark:border-app-dark-border dark:bg-app-dark-panel-elevated dark:text-app-dark-text dark:placeholder:text-app-dark-text-muted dark:focus:border-app-dark-accent dark:focus:ring-sky-950/40" placeholder="{{ _('Enter your username') }}">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="password" class="mb-2 block text-sm font-semibold text-app-text dark:text-app-dark-text">{{ _('Password') }}</label>
+                            <div class="relative">
+                                <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-app-text-secondary dark:text-app-dark-text-secondary">
+                                    <i class="fa-duotone fa-lock"></i>
+                                </span>
+                                <input id="password" name="password" type="password" autocomplete="current-password" required class="block w-full rounded-2xl border border-app-border bg-white/90 py-3 pr-4 pl-11 text-sm text-app-text shadow-sm outline-none transition placeholder:text-app-text-muted focus:border-app-accent focus:ring-4 focus:ring-sky-100 dark:border-app-dark-border dark:bg-app-dark-panel-elevated dark:text-app-dark-text dark:placeholder:text-app-dark-text-muted dark:focus:border-app-dark-accent dark:focus:ring-sky-950/40" placeholder="{{ _('Enter your password') }}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between gap-4">
+                        <label for="remember_me" class="inline-flex items-center gap-3 text-sm text-app-text-muted dark:text-app-dark-text-muted">
+                            <input id="remember_me" name="remember_me" type="checkbox" class="h-4 w-4 rounded border-app-border text-sky-600 focus:ring-sky-500 dark:border-app-dark-border dark:bg-app-dark-panel">
+                            <span>{{ _('Remember me') }}</span>
+                        </label>
+
+                        <div class="flex flex-col items-end gap-1 text-right">
+                            <a href="{{ url('password_reset') }}" class="text-sm font-semibold text-app-accent transition hover:text-sky-700 dark:text-app-dark-accent dark:hover:text-sky-300">
+                                {{ _('Forgot password?') }}
+                            </a>
+                            <a href="{{ url('registration_register') }}" class="text-sm font-semibold text-app-accent transition hover:text-sky-700 dark:text-app-dark-accent dark:hover:text-sky-300">
+                                {{ _('Create account') }}
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <button type="submit" class="btn-primary flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-bold text-white focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-transparent">
+                            <i class="fa-duotone fa-lock-open"></i>
+                            <span>{{ _('Sign in') }}</span>
+                        </button>
+                        <input type="hidden" name="next" value="{{ next }}">
+
+                        <div class="rounded-2xl border border-dashed border-app-border/80 px-4 py-3 text-xs leading-6 text-app-text-muted dark:border-app-dark-border/80 dark:text-app-dark-text-muted">
+                            {{ _('You will be redirected back to your previous page after signing in.') }}
+                        </div>
+                    </div>
+                </form>
+
+                {% if form.has_google_auth or form.has_facebook_auth or form.has_github_auth %}
+                    <div class="mt-6">
+                        <div class="flex items-center gap-3">
+                            <div class="h-px flex-1 bg-app-border dark:bg-app-dark-border"></div>
+                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-app-text-secondary dark:text-app-dark-text-secondary">
+                                {{ _('Or continue with') }}
+                            </p>
+                            <div class="h-px flex-1 bg-app-border dark:bg-app-dark-border"></div>
+                        </div>
+
+                        <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                            {% if form.has_google_auth %}
+                            <a href="{{ url('social:begin', 'google-oauth2') }}?next={{ next|urlencode }}" class="inline-flex items-center justify-center gap-2 rounded-2xl border border-app-border bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50 dark:border-app-dark-border dark:bg-app-dark-panel-elevated dark:text-app-dark-text dark:hover:border-slate-500 dark:hover:bg-slate-900">
+                                <i class="fa-brands fa-google text-red-500"></i>
+                                {{ _('Google') }}
+                            </a>
+                            {% endif %}
+                            {% if form.has_facebook_auth %}
+                            <a href="{{ url('social:begin', 'facebook') }}?next={{ next|urlencode }}" class="inline-flex items-center justify-center gap-2 rounded-2xl border border-app-border bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50 dark:border-app-dark-border dark:bg-app-dark-panel-elevated dark:text-app-dark-text dark:hover:border-slate-500 dark:hover:bg-slate-900">
+                                <i class="fa-brands fa-facebook-square text-blue-600"></i>
+                                {{ _('Facebook') }}
+                            </a>
+                            {% endif %}
+                            {% if form.has_github_auth %}
+                            <a href="{{ url('social:begin', 'github-secure') }}?next={{ next|urlencode }}" class="inline-flex items-center justify-center gap-2 rounded-2xl border border-app-border bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50 dark:border-app-dark-border dark:bg-app-dark-panel-elevated dark:text-app-dark-text dark:hover:border-slate-500 dark:hover:bg-slate-900">
+                                <i class="fa-brands fa-github-square text-slate-900 dark:text-white"></i>
+                                {{ _('GitHub') }}
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+{% endblock %}

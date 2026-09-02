@@ -1,0 +1,8 @@
+/**
+ * Name         : Martor v1.6.12
+ * Created by   : Agus Makmun (Summon Agus)
+ * Release date : 01-Mar-2022
+ * License      : GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
+ * Repository   : https://github.com/agusmakmun/django-markdown-editor
+**/
+:root{--primary:#79aec8;--secondary:#417690}body{margin:0;padding:0;font-size:14px;color:#333;background:#fff}#container{-webkit-box-sizing:unset;box-sizing:unset}#branding h1{margin:0!important}body,button,h1,h2,h3,h4,h5,input,optgroup,select{font-family:Roboto,"Lucida Grande","DejaVu Sans","Bitstream Vera Sans",Verdana,Arial,sans-serif}.button,.submit-row input,a.button,input[type=button],input[type=submit]{padding:5px 15px}nav.sticky caption{caption-side:unset}.ui.tabular.menu+.attached:not(.top).segment,.ui.tabular.menu+.attached:not(.top).segment+.attached:not(.top).segment{width:auto}fieldset .form-row>div{width:100%}fieldset .form-row .main-martor{display:grid!important}.submit-row a.deletelink{height:unset}.table.markdown-reference h2{font-size:1.5em;background:0 0;color:unset;padding:0;font-weight:300!important}.js-inline-admin-formset .form-row {display: revert}

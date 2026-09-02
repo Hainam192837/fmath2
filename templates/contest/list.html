@@ -1,0 +1,400 @@
+{% extends "common-content.html" %}
+{% block meta %}
+    <meta name="description" content="The {{ SITE_NAME }}'s contest list - past, present, and future.">
+{% endblock %}
+
+{% block js_media %}
+    <script src="{{ static('libs/featherlight/featherlight.min.js') }}" type="text/javascript"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.time-remaining').each(function () {
+                count_down($(this));
+            });
+
+            $('#organizations').select2({
+              placeholder: "{{ _('Select organization') }}",
+            }).on('change', function () {
+                $(this).closest('form').trigger('submit');
+            });
+            $('.contest-tag').find('a[data-featherlight]').featherlight();
+
+            $('.join-warning').click(function () {
+                return confirm('{{ _("Are you sure you want to join?") }}\n' +
+                    '{{ _("Joining a contest for the first time starts your timer, after which it becomes unstoppable.") }}');
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block title_ruler %}{% endblock %}
+
+{% block title_row %}
+    {% set tab = 'list' %}
+    {% set title = 'Contests' %}
+    {% include "contest/contest-list-tabs.html" %}
+{% endblock %}
+
+{# ── Badges ── #}
+{% macro contest_badges(contest, status) %}
+    <div class="w-full flex flex-wrap gap-1.5 sm:w-auto">
+        {# Status #}
+        <span class="text-xs font-semibold px-2 py-0.5 rounded bg-slate-200 text-slate-700 dark:bg-white/10 dark:text-slate-200">
+            {% if status == 'active' %}{{ _('Active') }}
+            {% elif status == 'ongoing' %}{{ _('Ongoing') }}
+            {% elif status == 'upcoming' %}{{ _('Upcoming') }}
+            {% elif status == 'past' %}{{ _('Ended') }}
+            {% else %}{{ _('Hidden') }}{% endif %}
+        </span>
+        {# Rated / Unrated #}
+        {% if contest.is_rated %}
+            <span class="text-xs font-semibold px-2 py-0.5 rounded bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300">{{ _('Rated') }}</span>
+        {% else %}
+            <span class="text-xs font-semibold px-2 py-0.5 rounded bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-300">{{ _('Unrated') }}</span>
+        {% endif %}
+        {# Private / Public #}
+        {% if contest.is_private or contest.is_organization_private %}
+            {# <span class="text-xs font-semibold px-2 py-0.5 rounded bg-slate-300 text-slate-700 dark:bg-slate-600/15 dark:text-slate-300">
+                <i class="fa-duotone fa-lock mr-0.5"></i> {{ _('Private') }}
+            </span> #}
+        {% else %}
+            <span class="text-xs font-semibold px-2 py-0.5 rounded bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300">{{ _('Public') }}</span>
+        {% endif %}
+        {# Hidden #}
+        {% if not contest.is_visible %}
+            <span class="text-xs font-semibold px-2 py-0.5 rounded bg-slate-200 text-slate-700 dark:bg-white/10 dark:text-slate-200">
+                <i class="fa fa-eye-slash mr-0.5"></i> {{ _('Hidden') }}
+            </span>
+        {% endif %}
+        {# Organization #}
+        {% if contest.is_organization_private %}
+            {% set orgs = contest.organizations.all() %}
+            {% if orgs|length == 1 %}
+                {% for org in orgs %}
+                    <a href="{{ org.get_absolute_url() }}" class="text-xs font-semibold px-2 py-0.5 rounded bg-indigo-100 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300">
+                        {{ org.short_name }}
+                    </a>
+                {% endfor %}
+            {% elif orgs|length >= 2 %}
+                <span class="text-xs font-semibold px-2 py-0.5 rounded bg-indigo-100 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300"
+                      title="{% for org in orgs %}{{ org.short_name }}{% if not loop.last %}, {% endif %}{% endfor %}">
+                    Multi-Org
+                </span>
+            {% endif %}
+        {% endif %}
+        {# Tags #}
+        {% for tag in contest.tags.all() %}
+            <span class="text-xs font-semibold px-2 py-0.5 rounded" style="background-color: {{ tag.color }}; color: {{ tag.text_color }}">
+                <a href="{{ url('contest_tag', tag.name) }}"
+                   data-featherlight="{{ url('contest_tag_ajax', tag.name) }}">
+                    {{- tag.name -}}
+                </a>
+            </span>
+        {% endfor %}
+    </div>
+{% endmacro %}
+
+{# ── Actions ── #}
+{% macro contest_actions(contest, request, status) %}
+    <div class="grid w-full grid-cols-1 items-stretch gap-2 sm:flex sm:w-auto sm:items-center sm:gap-3">
+        {% if contest.is_editable_by(request.user) %}
+            <a href="{{ url('contest_update', contest.key) }}"
+               class="inline-flex h-9 w-full items-center justify-center rounded-lg bg-slate-600 px-3 text-center text-sm leading-tight font-semibold text-white transition hover:bg-slate-700 sm:w-auto sm:px-4">
+                {{ _('Manage') }}
+            </a>
+        {% endif %}
+        {% if contest.can_see_own_scoreboard(request.user) and status != 'upcoming' %}
+            <a href="{{ url('contest_ranking', contest.key) }}"
+               class="inline-flex h-9 w-full items-center justify-center rounded-lg border border-slate-300 px-3 text-center text-sm leading-tight font-semibold transition hover:bg-slate-100 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-zinc-800 sm:w-auto sm:px-4">
+                {{ _('Ranking') }}
+            </a>
+        {% endif %}
+        {% if (status == 'ongoing' or status == 'active') and contest.is_joinable_by(request.user) and not request.in_contest %}
+            {% if request.profile in contest.authors.all() or request.profile in contest.curators.all() or request.profile in contest.testers.all() %}
+                <form action="{{ url('contest_join', contest.key) }}" method="post" class="w-full sm:w-auto">
+                    {% csrf_token %}
+                    <button type="submit" class="inline-flex h-9 w-full items-center justify-center rounded-lg bg-blue-500 px-3 text-center text-sm leading-tight font-semibold text-white transition hover:bg-blue-600 sm:px-4">
+                        {{ _('Spectate') }}
+                    </button>
+                </form>
+            {% else %}
+                <form action="{{ url('contest_join', contest.key) }}" method="post" class="w-full sm:w-auto">
+                    {% csrf_token %}
+                    <button type="submit" class="join-warning inline-flex h-9 w-full items-center justify-center rounded-lg bg-blue-500 px-3 text-center text-sm leading-tight font-semibold text-white transition hover:bg-blue-600 sm:px-4">
+                        {{ _('Join') }}
+                    </button>
+                </form>
+            {% endif %}
+        {% endif %}
+        {% if status == 'past' and contest.is_joinable_by(request.user) and not request.in_contest %}
+            <form action="{{ url('contest_join', contest.key) }}" method="post" class="w-full sm:w-auto">
+                {% csrf_token %}
+                <button type="submit" class="inline-flex h-9 w-full items-center justify-center rounded-lg bg-slate-600 px-3 text-center text-sm leading-tight font-semibold text-white transition hover:bg-slate-700 sm:px-4">
+                    {{ _('Practice') }}
+                </button>
+            </form>
+        {% endif %}
+    </div>
+{% endmacro %}
+
+{% macro current_contest_row(participation, request) %}
+    {% set contest = participation.contest %}
+    <section class="rounded-2xl border border-blue-200 bg-linear-to-r from-blue-50 via-white to-white p-4 shadow-sm dark:border-blue-500/20 dark:from-blue-500/10 dark:via-zinc-900 dark:to-zinc-900">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div class="min-w-0 flex-1">
+                <div class="mb-2 flex flex-wrap items-center gap-2">
+                    <span class="rounded-full bg-blue-600 px-2.5 py-1 text-xs font-bold uppercase tracking-[0.18em] text-white">
+                        {{ _('Current Contest') }}
+                    </span>
+                    {{ contest_badges(contest, 'active') }}
+                </div>
+                <div class="flex flex-col gap-1 lg:flex-row lg:items-center lg:gap-3">
+                    <a href="{{ url('contest_view', contest.key) }}" class="truncate text-xl font-semibold text-slate-900 hover:underline dark:text-white">
+                        {{ contest.name }}
+                    </a>
+                    <span class="hidden text-slate-300 lg:inline">•</span>
+                    {% if participation.time_remaining %}
+                        <span class="text-sm font-semibold text-red-600 dark:text-red-300">
+                            {{ _('Window ends in') }} {{ participation.time_remaining|as_countdown }}
+                        </span>
+                    {% elif contest.time_before_end %}
+                        <span class="text-sm font-semibold text-red-600 dark:text-red-300">
+                            {{ _('Ends in') }} {{ contest.time_before_end|as_countdown }}
+                        </span>
+                    {% endif %}
+                </div>
+                <div class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                    {% if contest.time_limit %}
+                        {{ contest.start_time|date(_("M j, Y, G:i")) }} – {{ contest.end_time|date(_("M j, Y, G:i")) }}
+                        · {{ _('%(time_limit)s window', time_limit=contest.time_limit|timedelta('localized-no-seconds')) }}
+                    {% else %}
+                        {{ contest.start_time|date(_("M j, Y, G:i")) }}
+                        · {{ _('%(duration)s long', duration=contest.contest_window_length|timedelta('localized-no-seconds')) }}
+                    {% endif %}
+                </div>
+            </div>
+            <div class="flex shrink-0 flex-col gap-3 lg:items-end">
+                <div class="text-sm text-slate-500 dark:text-slate-400">
+                    <i class="fa fa-users mr-1"></i>{{ contest.user_count }} {{ _('participants') }}
+                </div>
+                {{ contest_actions(contest, request, 'active') }}
+            </div>
+        </div>
+    </section>
+{% endmacro %}
+
+{# ── Card ── #}
+{% macro contest_card(contest, request, status, participation) %}
+    {% set joinable = (not request.in_contest) and contest.is_joinable_by(request.user) %}
+    <div class="rounded-2xl p-5 shadow hover:shadow-lg transition border-l-4
+        {% if not contest.is_visible %} bg-slate-400 dark:bg-zinc-800 opacity-75 {% else %} bg-white dark:bg-zinc-900 {% endif %}
+        {% if not joinable %} not_joinable {% endif %}
+        {% if status == 'ongoing' or status == 'active' %}
+            {% if contest.is_rated %} border-red-500/80 dark:border-red-400/70
+            {% else %} border-green-500/80 dark:border-green-400/70 {% endif %}
+        {% elif status == 'upcoming' %} border-amber-400/80 dark:border-amber-300/70
+        {% elif status == 'past' %} border-slate-400/70 dark:border-slate-500/60
+        {% else %} border-slate-300/60 dark:border-slate-600/50 {% endif %}
+    ">
+        {# Header #}
+        <header class="flex flex-col items-start justify-between gap-4 sm:flex-row">
+            <div class="min-w-0">
+                <h3 class="text-xl font-semibold line-clamp-2">
+                    <a href="{{ url('contest_view', contest.key) }}" class="dark:text-white hover:underline">
+                        {{- contest.name -}}
+                    </a>
+                </h3>
+                {% if contest.topic and contest.is_joinable_by(request.user) %}
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">{{ contest.topic }}</p>
+                {% endif %}
+            </div>
+            {{ contest_badges(contest, status) }}
+        </header>
+
+        {# Time area #}
+        <div class="mt-4">
+            {% if not contest.is_visible and status != 'past' and status != 'ongoing' and status != 'upcoming' and status != 'active' %}
+                <span class="text-sm text-slate-500 dark:text-slate-400">📌 {{ _('Hidden contest') }}</span>
+            {% elif status == 'past' %}
+                <div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                    <i class="fa fa-clock"></i>
+                    <span>{{ _('Ended at') }} {{ contest.end_time|date(_("M j, Y, G:i")) }}</span>
+                </div>
+            {% elif status == 'ongoing' or status == 'active' %}
+                {% if participation and participation.time_remaining %}
+                    <div class="flex items-center gap-2 text-lg font-mono text-red-600 dark:text-red-300">
+                        <i class="fa fa-hourglass-half"></i>
+                        <span class="time">{{ _('Window ends in') }} {{ participation.time_remaining|as_countdown }}</span>
+                    </div>
+                {% elif contest.time_before_end %}
+                    <div class="flex items-center gap-2 text-lg font-mono text-red-600 dark:text-red-300">
+                        <i class="fa fa-hourglass-half"></i>
+                        <span class="time">{{ _('Ends in') }} {{ contest.time_before_end|as_countdown }}</span>
+                    </div>
+                {% endif %}
+            {% elif status == 'upcoming' %}
+                {% if contest.time_before_start %}
+                    <div class="flex items-center gap-2 text-lg font-mono text-amber-600 dark:text-amber-300">
+                        <i class="fa fa-hourglass-half"></i>
+                        <span class="time">{{ _('Starts in') }} {{ contest.time_before_start|as_countdown }}</span>
+                    </div>
+                {% endif %}
+            {% endif %}
+            <div class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                {% if contest.time_limit %}
+                    {{ contest.start_time|date(_("M j, Y, G:i")) }} – {{ contest.end_time|date(_("M j, Y, G:i")) }}
+                    · {{ _('%(time_limit)s window', time_limit=contest.time_limit|timedelta('localized-no-seconds')) }}
+                {% else %}
+                    {{ contest.start_time|date(_("M j, Y, G:i")) }}
+                    · {{ _('%(duration)s long', duration=contest.contest_window_length|timedelta('localized-no-seconds')) }}
+                {% endif %}
+            </div>
+        </div>
+
+        {# Footer #}
+        <footer class="mt-4 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex w-full items-center gap-2 text-sm text-slate-500 dark:text-slate-400 sm:w-auto">
+                <i class="fa fa-users"></i>
+                <span>{{ contest.user_count }} {{ _('participants') }}</span>
+            </div>
+            {{ contest_actions(contest, request, status) }}
+        </footer>
+    </div>
+{% endmacro %}
+
+{# ── Section ── #}
+{% macro contest_section(title, contests, request, status, is_participation) %}
+    {% if contests %}
+    <section class="mt-10">
+        <div class="section-header sticky top-20 z-10 bg-gray-100 dark:bg-zinc-800 py-2 px-3 rounded-lg flex items-center gap-4 mb-4 transition-all duration-200">
+            <h2 class="text-lg font-bold uppercase text-slate-500 dark:text-slate-400 whitespace-nowrap">{{ _(title) }}</h2>
+            <div class="flex-1 border-t border-slate-200 dark:border-slate-700"></div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {% for item in contests %}
+                {% if is_participation %}
+                    {{ contest_card(item.contest, request, status, item) }}
+                {% else %}
+                    {{ contest_card(item, request, status, None) }}
+                {% endif %}
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+{% endmacro %}
+
+{% block body %}
+    <div class="flex flex-col gap-8">
+        {# Filter bar #}
+        <form action="" method="get">
+            <div class="rounded-xl bg-white p-4 shadow flex flex-wrap items-stretch gap-4 dark:bg-zinc-900">
+                <div class="flex h-11 w-full min-w-0 flex-1 items-center rounded-xl bg-white dark:bg-zinc-800 sm:min-w-52">
+                    <span class="px-4 text-sm font-semibold text-slate-600 dark:text-slate-300 whitespace-nowrap flex items-center h-full">
+                        {{ _('Organization') }}
+                    </span>
+                    <select id="organizations" name="organizations" class="flex-1 h-full px-3 bg-transparent focus:outline-none">
+                        <option value=""></option>
+                        {% for org in list_organizations %}
+                        <option value="{{ org.id }}" {% if organizations and org.id == organizations %}selected{% endif %}>
+                            {{ org.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <label class="ml-0 flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-3 whitespace-nowrap dark:border-slate-600 dark:bg-zinc-800 sm:ml-auto sm:w-auto">
+                    <input type="checkbox" id="can_join" class="rounded border-slate-300 text-blue-500 focus:ring-blue-500">
+                    <span class="text-sm dark:text-slate-200">{{ _('Only joinable') }}</span>
+                </label>
+            </div>
+        </form>
+
+        {% if current_participation %}
+            {{ current_contest_row(current_participation, request) }}
+        {% endif %}
+
+        {# Active #}
+        {{ contest_section('Active Contests', active_participations, request, 'active', True) }}
+
+        {# Ongoing #}
+        {{ contest_section('Ongoing Contests', current_contests, request, 'ongoing', False) }}
+
+        {# Upcoming #}
+        {% if future_contests %}
+            {{ contest_section('Upcoming Contests', future_contests, request, 'upcoming', False) }}
+        {% else %}
+            <section class="mt-10">
+                <div class="section-header sticky top-20 z-10 bg-gray-100 dark:bg-zinc-800 py-2 -mx-3 px-3 rounded-lg flex items-center gap-4 mb-4 transition-all duration-200">
+                    <h2 class="text-lg font-bold uppercase text-slate-500 dark:text-slate-400 whitespace-nowrap">{{ _('Upcoming Contests') }}</h2>
+                    <div class="flex-1 border-t border-slate-200 dark:border-slate-700"></div>
+                </div>
+                <p class="text-sm text-slate-500 dark:text-slate-400 italic">{{ _('There are no scheduled contests at this time.') }}</p>
+            </section>
+        {% endif %}
+
+        {# Past #}
+        {% if past_contests %}
+            <section class="mt-10" id="past-contests">
+                <div class="section-header sticky top-20 z-10 bg-gray-100 dark:bg-zinc-800 py-2 -mx-3 px-3 rounded-lg flex items-center gap-4 mb-4 transition-all duration-200">
+                    <h2 class="text-lg font-bold uppercase text-slate-500 dark:text-slate-400 whitespace-nowrap">{{ _('Past Contests') }}</h2>
+                    <div class="flex-1 border-t border-slate-200 dark:border-slate-700"></div>
+                </div>
+                {% if page_obj and page_obj.has_other_pages() %}
+                    <div class="top-pagination-bar mb-4">{% include "list-pages.html" %}</div>
+                {% endif %}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% for contest in past_contests %}
+                        {{ contest_card(contest, request, 'past', None) }}
+                    {% endfor %}
+                </div>
+                {% if page_obj and page_obj.has_other_pages() %}
+                    <div class="bottom-pagination-bar mt-4">{% include "list-pages.html" %}</div>
+                {% endif %}
+            </section>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block bodyend %}
+    {{ super() }}
+    <style>
+        .section-header.is-stuck {
+            background: rgba(239,246,255,0.95) !important;
+            box-shadow: 0 2px 10px rgba(59,130,246,0.12);
+            backdrop-filter: blur(8px);
+            border-bottom: 2px solid rgba(59,130,246,0.3);
+        }
+        .dark .section-header.is-stuck {
+            background: rgba(30,41,59,0.95) !important;
+            box-shadow: 0 2px 10px rgba(96,165,250,0.15);
+            border-bottom: 2px solid rgba(96,165,250,0.3);
+        }
+        .section-header.is-stuck h2 {
+            color: #2563eb;
+        }
+        .dark .section-header.is-stuck h2 {
+            color: #93c5fd;
+        }
+
+    </style>
+    <script>
+        var filterJoinableBtn = document.getElementById('can_join');
+        if (filterJoinableBtn) {
+            filterJoinableBtn.addEventListener('change', function () {
+                document.querySelectorAll('.not_joinable').forEach(function (el) {
+                    el.style.display = filterJoinableBtn.checked ? 'none' : '';
+                });
+            });
+        }
+
+        document.querySelectorAll('.section-header').forEach(function (header) {
+            var sentinel = document.createElement('div');
+            sentinel.style.height = '1px';
+            sentinel.style.marginBottom = '-1px';
+            header.parentNode.insertBefore(sentinel, header);
+
+            var observer = new IntersectionObserver(function (entries) {
+                header.classList.toggle('is-stuck', !entries[0].isIntersecting);
+            }, { threshold: 0, rootMargin: '-81px 0px 0px 0px' });
+            observer.observe(sentinel);
+        });
+    </script>
+{% endblock bodyend %}

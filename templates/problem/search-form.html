@@ -1,0 +1,62 @@
+<div class="grid w-full grid-cols-1">
+    <div class="filter-panel">
+        <div class="flex items-center justify-between">
+            <div>
+                <div class="section-title">{{ _('Filters') }}</div>
+                <div class="mt-1 text-lg font-semibold text-app-text dark:text-app-dark-text">{{ _('Problem search') }}</div>
+            </div>
+            <div class="status-badge status-badge-info">
+                <i class="fa-duotone fa-search"></i>
+                <span>{{ _('Query') }}</span>
+            </div>
+        </div>
+        <form action="" method="get" class="mt-1 flex flex-col gap-3" id="filter-form">
+            <input class="input-base" id="search" type="text" name="search" value="{{ search_query or '' }}"
+                    placeholder="{{ _('Search problems...') }}">
+            {% if has_fts %}
+            <div class="ui checkbox">
+                <input id="full_text" type="checkbox" name="full_text" value="1"
+                {% if full_text %}checked{% endif %}>
+                <label for="full_text">{{ _('Full text search') }}</label>
+            </div>
+            {% endif %}
+            {% if request.user.is_authenticated %}
+            <div class="block">
+                <label class="inline-flex items-center" for="hide_solved">
+                    <input class="checkbox-base" id="hide_solved" type="checkbox" name="hide_solved" value="1"
+                            {% if hide_solved %}checked{% endif %}>
+                    <span class="ml-2 text-sm text-app-text-secondary dark:text-app-dark-text-secondary">{{ _('Hide solved problems') }}</span>
+                </label>
+            </div>
+            {% endif %}
+            <div class="block">
+                <label for="category">
+                    <span class="section-title text-[0.72rem]!">{{ _('Category') }}</span>
+                    <select class="select-base mt-1" id="category" name="category" onchange="this.form.submit()">
+                        {% for group in categories %}
+                        <option value=""></option>
+                        <option value="{{ group.id }}" {% if category and group.id == category %} selected {% endif %}>
+                            {{ group.full_name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </label>
+            </div>
+            <fieldset class="rounded-2xl border border-app-border dark:border-app-dark-border bg-app-panel-elevated dark:bg-app-dark-panel-elevated p-3">
+                <legend class="px-2 font-mono text-xs font-semibold uppercase tracking-[0.16em] text-app-text-secondary dark:text-app-dark-text-secondary">{{ _('Groups') }}</legend>
+                <div class="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-1">
+                    {% for type in problem_types %}
+                    <div class="block">
+                        <label for="id_type_{{ loop.index }}" class="inline-flex items-center">
+                            <input class="checkbox-base peer"
+                                   type="checkbox" id="id_type_{{ loop.index }}" onchange="this.form.submit()" name="type" value="{{ type.id }}" {% if type.id in selected_types %}checked=checked{% endif %}>
+                            <span class="ml-2 line-clamp-1 text-sm text-app-text-secondary dark:text-app-dark-text-secondary peer-checked:font-semibold peer-checked:text-app-accent dark:peer-checked:text-app-dark-accent" title="{{ type.full_name }}">{{ type.full_name }}</span>
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+            </fieldset>
+            <button id="go" type="submit" class="btn-primary mt-1 w-full">{{ _('Go') }}</button>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+
+{% block media %}
+    {% include "timezone/media-css.html" %}
+    {{ form.media.css }}
+{% endblock %}
+
+{% block title_row %}
+{% endblock title_row %}
+
+{% block title_ruler %}
+{% endblock title_ruler %}
+
+{% block js_media %}
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
+    {{ form.media.js }}
+{% endblock %}
+
+{% block body %}
+    <section class="relative overflow-hidden rounded-[2rem] border border-app-border bg-app-panel-elevated/90 px-5 py-6 dark:border-app-dark-border dark:bg-app-dark-panel-elevated/90 sm:px-8 sm:py-8 lg:px-10">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,184,0,0.16),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(14,165,233,0.14),_transparent_30%)]"></div>
+
+        <div class="relative grid gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(24rem,0.95fr)] lg:items-start">
+            <div class="space-y-6">
+                <div class="inline-flex w-fit items-center gap-3 rounded-full border border-app-border/80 bg-app-panel/70 px-4 py-2 text-app-text dark:border-app-dark-border/80 dark:bg-app-dark-panel/70 dark:text-app-dark-text">
+                    <img class="h-8 w-8" src="{{ static('icons/logo.svg') }}" alt="FMATH">
+                    <div class="leading-none">
+                        <div class="text-sm font-semibold uppercase tracking-[0.24em]">FMATH</div>
+                        <div class="mt-1 text-xs text-app-text-secondary dark:text-app-dark-text-secondary">{{ _('Competitive programming workspace') }}</div>
+                    </div>
+                </div>
+
+                <div class="max-w-2xl space-y-4">
+                    <h1 class="text-3xl font-semibold leading-tight text-app-text dark:text-app-dark-text sm:text-4xl lg:text-5xl">
+                        {{ _('Create your account and start building steady progress.') }}
+                    </h1>
+                    <p class="max-w-xl text-sm leading-7 text-app-text-muted dark:text-app-dark-text-muted sm:text-base">
+                        {{ _('Join contests, track submissions, and keep your learning workflow organized from the first solved problem onward.') }}
+                    </p>
+                </div>
+
+                <div class="grid gap-3 sm:grid-cols-3">
+                    <div class="rounded-2xl border border-app-border/80 bg-app-panel/80 p-4 dark:border-app-dark-border/80 dark:bg-app-dark-panel/80">
+                        <div class="text-xs font-semibold uppercase tracking-[0.16em] text-app-text-secondary dark:text-app-dark-text-secondary">{{ _('Profile') }}</div>
+                        <p class="mt-2 text-sm leading-6 text-app-text-muted dark:text-app-dark-text-muted">
+                            {{ _('Set up your identity once and use it across problems, rankings, and organizations.') }}
+                        </p>
+                    </div>
+                    <div class="rounded-2xl border border-app-border/80 bg-app-panel/80 p-4 dark:border-app-dark-border/80 dark:bg-app-dark-panel/80">
+                        <div class="text-xs font-semibold uppercase tracking-[0.16em] text-app-text-secondary dark:text-app-dark-text-secondary">{{ _('Progress') }}</div>
+                        <p class="mt-2 text-sm leading-6 text-app-text-muted dark:text-app-dark-text-muted">
+                            {{ _('Keep your attempts, accepted solutions, and rating history in one account.') }}
+                        </p>
+                    </div>
+                    <div class="rounded-2xl border border-app-border/80 bg-app-panel/80 p-4 dark:border-app-dark-border/80 dark:bg-app-dark-panel/80">
+                        <div class="text-xs font-semibold uppercase tracking-[0.16em] text-app-text-secondary dark:text-app-dark-text-secondary">{{ _('Timezone') }}</div>
+                        <p class="mt-2 text-sm leading-6 text-app-text-muted dark:text-app-dark-text-muted">
+                            {{ _('Choose the right timezone so contest times and activity history stay accurate.') }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rounded-[1.75rem] border border-app-border bg-app-panel/95 p-5 shadow-[0_18px_60px_rgba(15,23,42,0.12)] dark:border-app-dark-border dark:bg-app-dark-panel/95 sm:p-7">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-app-text-secondary dark:text-app-dark-text-secondary">{{ _('New account') }}</p>
+                        <h2 class="mt-2 text-2xl font-semibold text-app-text dark:text-app-dark-text">{{ _('Create an account') }}</h2>
+                        <p class="mt-2 text-sm leading-6 text-app-text-muted dark:text-app-dark-text-muted">
+                            {{ _('Fill in the details below to start using the platform.') }}
+                        </p>
+                    </div>
+                    <span class="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900">
+                        <i class="fa-duotone fa-user-plus text-lg"></i>
+                    </span>
+                </div>
+
+                <form id="edit-form" action="" method="post" class="mt-6 space-y-5">
+                    {% csrf_token %}
+                    <input type="submit" value="{{ _('Create an account') }}" class="hidden" tabindex="-1" aria-hidden="true">
+
+                    <div class="space-y-4">
+                        <div>
+                            <label for="{{ form.username.id_for_label }}" class="mb-2 block text-sm font-semibold text-app-text dark:text-app-dark-text">{{ _('Username') }}</label>
+                            <input
+                                type="text"
+                                name="{{ form.username.name }}"
+                                id="{{ form.username.id_for_label }}"
+                                value="{{ form.username.value() or '' }}"
+                                class="block w-full rounded-2xl border {% if form.username.errors %}border-rose-400 dark:border-rose-500{% else %}border-app-border dark:border-app-dark-border{% endif %} bg-white/90 px-4 py-3 text-sm text-app-text shadow-sm outline-none transition placeholder:text-app-text-muted focus:border-app-accent focus:ring-4 focus:ring-sky-100 dark:bg-app-dark-panel-elevated dark:text-app-dark-text dark:placeholder:text-app-dark-text-muted dark:focus:border-app-dark-accent dark:focus:ring-sky-950/40"
+                                placeholder="{{ _('Choose a username') }}">
+                            {% if form.username.errors %}
+                            <p class="mt-2 text-xs text-rose-600 dark:text-rose-400">{{ form.username.errors|striptags }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.name.id_for_label }}" class="mb-2 block text-sm font-semibold text-app-text dark:text-app-dark-text">{{ _('Full name') }}</label>
+                            <input
+                                type="text"
+                                name="{{ form.name.name }}"
+                                id="{{ form.name.id_for_label }}"
+                                value="{{ form.name.value() or '' }}"
+                                class="block w-full rounded-2xl border {% if form.name.errors %}border-rose-400 dark:border-rose-500{% else %}border-app-border dark:border-app-dark-border{% endif %} bg-white/90 px-4 py-3 text-sm text-app-text shadow-sm outline-none transition placeholder:text-app-text-muted focus:border-app-accent focus:ring-4 focus:ring-sky-100 dark:bg-app-dark-panel-elevated dark:text-app-dark-text dark:placeholder:text-app-dark-text-muted dark:focus:border-app-dark-accent dark:focus:ring-sky-950/40"
+                                placeholder="{{ _('Enter your full name') }}">
+                            {% if form.name.errors %}
+                            <p class="mt-2 text-xs text-rose-600 dark:text-rose-400">{{ form.name.errors|striptags }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.email.id_for_label }}" class="mb-2 block text-sm font-semibold text-app-text dark:text-app-dark-text">{{ _('Email') }}</label>
+                            <input
+                                type="email"
+                                name="{{ form.email.name }}"
+                                id="{{ form.email.id_for_label }}"
+                                value="{{ form.email.value() or '' }}"
+                                class="block w-full rounded-2xl border {% if form.email.errors %}border-rose-400 dark:border-rose-500{% else %}border-app-border dark:border-app-dark-border{% endif %} bg-white/90 px-4 py-3 text-sm text-app-text shadow-sm outline-none transition placeholder:text-app-text-muted focus:border-app-accent focus:ring-4 focus:ring-sky-100 dark:bg-app-dark-panel-elevated dark:text-app-dark-text dark:placeholder:text-app-dark-text-muted dark:focus:border-app-dark-accent dark:focus:ring-sky-950/40"
+                                placeholder="{{ _('Enter your email address') }}">
+                            {% if form.email.errors %}
+                            <p class="mt-2 text-xs text-rose-600 dark:text-rose-400">{{ form.email.errors|striptags }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <div class="mb-2 flex items-center justify-between gap-3">
+                                <label for="{{ form.password1.id_for_label }}" class="block text-sm font-semibold text-app-text dark:text-app-dark-text">{{ _('Password') }}</label>
+                                {% if password_validators %}
+                                <span class="text-xs text-app-text-muted dark:text-app-dark-text-muted">{{ _('Hover for requirements') }}</span>
+                                {% endif %}
+                            </div>
+                            <input
+                                type="password"
+                                name="{{ form.password1.name }}"
+                                id="{{ form.password1.id_for_label }}"
+                                class="block w-full rounded-2xl border {% if form.password1.errors %}border-rose-400 dark:border-rose-500{% else %}border-app-border dark:border-app-dark-border{% endif %} bg-white/90 px-4 py-3 text-sm text-app-text shadow-sm outline-none transition placeholder:text-app-text-muted focus:border-app-accent focus:ring-4 focus:ring-sky-100 dark:bg-app-dark-panel-elevated dark:text-app-dark-text dark:placeholder:text-app-dark-text-muted dark:focus:border-app-dark-accent dark:focus:ring-sky-950/40"
+                                placeholder="{{ _('Create a password') }}">
+                            {% if form.password1.errors %}
+                            <p class="mt-2 text-xs text-rose-600 dark:text-rose-400">{{ form.password1.errors|striptags }}</p>
+                            {% endif %}
+
+                            <div id="password_validators" role="tooltip" class="hidden max-w-sm rounded-2xl border border-app-border bg-app-panel-elevated px-4 py-3 text-sm leading-6 text-app-text shadow-xl dark:border-app-dark-border dark:bg-app-dark-panel-elevated dark:text-app-dark-text">
+                                <ul class="space-y-1 text-sm text-app-text-muted dark:text-app-dark-text-muted">
+                                    {% for validator in password_validators %}
+                                        <li>{{ validator.get_help_text() }}</li>
+                                    {% endfor %}
+                                </ul>
+                                <div class="tooltip-arrow" data-popper-arrow></div>
+                            </div>
+                            <script>
+                                $(document).ready(function () {
+                                    const $password_validator = document.getElementById('password_validators');
+                                    const $password_input = document.getElementById('{{ form.password1.id_for_label }}');
+                                    const options = {
+                                        placement: 'bottom',
+                                        triggerType: 'hover',
+                                    };
+                                    const instanceOptions = {
+                                        id: 'tooltipContent',
+                                        override: true
+                                    };
+                                    const tooltip = new Tooltip($password_validator, $password_input, options, instanceOptions);
+                                    tooltip.show();
+                                });
+                            </script>
+                        </div>
+
+                        <div>
+                            <label for="{{ form.password2.id_for_label }}" class="mb-2 block text-sm font-semibold text-app-text dark:text-app-dark-text">{{ _('Confirm password') }}</label>
+                            <input
+                                type="password"
+                                name="{{ form.password2.name }}"
+                                id="{{ form.password2.id_for_label }}"
+                                class="block w-full rounded-2xl border {% if form.password2.errors %}border-rose-400 dark:border-rose-500{% else %}border-app-border dark:border-app-dark-border{% endif %} bg-white/90 px-4 py-3 text-sm text-app-text shadow-sm outline-none transition placeholder:text-app-text-muted focus:border-app-accent focus:ring-4 focus:ring-sky-100 dark:bg-app-dark-panel-elevated dark:text-app-dark-text dark:placeholder:text-app-dark-text-muted dark:focus:border-app-dark-accent dark:focus:ring-sky-950/40"
+                                placeholder="{{ _('Re-enter your password') }}">
+                            {% if form.password2.errors %}
+                            <p class="mt-2 text-xs text-rose-600 dark:text-rose-400">{{ form.password2.errors|striptags }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.timezone.id_for_label }}" class="mb-2 block text-sm font-semibold {% if form.timezone.errors %}text-rose-600 dark:text-rose-400{% else %}text-app-text dark:text-app-dark-text{% endif %}">
+                                {{ form.timezone.label }}
+                            </label>
+                            <select id="{{ form.timezone.id_for_label }}" name="{{ form.timezone.name }}" class="block w-full rounded-2xl border {% if form.timezone.errors %}border-rose-400 dark:border-rose-500{% else %}border-app-border dark:border-app-dark-border{% endif %} bg-white/90 px-4 py-3 text-sm text-app-text shadow-sm outline-none transition focus:border-app-accent focus:ring-4 focus:ring-sky-100 dark:bg-app-dark-panel-elevated dark:text-app-dark-text dark:focus:border-app-dark-accent dark:focus:ring-sky-950/40">
+                                {% for group_label, group_choices in form.timezone.field.choices %}
+                                    <optgroup label="{{ group_label }}">
+                                        {% for value, label in group_choices %}
+                                            <option value="{{ value }}" {% if form.timezone.value() == value %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </optgroup>
+                                {% endfor %}
+                            </select>
+                            {% if form.timezone.help_text %}
+                            <div class="mt-2 text-xs leading-6 text-app-text-muted dark:text-app-dark-text-muted">
+                                {{ form.timezone.help_text }}
+                            </div>
+                            {% endif %}
+                            {% if form.timezone.errors %}
+                            <p class="mt-2 text-xs text-rose-600 dark:text-rose-400">{{ form.timezone.errors|striptags }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <button class="btn-primary flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-bold text-white focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-transparent" type="submit">
+                            <i class="fa-duotone fa-user-plus"></i>
+                            <span>{{ _('Create account') }}</span>
+                        </button>
+                        <div class="rounded-2xl border border-dashed border-app-border/80 px-4 py-3 text-xs leading-6 text-app-text-muted dark:border-app-dark-border/80 dark:text-app-dark-text-muted">
+                            {{ _('Already have an account? Sign in to continue where you left off.') }}
+                            <a href="{{ url('auth_login') }}" class="ml-1 font-semibold text-app-accent hover:text-sky-700 dark:text-app-dark-accent dark:hover:text-sky-300">{{ _('Sign in') }}</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+{% endblock %}

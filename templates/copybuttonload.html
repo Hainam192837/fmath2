@@ -1,0 +1,45 @@
+<script>
+    window.add_code_copy_buttons = function (root) {
+        const containers = root instanceof Element ? [root] : Array.from(document.querySelectorAll('.custom-typography'));
+
+        containers.forEach((container) => {
+            container.querySelectorAll('pre').forEach((preElement) => {
+                if (preElement.parentElement?.classList.contains('code-copy-wrapper')) {
+                    return;
+                }
+
+                const wrapper = document.createElement('div');
+                wrapper.classList.add('code-copy-wrapper');
+
+                const copyButton = document.createElement('button');
+                copyButton.type = 'button';
+                copyButton.classList.add('copy-button');
+                copyButton.textContent = 'Copy';
+
+                copyButton.addEventListener('click', async () => {
+                    const codeElement = preElement.querySelector('code');
+                    const codeText = (codeElement || preElement).textContent || '';
+
+                    try {
+                        await navigator.clipboard.writeText(codeText);
+                        copyButton.textContent = 'Copied!';
+                        setTimeout(() => {
+                            copyButton.textContent = 'Copy';
+                        }, 1000);
+                    } catch (error) {
+                        copyButton.textContent = 'Failed';
+                        setTimeout(() => {
+                            copyButton.textContent = 'Copy';
+                        }, 1000);
+                    }
+                });
+
+                preElement.parentNode.insertBefore(wrapper, preElement);
+                wrapper.appendChild(copyButton);
+                wrapper.appendChild(preElement);
+            });
+        });
+    };
+
+    window.add_code_copy_buttons();
+</script>

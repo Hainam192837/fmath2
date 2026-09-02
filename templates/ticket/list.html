@@ -1,0 +1,347 @@
+{% extends "base.html" %}
+{% block media %}
+    <style>
+        .select2-selection__arrow {
+            display: none;
+        }
+
+        .select2-container {
+            width: 100% !important;
+        }
+
+        .select2-container--default .select2-selection--multiple {
+            min-height: 44px;
+            padding: 0.45rem 0.75rem;
+            border-radius: 0.75rem;
+            border: 1px solid var(--app-border);
+            background: color-mix(in srgb, var(--app-panel-elevated) 88%, transparent);
+        }
+
+        .dark .select2-container--default .select2-selection--multiple {
+            border-color: var(--app-dark-border);
+            background: color-mix(in srgb, var(--app-dark-panel-elevated) 88%, transparent);
+        }
+
+        .select2-selection__rendered {
+            cursor: text;
+        }
+
+        .select2-container--default.select2-container--focus .select2-selection--multiple {
+            border-color: var(--app-border-interactive);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.12);
+        }
+
+        .dark .select2-container--default.select2-container--focus .select2-selection--multiple {
+            border-color: var(--app-dark-border-interactive);
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            margin-top: 0.2rem;
+            border: 0;
+            border-radius: 999px;
+            background: var(--app-accent-soft);
+            color: var(--app-text);
+            padding: 0.15rem 0.55rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .dark .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background: var(--app-dark-accent-soft);
+            color: var(--app-dark-text);
+        }
+
+        .select2-dropdown {
+            border-radius: 1rem;
+            overflow: hidden;
+            border: 1px solid var(--app-border-strong);
+            background: var(--app-panel-elevated);
+            box-shadow: var(--app-shadow);
+        }
+
+        .dark .select2-dropdown {
+            border-color: var(--app-dark-border-strong);
+            background: var(--app-dark-panel-elevated);
+        }
+
+        .select2-results__option {
+            position: relative;
+            color: var(--app-text);
+        }
+
+        .dark .select2-results__option {
+            color: var(--app-dark-text);
+        }
+
+        .select2-results__option--highlighted {
+            background-color: var(--app-accent-soft) !important;
+            color: var(--app-text) !important;
+        }
+
+        .dark .select2-results__option--highlighted {
+            background-color: var(--app-dark-accent-soft) !important;
+            color: var(--app-dark-text) !important;
+        }
+
+        li.select2-results__option--highlighted a.user-redirect {
+            display: inline-block;
+        }
+
+        a.user-redirect {
+            color: var(--app-accent);
+            vertical-align: middle;
+            font-size: 1.2em;
+            position: absolute;
+            right: 0.8em;
+            display: none;
+        }
+
+        a.user-redirect:hover {
+            text-shadow: 0 0 2px color-mix(in srgb, var(--app-accent) 65%, white 35%);
+        }
+
+        @media (max-width: 767px) {
+            #ticket-list thead th,
+            #ticket-list tbody td {
+                padding-left: 0.85rem;
+                padding-right: 0.85rem;
+            }
+
+            #ticket-list thead th {
+                font-size: 0.7rem;
+                letter-spacing: 0.12em;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block js_media %}
+    <script type="text/javascript">
+        window.filter_user_ids = {{filter_status.user_id}};
+        window.filter_own_id = {{filter_status.own_id}};
+        window.filter_assignee_ids = {{filter_status.assignee_id}};
+    </script>
+    <script type="text/javascript">
+        $(function () {
+            $('input#own').click(function () {
+                ($('<form>').attr('action', window.location.pathname + '?' + $('form#filter-form').serialize())
+                    .append($('<input>').attr('type', 'hidden').attr('name', 'csrfmiddlewaretoken')
+                        .attr('value', $.cookie('csrftoken')))
+                    .attr('method', 'POST').appendTo($('body')).submit());
+            });
+
+            register_notify('ticket', {
+                $checkbox: $('#notification'),
+                change: function (enabled) {
+                    if (!enabled)
+                        for (key in localStorage)
+                            if (key.startsWith('ticket:open:'))
+                                delete localStorage[key];
+                }
+            });
+
+            function main_list_notify(id) {
+                key = 'ticket:open:' + id;
+                return !(key in localStorage) || localStorage[key] == '0';
+            }
+
+            var $tbody = $('#ticket-list').find('tbody');
+
+            function new_ticket(ticket) {
+                console.log('Fetching data for: ' + ticket.id);
+                $.ajax({
+                    url: "{{ url('ticket_ajax') }}",
+                    data: {id: ticket.id},
+                    success: function (data) {
+                        console.log('Got data for: ' + ticket.id);
+                        console.log(data);
+                        $tbody.prepend($(data.row));
+                        notify('ticket', data.notification.title, {
+                            body: data.notification.body
+                        });
+                    },
+                    error: function (data) {
+                        if (data.status === 403)
+                            console.log('No right to see: ' + ticket.id);
+                        else {
+                            console.log('Could not load ticket:');
+                            console.log(data.responseText);
+                        }
+                    }
+                });
+            }
+
+            function ticket_status(ticket) {
+                if (!main_list_notify(ticket.id)) return;
+
+                var $row = $('#ticket-' + ticket.id);
+                console.log('Ticket status change: ' + ticket.id);
+                if ($row.length) {
+                    var $status = $row.find('td').first().find('.status-badge');
+                    var $icon = $status.find('i');
+                    if (ticket.open) {
+                        $status.removeClass('status-badge-ac').addClass('status-badge-wa');
+                        $icon.removeClass('fa-circle-check').addClass('fa-circle-exclamation');
+                        $status.contents().last()[0].textContent = ' {{ _("Open") }}';
+                        notify('ticket', "{{ _('Reopened: ') }}" + ticket.title);
+                    } else {
+                        $status.removeClass('status-badge-wa').addClass('status-badge-ac');
+                        $icon.removeClass('fa-circle-exclamation').addClass('fa-circle-check');
+                        $status.contents().last()[0].textContent = ' {{ _("Closed") }}';
+                        notify('ticket', "{{ _('Closed: ') }}" + ticket.title);
+                    }
+                }
+            }
+
+            window.load_dynamic_update = function () {
+                var $assignees = $(filter_assignee_ids);
+
+                event_dispatcher.on('tickets', function (message) {
+                        console.log(message);
+                        if (filter_own_id != null && message.user != filter_own_id &&
+                            !~message.assignees.indexOf(filter_own_id))
+                            return;
+                        if (filter_user_ids.length && !~filter_user_ids.indexOf(message.user))
+                            return;
+                        if ($assignees.length && !$assignees.filter(message.assignees).length)
+                            return;
+                        switch (message.type) {
+                            case 'new-ticket':
+                                new_ticket(message);
+                                break;
+                            case 'ticket-status':
+                                ticket_status(message);
+                                break;
+                        }
+                    }
+                );
+            };
+
+            var user_select2 = {
+                templateResult: function (data, container) {
+                    return $('<span>')
+                        .append($('<img>', {
+                            'loading': 'lazy',
+                            'class': 'user-search-image', src: data.gravatar_url,
+                            width: 24, height: 24
+                        }))
+                        .append($('<span>', {'class': data.display_rank + ' user-search-name'}).text(data.text));
+                },
+                ajax: {
+                    data: function (params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1
+                        }
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data.results,
+                            pagination: {
+                                more: data.more
+                            }
+                        };
+                    },
+                },
+            };
+
+            $('#filter-user').select2($.extend(true, {}, user_select2,
+                {ajax: {url: "{{ url('ticket_user_select2_ajax') }}"}}));
+            $('#filter-assignee').select2($.extend(true, {}, user_select2,
+                {ajax: {url: "{{ url('ticket_assignee_select2_ajax') }}"}}));
+        });
+    </script>
+
+    <script type="text/javascript">
+        $(function () {
+            load_dynamic_update();
+        });
+    </script>
+{% endblock %}
+
+{% block body %}
+    {% if page_obj.has_other_pages() %}
+        <div class="top-pagination-bar">{% include "list-pages.html" %}</div>
+    {% endif %}
+    <section class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+        <main class="min-w-0 space-y-4 lg:order-1">
+            <div class="panel overflow-hidden">
+                <div class="flex items-center justify-between gap-3 border-b border-app-border px-4 py-3 dark:border-app-dark-border">
+                    <div>
+                        <p class="section-title">{{ _('Support queue') }}</p>
+                        <h2 class="section-heading text-xl!">{{ _('Tickets') }}</h2>
+                    </div>
+                    <div class="metric">{{ page_obj.paginator.count }}</div>
+                </div>
+                <div class="h-scrollable-table overflow-x-auto">
+                    <table id="ticket-list" class="table-base min-w-full md:min-w-full">
+                        <thead>
+                        <tr>
+                            <th class="w-14">{{ _('State') }}</th>
+                            <th class="w-20">{{ _('ID') }}</th>
+                            <th>{{ _('Title') }}</th>
+                            <th class="hidden md:table-cell">{{ _('User') }}</th>
+                            <th class="hidden lg:table-cell">{{ _('Assignees') }}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for ticket in tickets %}
+                            {% include "ticket/row.html" %}
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+
+        <aside class="lg:order-2">
+            <div class="sticky top-20 space-y-4">
+                <div class="filter-panel">
+                    <div class="space-y-1">
+                        <p class="section-title">{{ _('Filters') }}</p>
+                        <p class="text-sm text-app-text-secondary dark:text-app-dark-text-secondary">
+                            {{ _('Narrow the queue by reporter or assignee.') }}
+                        </p>
+                    </div>
+
+                    <div class="flex items-center gap-3 rounded-xl border border-app-border bg-app-accent-soft/60 px-3 py-2.5 dark:border-app-dark-border dark:bg-app-dark-accent-soft/60">
+                        <input id="notification" type="checkbox" class="checkbox-base h-4 w-4 shrink-0">
+                        <label for="notification" class="text-sm font-medium text-app-text dark:text-app-dark-text">
+                            {{ _('Use desktop notification') }}
+                        </label>
+                    </div>
+
+                    <form id="filter-form" name="form" action="" method="get" class="space-y-4">
+                        <label id="own-box" class="flex cursor-pointer items-center gap-3 rounded-xl border border-app-border px-3 py-2.5 text-sm text-app-text dark:border-app-dark-border dark:text-app-dark-text">
+                            <input id="own" type="checkbox" name="own"{% if filter_status.own %} checked{% endif %} value="1" class="checkbox-base h-4 w-4 shrink-0">
+                            <span>{{ _('Show my tickets only') }}</span>
+                        </label>
+
+                        <div id="user-box" class="space-y-2">
+                            <label for="filter-user" class="section-title text-[0.72rem]!">{{ _('Filing user') }}</label>
+                            <select id="filter-user" class="select-base" multiple name="user">
+                                {% for username in filter_status.user %}
+                                    <option value="{{ username }}" selected>{{ username }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div id="assignee-box" class="space-y-2">
+                            <label for="filter-assignee" class="section-title text-[0.72rem]!">{{ _('Assignee') }}</label>
+                            <select id="filter-assignee" class="select-base" multiple name="assignee">
+                                {% for username in filter_status.assignee %}
+                                    <option value="{{ username }}" selected>{{ username }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn-primary w-full">{{ _('Apply filters') }}</button>
+                    </form>
+                </div>
+            </div>
+        </aside>
+    </section>
+    {% if page_obj.has_other_pages() %}
+        <div class="bottom-pagination-bar">{% include "list-pages.html" %}</div>
+    {% endif %}
+{% endblock %}

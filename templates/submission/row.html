@@ -1,0 +1,112 @@
+{% set can_view, can_edit = submission_layout(submission, profile_id, request.user, completed_problem_ids, editable_problem_ids, tester_problem_ids) %}
+<td class="w-28 px-2 py-2">
+    <div class="flex min-h-[4.9rem] h-full flex-col items-center justify-center rounded-[1.25rem] border border-app-border/35 px-2.5 py-2.5 text-center text-base dark:border-app-dark-border/35 {{ submission.result_background }}">
+        {%- if submission.is_graded -%}
+        <div class="metric">
+            {%- if submission.status in ('IE', 'CE', 'AB') -%}
+                -- / --
+            {%- else -%}
+            {{ submission.case_points|floatformat(0) }} / {{ submission.case_total|floatformat(0) }}
+            {%- endif -%}
+        </div>
+        {%- else -%}
+        <div>
+            <i class="fa-duotone fa-spinner fa-spin fa-lg"></i>
+        </div>
+        {%- endif -%}
+        <div class="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-app-text-secondary dark:text-app-dark-text-secondary">
+            <span title="{{ submission.long_status }}">{{ submission.short_status }} | {{ submission.language.short_display_name }}</span>
+        </div>
+    </div>
+</td>
+<td class="bg-app-panel-elevated/90 px-4 py-3 dark:bg-app-dark-panel-elevated/90">
+    <div class="flex flex-col items-start gap-3 lg:flex-row lg:items-center">
+        <div class="min-w-0 flex-1">
+            {% if show_problem %}
+            <div class="text-lg font-bold leading-snug">
+                <a href="{{ submission.problem_link }}" class="line-clamp-1 text-app-text dark:text-app-dark-text transition hover:text-app-accent dark:hover:text-app-dark-accent" title="{{ submission.problem_name }}">{{ submission.problem_name }}</a>
+            </div>
+            <div class="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-app-text-secondary dark:text-app-dark-text-secondary">
+                {{ link_user(submission.user) }}
+            {% else %}
+            <div class="text-lg font-bold leading-snug">
+                {{ link_user(submission.user) }}
+            </div>
+            <div class="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-app-text-secondary dark:text-app-dark-text-secondary">
+            {% endif %}
+                <span class="time">{{ relative_time(submission.date) }}</span>
+                {% if not request.in_contest and submission.contest_object_id %}
+                    <a href="{{ url('contest_view', submission.contest_object.key) }}"
+                        class="submission-contest code-accent inline-flex items-center gap-1">
+                        <i title="{{ submission.contest_object.name }}" class="fa-duotone fa-circle-dot"></i>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        {% if submission.status == 'G' %}
+        <div class="rounded-xl border border-app-border/70 bg-app-panel px-3 py-1.5 text-sm font-semibold text-app-text dark:border-app-dark-border/70 dark:bg-app-dark-panel dark:text-app-dark-text">
+            {%- if submission.current_testcase > 0 -%}
+                {{ _('Case #%(case)s', case=submission.current_testcase) }}
+            {%- else -%}
+                ...
+            {%- endif -%}
+        </div>
+        {% endif %}
+        {% if can_view %}
+            <div class="flex min-h-4 flex-wrap items-center gap-4 py-0.5 lg:justify-end" id="manage">
+                <a class="relative pl-5 text-sm font-medium text-app-text-secondary transition hover:text-app-accent dark:text-app-dark-text-secondary dark:hover:text-app-dark-accent" href="{{ url('submission_status', submission.id) }}">
+                    <span class="absolute top-0.5 left-0 flex h-full w-4 flex-col items-center justify-center text-sm">
+                        <i class="fa-duotone fa-eye"></i>
+                    </span>
+                    <div class="hidden md:block">{{ _('view') }}</div>
+                </a>
+                {% if perms.judge.rejudge_submission and can_edit %} 
+                    {% if not submission.is_locked %}
+                    <a class="relative pl-5 text-sm font-medium text-app-text-secondary transition hover:text-app-accent dark:text-app-dark-text-secondary dark:hover:text-app-dark-accent" href="javascript:void(0)" onclick="rejudge_submission({{ submission.id }}, event);return false">
+                        <span class="absolute top-0.5 left-0 flex h-full w-4 flex-col items-center justify-center text-sm">
+                            <i class="fa-duotone fa-arrows-rotate"></i>
+                        </span>
+                        <div class="hidden md:block">{{ _('rejudge') }}</div>
+                    </a>
+                    {% else %}
+                    <div class="relative pl-5 text-sm font-medium text-app-text-muted dark:text-app-dark-text-muted">
+                        <span class="absolute top-0.5 left-0 flex h-full w-4 flex-col items-center justify-center text-sm">
+                            <i class="text-gray-500 fa-duotone fa-arrows-rotate"></i>
+                        </span>
+                        <div class="hidden md:block">{{ _('locked') }}</div>
+                    </div>
+                    {% endif %}
+                {% endif %}
+                {% if can_edit %}
+                    <a class="relative pl-5 text-sm font-medium text-app-text-secondary transition hover:text-app-accent dark:text-app-dark-text-secondary dark:hover:text-app-dark-accent" href="{{ url('admin:judge_submission_change', submission.id) }}">
+                        <span class="absolute top-0.5 left-0 flex h-full w-4 flex-col items-center justify-center text-sm">
+                            <i class="fa-duotone fa-gear"></i>
+                        </span>
+                        <div class="hidden md:block">{{ _('admin') }}</div>
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</td>
+<td class="w-24 overflow-hidden rounded-r-[1.6rem] px-2 py-2">
+    <div class="flex min-h-[4.9rem] h-full flex-col items-center justify-center px-1 py-1 text-center">
+        {% if submission.status in ('QU', 'P', 'G', 'CE', 'IE', 'AB') %}
+            <div class="metric">
+                ---
+            </div>
+            <div class="text-sm text-app-text-muted dark:text-app-dark-text-muted">---</div>
+        {% else %}
+            {% if "TLE" != submission.result %}
+                <div title="{{ submission.time or 0 }}s" class="metric">
+                    {{ (submission.time or 0)|floatformat(2) }}s
+            {% else %}
+                <div class="metric">
+                    ---
+            {% endif %}
+            {# No one actually like IEC prefixes, Jinja2. #}
+        </div>
+        <div class="mt-1 text-sm text-app-text-muted dark:text-app-dark-text-muted">{{ (submission.memory_bytes|filesizeformat(True)).replace('i', '') }}</div>
+        {% endif %}
+    </div>
+</td>

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block body %}
+    <div class="mx-auto max-w-3xl">
+        <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-zinc-900 md:p-8">
+            <div class="mb-6 flex flex-col gap-2 border-b border-slate-200 pb-5 dark:border-slate-700">
+                <div class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">{{ _('Request detail') }}</div>
+                <h1 class="text-2xl font-black tracking-tight text-slate-900 dark:text-white">{{ _('Membership request') }}</h1>
+            </div>
+            <div class="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700">
+                <table class="w-full">
+                    <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+                        <tr class="bg-white dark:bg-zinc-900">
+                            <th class="w-44 bg-slate-50 px-5 py-4 text-left text-sm font-semibold text-slate-700 dark:bg-zinc-800 dark:text-slate-200">{{ _('User') }}</th>
+                            <td class="px-5 py-4 text-slate-700 dark:text-slate-200">{{ link_user(object.user) }}</td>
+                        </tr>
+                        <tr class="bg-white dark:bg-zinc-900">
+                            <th class="bg-slate-50 px-5 py-4 text-left text-sm font-semibold text-slate-700 dark:bg-zinc-800 dark:text-slate-200">{{ _('Organization') }}</th>
+                            <td class="px-5 py-4">
+                                {% with org=object.organization %}
+                                    <a class="font-medium text-sky-600 hover:text-sky-700 dark:text-sky-300 dark:hover:text-sky-200" href="{{ org.get_absolute_url() }}">{{ org.name }}</a>
+                                {% endwith %}
+                            </td>
+                        </tr>
+                        <tr class="bg-white dark:bg-zinc-900">
+                            <th class="bg-slate-50 px-5 py-4 text-left text-sm font-semibold text-slate-700 dark:bg-zinc-800 dark:text-slate-200">{{ _('Time') }}</th>
+                            <td class="px-5 py-4 text-slate-700 dark:text-slate-200">{{ object.time|date(_("N j, Y, g:i a")) }}</td>
+                        </tr>
+                        <tr class="bg-white dark:bg-zinc-900">
+                            <th class="bg-slate-50 px-5 py-4 text-left text-sm font-semibold text-slate-700 dark:bg-zinc-800 dark:text-slate-200 align-top">{{ _('Reason') }}</th>
+                            <td class="px-5 py-4 whitespace-pre-line text-slate-700 dark:text-slate-200">{{ object.reason }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}

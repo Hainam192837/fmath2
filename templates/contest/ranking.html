@@ -1,0 +1,339 @@
+{% extends "user/base-users.html" %}
+
+{% block title_ruler %}{% endblock %}
+
+{% block title_row %}
+    {% set title = contest.name %}
+    {% include "contest/contest-tabs.html" %}
+{% endblock %}
+
+{% block users_media %}
+    <style>
+        #users-table {
+            min-width: max-content;
+        }
+
+        #users-table .username {
+            min-width: 11rem;
+        }
+
+        #users-table .rating-column {
+            min-width: 3em;
+        }
+
+        .userinfo a, .user-name-link a {
+            display: inline !important;
+        }
+
+        .user-actions a,
+        .user-actions form {
+            display: inline-flex !important;
+        }
+
+        .user-actions {
+            gap: 0.375rem;
+        }
+
+        .disqualified>td {
+            background: rgba(254, 226, 226, 0.72) !important;
+        }
+
+        .dark .disqualified>td {
+            background: rgba(127, 29, 29, 0.4) !important;
+        }
+
+        #users-table tbody tr:nth-child(even):not(.disqualified) > td:not(.first-accept) {
+            background: rgba(248, 250, 252, 0.96) !important;
+        }
+
+        .dark #users-table tbody tr:nth-child(even):not(.disqualified) > td:not(.first-accept) {
+            background: rgba(15, 23, 42, 0.92) !important;
+        }
+
+        #users-table td.first-accept {
+            background: rgb(134 239 172) !important;
+        }
+
+        #users-table td.first-accept .first-accept-pill {
+            background: rgb(34 197 94) !important;
+            color: rgb(20 83 45) !important;
+        }
+
+        .dark #users-table td.first-accept {
+            background: rgba(34, 197, 94, 0.34) !important;
+        }
+
+        .dark #users-table td.first-accept .first-accept-pill {
+            background: rgba(34, 197, 94, 0.86) !important;
+            color: rgb(236 253 245) !important;
+        }
+
+        #users-table.ranking-compact td,
+        #users-table.ranking-compact th {
+            padding-top: 0.55rem;
+            padding-bottom: 0.55rem;
+        }
+
+        .solving-time {
+            display: block;
+        }
+
+        .organization-column a {
+            color: inherit !important;
+        }
+
+        .contest-ranking-shell {
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            border-radius: 1.5rem;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            background: rgba(255, 255, 255, 0.94);
+            box-shadow: 0 14px 34px rgba(15, 23, 42, 0.06);
+        }
+
+        .dark .contest-ranking-shell {
+            border-color: rgba(148, 163, 184, 0.12);
+            background: rgba(15, 23, 42, 0.88);
+            box-shadow: 0 16px 40px rgba(2, 6, 23, 0.24);
+        }
+
+        .ranking-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.45rem 0.9rem;
+            align-items: center;
+        }
+
+        .ranking-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+
+        .ranking-toggle span {
+            color: rgb(51 65 85);
+        }
+
+        .dark .ranking-toggle span {
+            color: rgb(226 232 240);
+        }
+
+        .ranking-export {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            border-radius: 999px;
+            padding: 0.55rem 0.9rem;
+            font-weight: 700;
+            color: white;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            box-shadow: 0 14px 28px rgba(37, 99, 235, 0.28);
+        }
+
+        @media (min-width: 1024px) {
+            .ranking-controls-row {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 1.5rem;
+            }
+
+            .ranking-controls-row .ranking-toolbar {
+                justify-content: flex-end;
+            }
+        }
+    </style>
+
+    {% if has_rating %}
+        <style>#users-table .rate-box {
+            font-size: 0.85em;
+            float: left;
+        }
+
+        #users-table td:nth-child(1) .rating {
+            margin-left: 1.25em;
+            display: block;
+        }
+
+        #users-table td:nth-child(2) a {
+            display: block;
+        }
+        </style>
+    {% endif %}
+
+    <style>
+        .select2-selection__arrow {
+            display: none;
+        }
+
+        .select2-selection__rendered {
+            cursor: text;
+            overflow: initial !important
+        }
+
+        .select2-results__option--highlighted {
+            background-color: #DEDEDE !important;
+        }
+
+        .select2-results__option {
+            white-space: nowrap;
+        }
+
+        #search-contest, #search-contest + .select2 {
+            margin-top: 0.5em;
+        }
+
+        #search-contest {
+            width: 200px;
+            height: 2.3em;
+        }
+    </style>
+{% endblock %}
+
+{% block users_js_media %}
+    {% if can_edit %}
+        <script type="text/javascript">
+            $(function () {
+                $('a.disqualify-participation').click(function (e) {
+                    e.preventDefault();
+                    if (e.ctrlKey || e.metaKey || confirm("{{ _('Are you sure you want to disqualify this participation?') }}"))
+                        $(this).closest('form').submit();
+                })
+                $('a.un-disqualify-participation').click(function (e) {
+                    e.preventDefault();
+                    if (e.ctrlKey || e.metaKey || confirm("{{ _('Are you sure you want to un-disqualify this participation?') }}"))
+                        $(this).closest('form').submit();
+                })
+            });
+        </script>
+    {% endif %}
+    <script type="text/javascript">
+        $(function () {
+            var url = "{{ url('contest_participation', contest.key, '__username__') }}";
+            var placeholder = $('#search-contest').replaceWith($('<select>').attr({
+                id: 'search-contest'
+            })).attr('placeholder');
+
+            $('#search-contest').select2({
+                placeholder: placeholder,
+                ajax: {
+                    url: "{{ url('contest_user_search_select2_ajax', contest.key) }}"
+                },
+                minimumInputLength: 1,
+                templateResult: function (data) {
+                    return $('<span>')
+                        .append($('<img>', {
+                            loading: 'lazy',
+                            class: 'user-search-image',
+                            src: data.gravatar_url,
+                            width: 24,
+                            height: 24,
+                        }))
+                        .append($('<span>', {
+                            class: data.display_rank + ' user-search-name',
+                        }).text(data.text));
+                }
+            }).on('change', function () {
+                window.location.href = url.replace('__username__', $(this).val());
+            });
+
+            function toggle(elements) {
+                elements.toggleClass('hidden');
+            };
+            
+            $('#show-organizations-checkbox').click(function () {
+                toggle($('.organization-column'));
+                localStorage.setItem('show-organizations', $('.organization-column').is(':visible') ? 'true' : 'false');
+            });
+
+            $('#show-usernames-checkbox').click(function () {
+                toggle($('.username-column'));
+                localStorage.setItem('show-usernames', $('.username-column').is(':visible') ? 'true' : 'false');
+            });
+
+            $('#hidden-time-checkbox').click(function () {
+                toggle($('.solving-time'));
+                localStorage.setItem('hidden-time', $('.solving-time').is(':visible') ? 'false' : 'true');
+            });
+            
+            var table = document.querySelector('#users-table')
+            $('#compact-checkbox').click(function () {
+                table.classList.toggle('ranking-compact')
+                localStorage.setItem('compact-row', table.classList.contains('ranking-compact') ? 'true' : 'false');
+            });
+            
+            if (localStorage.getItem('show-organizations') == 'true') {
+                toggle($('.organization-column'));
+                $('#show-organizations-checkbox').prop('checked', true);
+            } 
+
+            if (localStorage.getItem('show-usernames') == 'true') {
+                toggle($('.username-column'));
+                $('#show-usernames-checkbox').prop('checked', true);
+            }
+
+            if (localStorage.getItem('hidden-time') == 'true') {
+                toggle($('.solving-time'));
+                $('#hidden-time-checkbox').prop('checked', true);
+            }
+
+            if (localStorage.getItem('compact-row') == 'true') {
+                table.classList.add('ranking-compact')
+                $('#compact-checkbox').prop('checked', true);
+            }
+        });
+    </script>
+    {% include "contest/media-js.html" %}
+{% endblock %}
+
+{% block before_users_table %}
+<div class="contest-ranking-shell">
+<div class="ranking-controls-row">
+    <div class="ranking-toolbar">
+        <label for="show-organizations-checkbox" class="ranking-toggle">
+            <input id="show-organizations-checkbox" type="checkbox" class="w-5 h-5 text-indigo-600 border-gray-300 rounded shadow-sm focus:border-indigo-300 focus:ring focus:ring-offset-0 focus:ring-indigo-200 focus:ring-opacity-50">
+            <span>{{ _('Show organizations') }}</span>
+        </label>
+        <label for="show-usernames-checkbox" class="ranking-toggle">
+            <input id="show-usernames-checkbox" type="checkbox" class="w-5 h-5 text-indigo-600 border-gray-300 rounded shadow-sm focus:border-indigo-300 focus:ring focus:ring-offset-0 focus:ring-indigo-200 focus:ring-opacity-50">
+            <span>{{ _('Show username') }}</span>
+        </label>
+        {% if request.user.is_staff or request.user.is_superuser %}
+        <label for="compact-checkbox" class="ranking-toggle">
+            <input id="compact-checkbox" type="checkbox" class="w-5 h-5 text-indigo-600 border-gray-300 rounded shadow-sm focus:border-indigo-300 focus:ring focus:ring-offset-0 focus:ring-indigo-200 focus:ring-opacity-50">
+            <span>{{ _('Compact') }}</span>
+        </label>
+        {% endif %}
+        <label for="hidden-time-checkbox" class="ranking-toggle">
+            <input id="hidden-time-checkbox" type="checkbox" class="w-5 h-5 text-indigo-600 border-gray-300 rounded shadow-sm focus:border-indigo-300 focus:ring focus:ring-offset-0 focus:ring-indigo-200 focus:ring-opacity-50">
+            <span>{{ _('Hide solving time') }}</span>
+        </label>
+        {% if tab == 'participation' %}
+            {% if contest.can_see_full_scoreboard(request.user) %}
+                <input id="search-contest" type="text" placeholder="{{ _('View user participation') }}">
+            {% endif %}
+        {% endif %}
+    </div>
+    <div class="flex items-center justify-start gap-2">
+        {% if contest.can_see_full_scoreboard(request.user) %}
+        <a class="ranking-export hover:brightness-110" href="{{ url('contest_ranking_image', contest.key) }}">
+            <i class="fa-duotone fa-images"></i>
+            {{ _('Download ranking image') }}
+        </a>
+        {% endif %}
+        {% if request.user.has_perm('judge.download_rank_contest') %}
+        <a class="ranking-export hover:brightness-110" href="{{ url('export_excel', contest.key) }}">
+            <i class="fa-duotone fa-file-export"></i>
+            {{ _('Export to Excel') }}
+        </a>
+        {% endif %}
+    </div>
+</div>
+</div>
+{% endblock %}
+
+{% block users_table %}
+    {% include "contest/ranking-table.html" %}
+{% endblock %}

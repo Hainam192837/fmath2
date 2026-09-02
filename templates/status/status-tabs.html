@@ -1,0 +1,22 @@
+{% extends "tabs-base.html" %}
+
+{% block tab_title %}
+    <div class="flex min-w-0 flex-1 flex-col justify-center lg:max-w-[40%]">
+        <span class="section-title">{{ _('Infrastructure') }}</span>
+        <span class="line-clamp-1 text-3xl font-bold text-app-text dark:text-app-dark-text">
+            {% if tab == 'judges' %}
+                {{ _('Judge status') }}
+            {% elif tab == 'runtimes' %}
+                {{ _('Runtime registry') }}
+            {% else %}
+                {{ _('Version matrix') }}
+            {% endif %}
+        </span>
+    </div>
+{% endblock %}
+
+{% block tabs %}
+    {{ make_tab('judges', 'fa-server', url('status_all'), _('Judges')) }}
+    {{ make_tab('runtimes', 'fa-code', url('runtime_list'), _('Runtimes')) }}
+    {{ make_tab('matrix', 'fa-table', url('version_matrix'), _('Version Matrix')) }}
+{% endblock %}

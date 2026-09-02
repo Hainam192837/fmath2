@@ -1,0 +1,6 @@
+{% extends "errors/base.html" %}
+
+{% set error_code = 403 %}
+{% set error_label = _('Forbidden') %}
+{% set error_title = _('You do not have permission to access this page') %}
+{% set error_message = _('The current account is not allowed to open %(path)s.', path=request.path) %}

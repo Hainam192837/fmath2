@@ -1,0 +1,396 @@
+Usage: celery [OPTIONS] [COMMAND] [ARGS]...
+Try 'celery --help' for help.
+
+Error: 
+Unable to load celery application.
+The module dmoj_celery was not found.
+Usage: celery [OPTIONS] [COMMAND] [ARGS]...
+Try 'celery --help' for help.
+
+Error: 
+Unable to load celery application.
+The module dmoj_celery was not found.
+Usage: celery [OPTIONS] [COMMAND] [ARGS]...
+Try 'celery --help' for help.
+
+Error: 
+Unable to load celery application.
+The module dmoj_celery was not found.
+Usage: celery [OPTIONS] [COMMAND] [ARGS]...
+Try 'celery --help' for help.
+
+Error: 
+Unable to load celery application.
+The module dmoj_celery was not found.
+Usage: celery [OPTIONS] [COMMAND] [ARGS]...
+Try 'celery --help' for help.
+
+Error: 
+Unable to load celery application.
+The module dmoj_celery was not found.
+Usage: celery [OPTIONS] [COMMAND] [ARGS]...
+Try 'celery --help' for help.
+
+Error: 
+Unable to load celery application.
+The module dmoj_celery was not found.
+Usage: celery [OPTIONS] [COMMAND] [ARGS]...
+Try 'celery --help' for help.
+
+Error: 
+Unable to load celery application.
+The module dmoj_celery was not found.
+Usage: celery [OPTIONS] [COMMAND] [ARGS]...
+Try 'celery --help' for help.
+
+Error: 
+Unable to load celery application.
+The module dmoj_celery was not found.
+Usage: celery [OPTIONS] [COMMAND] [ARGS]...
+Try 'celery --help' for help.
+
+Error: 
+Unable to load celery application.
+The module dmoj_celery was not found.
+Usage: celery [OPTIONS] [COMMAND] [ARGS]...
+Try 'celery --help' for help.
+
+Error: 
+Unable to load celery application.
+The module dmoj_celery was not found.
+Usage: celery [OPTIONS] [COMMAND] [ARGS]...
+Try 'celery --help' for help.
+
+Error: 
+Unable to load celery application.
+The module dmoj_celery was not found.
+Usage: celery [OPTIONS] [COMMAND] [ARGS]...
+Try 'celery --help' for help.
+
+Error: 
+Unable to load celery application.
+The module dmoj_celery was not found.
+Usage: celery [OPTIONS] [COMMAND] [ARGS]...
+Try 'celery --help' for help.
+
+Error: 
+Unable to load celery application.
+The module dmoj_celery was not found.
+Usage: celery [OPTIONS] [COMMAND] [ARGS]...
+Try 'celery --help' for help.
+
+Error: 
+Unable to load celery application.
+The module dmoj_celery was not found.
+Usage: celery [OPTIONS] [COMMAND] [ARGS]...
+Try 'celery --help' for help.
+
+Error: 
+Unable to load celery application.
+The module dmoj_celery was not found.
+Usage: celery [OPTIONS] [COMMAND] [ARGS]...
+Try 'celery --help' for help.
+
+Error: 
+Unable to load celery application.
+The module dmoj_celery was not found.
+Usage: celery [OPTIONS] [COMMAND] [ARGS]...
+Try 'celery --help' for help.
+
+Error: 
+Unable to load celery application.
+The module dmoj_celery was not found.
+[2026-08-22 03:07:35,874: WARNING/MainProcess] consumer: Connection to broker lost. Trying to re-establish the connection...
+Traceback (most recent call last):
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/retry.py", line 120, in call_with_retry
+    return do()
+           ^^^^
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/client.py", line 1308, in <lambda>
+    lambda: command(*args, **kwargs),
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/client.py", line 1395, in try_read
+    return conn.read_response(
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/connection.py", line 1407, in read_response
+    response = self._parser.read_response(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/_parsers/resp3.py", line 40, in read_response
+    result = self._read_response(
+             ^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/_parsers/resp3.py", line 65, in _read_response
+    raw = self._buffer.readline(timeout=timeout)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/_parsers/socket.py", line 117, in readline
+    self._read_from_socket(timeout=timeout)
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/_parsers/socket.py", line 67, in _read_from_socket
+    raise ConnectionError(SERVER_CLOSED_CONNECTION_ERROR)
+redis.exceptions.ConnectionError: Connection closed by server.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/connection.py", line 1055, in connect_check_health
+    sock = self._connect()
+           ^^^^^^^^^^^^^^^
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/connection.py", line 1617, in _connect
+    raise err
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/connection.py", line 1601, in _connect
+    sock.connect(socket_address)
+ConnectionRefusedError: [Errno 111] Connection refused
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/celery/worker/consumer/consumer.py", line 346, in start
+    blueprint.start(self)
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/celery/bootsteps.py", line 116, in start
+    step.start(parent)
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/celery/worker/consumer/consumer.py", line 788, in start
+    c.loop(*c.loop_args())
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/celery/worker/loops.py", line 97, in asynloop
+    next(loop)
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/kombu/asynchronous/hub.py", line 377, in create_loop
+    cb(*cbargs)
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/kombu/transport/redis.py", line 1394, in on_readable
+    self.cycle.on_readable(fileno)
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/kombu/transport/redis.py", line 579, in on_readable
+    chan.handlers[type]()
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/kombu/transport/redis.py", line 931, in _receive
+    ret.append(self._receive_one(c))
+               ^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/kombu/transport/redis.py", line 941, in _receive_one
+    response = c.parse_response()
+               ^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/client.py", line 1399, in parse_response
+    response = self._execute(conn, try_read)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/client.py", line 1307, in _execute
+    response = conn.retry.call_with_retry(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/retry.py", line 127, in call_with_retry
+    fail(error, failures)
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/client.py", line 1304, in failure_callback
+    self._reconnect(conn, error, failure_count, start_time, command_name)
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/client.py", line 1278, in _reconnect
+    conn.connect()
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/connection.py", line 1028, in connect
+    self.retry.call_with_retry(
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/retry.py", line 132, in call_with_retry
+    raise error
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/retry.py", line 120, in call_with_retry
+    return do()
+           ^^^^
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/connection.py", line 1029, in <lambda>
+    lambda: self.connect_check_health(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/connection.py", line 1077, in connect_check_health
+    raise e
+redis.exceptions.ConnectionError: Error 111 connecting to localhost:6379. Connection refused.
+[2026-08-22 03:07:36,010: WARNING/MainProcess] /home/ubuntu/tmath/.venv/lib/python3.12/site-packages/celery/worker/consumer/consumer.py:397: CPendingDeprecationWarning: 
+In Celery 5.1 we introduced an optional breaking change which
+on connection loss cancels all currently executed tasks with late acknowledgement enabled.
+These tasks cannot be acknowledged as the connection is gone, and the tasks are automatically redelivered
+back to the queue. You can enable this behavior using the worker_cancel_long_running_tasks_on_connection_loss
+setting. In Celery 5.1 it is set to False by default. The setting will be set to True by default in Celery 6.0.
+
+  warnings.warn(CANCEL_TASKS_BY_DEFAULT, CPendingDeprecationWarning)
+
+[2026-08-22 03:07:36,029: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:6379//: Error 111 connecting to localhost:6379. Connection refused..
+Trying again in 2.00 seconds... (1/100)
+
+[2026-08-27 06:34:40,891: WARNING/MainProcess] consumer: Connection to broker lost. Trying to re-establish the connection...
+Traceback (most recent call last):
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/retry.py", line 120, in call_with_retry
+    return do()
+           ^^^^
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/client.py", line 1308, in <lambda>
+    lambda: command(*args, **kwargs),
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/client.py", line 1395, in try_read
+    return conn.read_response(
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/connection.py", line 1407, in read_response
+    response = self._parser.read_response(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/_parsers/resp3.py", line 40, in read_response
+    result = self._read_response(
+             ^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/_parsers/resp3.py", line 65, in _read_response
+    raw = self._buffer.readline(timeout=timeout)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/_parsers/socket.py", line 117, in readline
+    self._read_from_socket(timeout=timeout)
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/_parsers/socket.py", line 67, in _read_from_socket
+    raise ConnectionError(SERVER_CLOSED_CONNECTION_ERROR)
+redis.exceptions.ConnectionError: Connection closed by server.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/connection.py", line 1055, in connect_check_health
+    sock = self._connect()
+           ^^^^^^^^^^^^^^^
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/connection.py", line 1617, in _connect
+    raise err
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/connection.py", line 1601, in _connect
+    sock.connect(socket_address)
+ConnectionRefusedError: [Errno 111] Connection refused
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/celery/worker/consumer/consumer.py", line 346, in start
+    blueprint.start(self)
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/celery/bootsteps.py", line 116, in start
+    step.start(parent)
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/celery/worker/consumer/consumer.py", line 788, in start
+    c.loop(*c.loop_args())
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/celery/worker/loops.py", line 97, in asynloop
+    next(loop)
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/kombu/asynchronous/hub.py", line 377, in create_loop
+    cb(*cbargs)
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/kombu/transport/redis.py", line 1394, in on_readable
+    self.cycle.on_readable(fileno)
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/kombu/transport/redis.py", line 579, in on_readable
+    chan.handlers[type]()
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/kombu/transport/redis.py", line 931, in _receive
+    ret.append(self._receive_one(c))
+               ^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/kombu/transport/redis.py", line 941, in _receive_one
+    response = c.parse_response()
+               ^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/client.py", line 1399, in parse_response
+    response = self._execute(conn, try_read)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/client.py", line 1307, in _execute
+    response = conn.retry.call_with_retry(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/retry.py", line 127, in call_with_retry
+    fail(error, failures)
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/client.py", line 1304, in failure_callback
+    self._reconnect(conn, error, failure_count, start_time, command_name)
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/client.py", line 1278, in _reconnect
+    conn.connect()
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/connection.py", line 1028, in connect
+    self.retry.call_with_retry(
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/retry.py", line 132, in call_with_retry
+    raise error
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/retry.py", line 120, in call_with_retry
+    return do()
+           ^^^^
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/connection.py", line 1029, in <lambda>
+    lambda: self.connect_check_health(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/connection.py", line 1077, in connect_check_health
+    raise e
+redis.exceptions.ConnectionError: Error 111 connecting to localhost:6379. Connection refused.
+[2026-08-27 06:34:40,966: WARNING/MainProcess] /home/ubuntu/tmath/.venv/lib/python3.12/site-packages/celery/worker/consumer/consumer.py:397: CPendingDeprecationWarning: 
+In Celery 5.1 we introduced an optional breaking change which
+on connection loss cancels all currently executed tasks with late acknowledgement enabled.
+These tasks cannot be acknowledged as the connection is gone, and the tasks are automatically redelivered
+back to the queue. You can enable this behavior using the worker_cancel_long_running_tasks_on_connection_loss
+setting. In Celery 5.1 it is set to False by default. The setting will be set to True by default in Celery 6.0.
+
+  warnings.warn(CANCEL_TASKS_BY_DEFAULT, CPendingDeprecationWarning)
+
+[2026-08-27 06:34:41,005: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:6379//: Error 111 connecting to localhost:6379. Connection refused..
+Trying again in 2.00 seconds... (1/100)
+
+[2026-09-02 06:19:01,795: WARNING/MainProcess] consumer: Connection to broker lost. Trying to re-establish the connection...
+Traceback (most recent call last):
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/retry.py", line 120, in call_with_retry
+    return do()
+           ^^^^
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/client.py", line 1308, in <lambda>
+    lambda: command(*args, **kwargs),
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/client.py", line 1395, in try_read
+    return conn.read_response(
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/connection.py", line 1407, in read_response
+    response = self._parser.read_response(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/_parsers/resp3.py", line 40, in read_response
+    result = self._read_response(
+             ^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/_parsers/resp3.py", line 65, in _read_response
+    raw = self._buffer.readline(timeout=timeout)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/_parsers/socket.py", line 117, in readline
+    self._read_from_socket(timeout=timeout)
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/_parsers/socket.py", line 67, in _read_from_socket
+    raise ConnectionError(SERVER_CLOSED_CONNECTION_ERROR)
+redis.exceptions.ConnectionError: Connection closed by server.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/connection.py", line 1055, in connect_check_health
+    sock = self._connect()
+           ^^^^^^^^^^^^^^^
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/connection.py", line 1617, in _connect
+    raise err
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/connection.py", line 1601, in _connect
+    sock.connect(socket_address)
+ConnectionRefusedError: [Errno 111] Connection refused
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/celery/worker/consumer/consumer.py", line 346, in start
+    blueprint.start(self)
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/celery/bootsteps.py", line 116, in start
+    step.start(parent)
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/celery/worker/consumer/consumer.py", line 788, in start
+    c.loop(*c.loop_args())
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/celery/worker/loops.py", line 97, in asynloop
+    next(loop)
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/kombu/asynchronous/hub.py", line 377, in create_loop
+    cb(*cbargs)
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/kombu/transport/redis.py", line 1394, in on_readable
+    self.cycle.on_readable(fileno)
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/kombu/transport/redis.py", line 579, in on_readable
+    chan.handlers[type]()
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/kombu/transport/redis.py", line 931, in _receive
+    ret.append(self._receive_one(c))
+               ^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/kombu/transport/redis.py", line 941, in _receive_one
+    response = c.parse_response()
+               ^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/client.py", line 1399, in parse_response
+    response = self._execute(conn, try_read)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/client.py", line 1307, in _execute
+    response = conn.retry.call_with_retry(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/retry.py", line 127, in call_with_retry
+    fail(error, failures)
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/client.py", line 1304, in failure_callback
+    self._reconnect(conn, error, failure_count, start_time, command_name)
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/client.py", line 1278, in _reconnect
+    conn.connect()
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/connection.py", line 1028, in connect
+    self.retry.call_with_retry(
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/retry.py", line 132, in call_with_retry
+    raise error
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/retry.py", line 120, in call_with_retry
+    return do()
+           ^^^^
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/connection.py", line 1029, in <lambda>
+    lambda: self.connect_check_health(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/tmath/.venv/lib/python3.12/site-packages/redis/connection.py", line 1077, in connect_check_health
+    raise e
+redis.exceptions.ConnectionError: Error 111 connecting to localhost:6379. Connection refused.
+[2026-09-02 06:19:01,838: WARNING/MainProcess] /home/ubuntu/tmath/.venv/lib/python3.12/site-packages/celery/worker/consumer/consumer.py:397: CPendingDeprecationWarning: 
+In Celery 5.1 we introduced an optional breaking change which
+on connection loss cancels all currently executed tasks with late acknowledgement enabled.
+These tasks cannot be acknowledged as the connection is gone, and the tasks are automatically redelivered
+back to the queue. You can enable this behavior using the worker_cancel_long_running_tasks_on_connection_loss
+setting. In Celery 5.1 it is set to False by default. The setting will be set to True by default in Celery 6.0.
+
+  warnings.warn(CANCEL_TASKS_BY_DEFAULT, CPendingDeprecationWarning)
+
+[2026-09-02 06:19:01,851: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:6379//: Error 111 connecting to localhost:6379. Connection refused..
+Trying again in 2.00 seconds... (1/100)
+

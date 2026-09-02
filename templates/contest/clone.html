@@ -1,0 +1,189 @@
+{% extends "common-content.html" %}
+
+{% block title_ruler %}{% endblock %}
+
+{% block title_row %}
+    {% set tab = 'clone' %}
+    {% set title = _('Clone Contest') %}
+    {% include "contest/contest-tabs.html" %}
+{% endblock %}
+
+{% block content_media %}
+<style>
+    .contest-clone-shell {
+        display: grid;
+        gap: 1.5rem;
+    }
+
+    .contest-clone-hero {
+        position: relative;
+        overflow: hidden;
+        border-radius: 1.75rem;
+        border: 1px solid color-mix(in srgb, var(--app-border) 80%, transparent);
+        padding: 1.75rem;
+        background:
+            radial-gradient(circle at top right, color-mix(in srgb, var(--app-accent) 18%, transparent), transparent 34%),
+            linear-gradient(145deg, color-mix(in srgb, var(--app-panel-elevated) 96%, white 4%), color-mix(in srgb, var(--app-panel) 92%, white 8%));
+        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+    }
+
+    .dark .contest-clone-hero {
+        border-color: color-mix(in srgb, var(--app-dark-border) 82%, transparent);
+        background:
+            radial-gradient(circle at top right, color-mix(in srgb, var(--app-dark-accent) 20%, transparent), transparent 36%),
+            linear-gradient(145deg, color-mix(in srgb, var(--app-dark-panel-elevated) 96%, black 4%), color-mix(in srgb, var(--app-dark-panel) 92%, black 8%));
+        box-shadow: 0 20px 44px rgba(2, 6, 23, 0.32);
+    }
+
+    .contest-clone-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55rem;
+        border-radius: 999px;
+        border: 1px solid color-mix(in srgb, var(--app-border) 70%, transparent);
+        background: color-mix(in srgb, var(--app-panel) 82%, white 18%);
+        padding: 0.55rem 0.9rem;
+        font-size: 0.8rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--app-text-muted);
+    }
+
+    .dark .contest-clone-chip {
+        border-color: color-mix(in srgb, var(--app-dark-border) 70%, transparent);
+        background: color-mix(in srgb, var(--app-dark-panel) 84%, black 16%);
+        color: var(--app-dark-text-muted);
+    }
+
+    .contest-clone-form {
+        border-radius: 1.75rem;
+        border: 1px solid color-mix(in srgb, var(--app-border) 80%, transparent);
+        background: color-mix(in srgb, var(--app-panel) 96%, white 4%);
+        padding: 1.5rem;
+        box-shadow: 0 16px 36px rgba(15, 23, 42, 0.06);
+    }
+
+    .dark .contest-clone-form {
+        border-color: color-mix(in srgb, var(--app-dark-border) 80%, transparent);
+        background: color-mix(in srgb, var(--app-dark-panel) 96%, black 4%);
+        box-shadow: 0 18px 38px rgba(2, 6, 23, 0.28);
+    }
+
+    .contest-clone-label {
+        display: block;
+        font-size: 0.82rem;
+        font-weight: 900;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--app-text-muted);
+    }
+
+    .dark .contest-clone-label {
+        color: var(--app-dark-text-muted);
+    }
+
+    .contest-clone-input {
+        width: 100%;
+        margin-top: 0.75rem;
+        border-radius: 1rem;
+        border: 1px solid color-mix(in srgb, var(--app-border) 85%, transparent);
+        background: color-mix(in srgb, var(--app-panel-elevated) 92%, white 8%);
+        padding: 0.95rem 1rem;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--app-text);
+        transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+    }
+
+    .contest-clone-input::placeholder {
+        color: color-mix(in srgb, var(--app-text-muted) 78%, transparent);
+    }
+
+    .contest-clone-input:focus {
+        outline: none;
+        border-color: color-mix(in srgb, var(--app-accent) 68%, transparent);
+        box-shadow: 0 0 0 4px color-mix(in srgb, var(--app-accent) 16%, transparent);
+    }
+
+    .dark .contest-clone-input {
+        border-color: color-mix(in srgb, var(--app-dark-border) 85%, transparent);
+        background: color-mix(in srgb, var(--app-dark-panel-elevated) 92%, black 8%);
+        color: var(--app-dark-text);
+    }
+
+    .dark .contest-clone-input::placeholder {
+        color: color-mix(in srgb, var(--app-dark-text-muted) 76%, transparent);
+    }
+
+    .dark .contest-clone-input:focus {
+        border-color: color-mix(in srgb, var(--app-dark-accent) 72%, transparent);
+        box-shadow: 0 0 0 4px color-mix(in srgb, var(--app-dark-accent) 18%, transparent);
+    }
+</style>
+{% endblock %}
+
+{% block description %}
+<div class="contest-clone-shell">
+    <section class="contest-clone-hero">
+        <div class="flex flex-wrap gap-2">
+            <span class="contest-clone-chip">
+                <i class="fa-duotone fa-copy"></i>
+                {{ _('Clone workflow') }}
+            </span>
+            <span class="contest-clone-chip">
+                <i class="fa-duotone fa-pen-to-square"></i>
+                {{ _('Frontend editor') }}
+            </span>
+        </div>
+
+        <div class="mt-5 max-w-3xl">
+            <h1 class="text-3xl font-black tracking-tight text-app-text dark:text-app-dark-text md:text-4xl">
+                {{ _('Create a contest draft from %(contest)s', contest=contest.name) }}
+            </h1>
+            <p class="mt-3 text-sm leading-7 text-app-text-secondary dark:text-app-dark-text-secondary md:text-base">
+                {{ _('Enter a new contest key. After cloning, you will be redirected to the frontend update page to continue editing the new contest.') }}
+            </p>
+        </div>
+    </section>
+
+    <form action="" method="post" class="contest-clone-form">
+        {% csrf_token %}
+
+        {% if form.errors %}
+            <div class="mb-5 rounded-2xl border border-red-300/70 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300">
+                {{ form.key.errors }}
+            </div>
+        {% endif %}
+
+        <label for="{{ form.key.id_for_label }}" class="block">
+            <span class="contest-clone-label">{{ _('New contest key') }}</span>
+            <input
+                type="text"
+                name="key"
+                id="{{ form.key.id_for_label }}"
+                maxlength="20"
+                required
+                value="{{ form.key.value() or '' }}"
+                placeholder="{{ _('Example: spring-open-2026-copy') }}"
+                class="contest-clone-input"
+            >
+        </label>
+
+        <div class="mt-3 text-sm leading-6 text-app-text-muted dark:text-app-dark-text-muted">
+            {{ _('The cloned contest starts as hidden so you can review settings before publishing.') }}
+        </div>
+
+        <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <a href="{{ url('contest_view', contest.key) }}" class="btn-ghost justify-center rounded-2xl px-5 py-3">
+                {{ _('Back to contest') }}
+            </a>
+            <button class="btn-primary justify-center rounded-2xl px-6 py-3 font-bold" type="submit">
+                {{ _('Clone and edit') }}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block description_end %}{% endblock %}

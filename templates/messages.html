@@ -1,0 +1,12 @@
+{% if messages %}
+    <div class="hidden" aria-hidden="true">
+        {% for message in messages %}
+            <div class="toast-payload" data-level="{{ message.tags|default('info') }}" data-message="{{ message|string }}"></div>
+        {% endfor %}
+    </div>
+    <script>
+        if (window.consumeToastPayloads) {
+            window.consumeToastPayloads(document.currentScript ? document.currentScript.previousElementSibling : document);
+        }
+    </script>
+{% endif %}

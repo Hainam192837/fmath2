@@ -1,0 +1,4 @@
+id: HaiNamPCT
+key: HaiNamPCTJudgeKey
+problem_storage_globs:
+  - /problems/*

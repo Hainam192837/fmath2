@@ -1,0 +1,485 @@
+{% extends "common-content.html" %}
+{% block js_media %}
+    <script type="text/javascript">
+        {% if dynamic_update %}
+            {% if dynamic_contest_id %}
+                window.dynamic_contest_id = {{ dynamic_contest_id }};
+            {% else %}
+                window.dynamic_contest_id = null;
+            {% endif %}
+            {% if dynamic_user_id %}
+                window.dynamic_user_id = {{ dynamic_user_id }};
+            {% else %}
+                window.dynamic_user_id = null;
+            {% endif %}
+            {% if dynamic_problem_id %}
+                window.dynamic_problem_id = {{ dynamic_problem_id }};
+            {% else %}
+                window.dynamic_problem_id = null;
+            {% endif %}
+            {% if show_problem %}
+                window.show_problem = 1;
+            {% else %}
+                window.show_problem = 0;
+            {% endif %}
+        {% endif %}
+        window.results_json = {{ results_json }};
+    </script>
+
+    {% compress js %}
+        {% if request.user.is_authenticated and perms.judge.rejudge_submission %}
+            <script type="text/javascript">
+                window.rejudge_submission = function (id, e) {
+                    if ((typeof e !== 'undefined' && e.ctrlKey) ||
+                        confirm('Are you sure you want to rejudge?')) {
+                        $.ajax({
+                            url: '{{ url('submission_rejudge') }}',
+                            type: "POST",
+                            data: {
+                                id: id
+                            }
+                        });
+                    }
+                };
+            </script>
+        {% endif %}
+
+        <script src="{{ static('libs/chart.js/Chart.js') }}"></script>
+    {% endcompress %}
+        
+    <script type="text/javascript">
+        $(function () {
+            function escapeRegExp(string) {
+                return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+            }
+
+            function idAndTextMatcher(params, data) {
+                if ($.trim(params.term) === '')
+                    return data;
+                var regex = new RegExp(escapeRegExp(params.term), 'i');
+                return data.text.search(regex) >= 0 || data.id.search(regex) >= 0 ? data : null;
+            }
+
+            $('#status').select2({
+                multiple: 1,
+                placeholder: '{{ _('Filter by status...') }}',
+                matcher: idAndTextMatcher,
+            }).css({'visibility': 'visible'});
+
+            $('#language_code').select2({
+                multiple: 1,
+                placeholder: '{{ _('Filter by language...') }}',
+                matcher: idAndTextMatcher,
+            }).css({'visibility': 'visible'});
+        });
+
+        // Draw the statistics graph.
+        var chart = null;
+        function stats_graph(raw_data) {
+            var colors = {{ results_colors_json }};
+
+            var ctx = $('#status-graph').find('canvas')[0].getContext('2d');
+            var font = $('body').css('font-family');
+            if (chart !== null) {
+                chart.destroy();
+            }
+            chart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    datasets: [{
+                        data: raw_data.categories.map(function(entry) {
+                            return entry.count;
+                        }),
+                        backgroundColor: raw_data.categories.map(function(entry) {
+                            return colors[entry.code];
+                        }),
+                    }],
+                    labels: raw_data.categories.map(function(entry) {
+                        return entry.name;
+                    }),
+                },
+                options: {
+                    animation: false,
+                    scaleFontFamily: font,
+                    tooltips: {
+                        titleFontFamily: font,
+                        bodyFontFamily: font,
+                    },
+                    legend: {
+                        display: false,
+                    },
+                },
+            });
+
+            $('#total-submission-count').text(raw_data.total);
+        }
+
+        $(function () {
+            stats_graph(window.results_json);
+        });
+        {% if dynamic_update %}
+
+        var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+        var ws_path = ws_scheme + '://' + window.location.host + '/ws/submissions/';
+
+        
+        function load_dynamic_update() {
+            var _collect = function (e) {
+                return e.value;
+            };
+            var language_filter = $.map($('select#language_code option[selected]'), _collect);
+            var status_filter = $.map($('select#status option[selected]'), _collect);
+
+            var table = $('#submissions-table');
+            var statistics = $("#statistics-table");
+            var doing_ajax = false;
+
+            var update_submission = function (message, force) {
+                var first = parseInt(table.find('>tbody>tr:first-child').attr('id'));
+                if (language_filter.length && 'language' in message &&
+                    language_filter.indexOf(message.language) == -1)
+                    return;
+                if (status_filter.length && 'status' in message &&
+                    status_filter.indexOf(message.status) == -1)
+                    return;
+                var id = message.id;
+                var row = table.find('tr#' + id);
+                if (row.length < 1) {
+                    if (id < first)
+                        return;
+                    first = id;
+                    row = $('<tr>', {id: id, 'class': 'transition-all submission-row-pending'}).prependTo(table);
+                    if (table.find('>tr').length >= {{ paginator.per_page }})
+                        table.find('>tr:last-child').slideUp('slow', function () {
+                            $(this).remove();
+                        });
+                }
+                if (force || !doing_ajax) {
+                    if (!force) doing_ajax = true;
+                    $.ajax({
+                        url: '{{ url('submission_single_query') }}',
+                        data: {id: id, show_problem: show_problem}
+                    }).done(function (data) {
+                        var is_new_row = row.hasClass('submission-row-pending');
+                        row.html(data);
+                        register_time(row.find('.time-with-rel'));
+                        if (is_new_row) {
+                            requestAnimationFrame(function () {
+                                row.addClass('submission-row-visible');
+                            });
+                            setTimeout(function () {
+                                row.removeClass('submission-row-pending submission-row-visible');
+                            }, 420);
+                        }
+                        if (!force)
+                            setTimeout(function () {
+                                doing_ajax = false;
+                            }, 1000);
+                    }).fail(function () {
+                        console.log('Failed to update submission: ' + id);
+                        if (!force) doing_ajax = false;
+                    });
+                }
+            };
+
+            var stats_outdated = false;
+            var last_stat_update = Date.now();
+            var stats_update_interval = {{ stats_update_interval|default(0) * 1000 }};
+
+            function update_stats() {
+                if (Date.now() - last_stat_update < stats_update_interval)
+                    return;
+                $.ajax({
+                    url: '?results'
+                }).done(function (data) {
+                    last_stat_update = Date.now();
+                    stats_graph(data);
+                }).fail(function () {
+                    console.log('Failed to update statistics table!' + id);
+                }).always(function () {
+                    stats_outdated = false;
+                });
+            }
+
+            $(window).on('dmoj:window-visible', function () {
+                if (stats_outdated)
+                    update_stats();
+            });
+
+            function createWebSocket() {
+                var socket = new WebSocket(ws_path);
+              
+                socket.onopen = function() {
+                  console.log("WebSocket connected");
+                };
+              
+                socket.onclose = function(event) {
+                  console.log("WebSocket disconnected with code: " + event.code);
+                  // Thử kết nối lại sau 5 giây
+                  setTimeout(function() {
+                    createWebSocket();
+                  }, 5000);
+                };
+              
+                socket.onerror = function(error) {
+                  console.error("WebSocket error: " + error);
+                };
+    
+                var $body = $(document.body);
+              
+                socket.onmessage = function (event) {
+                    var data = JSON.parse(event.data);
+                    var message = data.message
+                    if (dynamic_user_id && message.user != dynamic_user_id ||
+                        dynamic_problem_id && message.problem != dynamic_problem_id ||
+                        dynamic_contest_id && message.contest != dynamic_contest_id)
+                        return;
+                    if (data.type == 'update-submission') {
+                        if (message.state == 'test-case' && $body.hasClass('window-hidden'))
+                            return;
+                        update_submission(message);
+                    } else if (data.type == 'done-submission') {
+                        update_submission(message, true);
+    
+                        if (!statistics.length) return;
+                        if ($('body').hasClass('window-hidden'))
+                            return stats_outdated = true;
+                        update_stats();
+                    }
+                };
+            }
+              
+            // Gọi hàm để tạo kết nối WebSocket ban đầu
+            createWebSocket();
+        }
+        {% endif %}
+    </script>
+    {% if dynamic_update %}
+        <script type="text/javascript">
+            $(function () {
+                load_dynamic_update();
+            });
+        </script>
+    {% endif %}
+{% endblock %}
+
+{% block title_ruler %}{% endblock %}
+
+{% block title_row %}
+    {% include "submission/submission-list-tabs.html" %}
+{% endblock %}
+
+{% block media %}
+    {% if perms.judge.change_submission and perms.judge.rejudge_submission %}
+        <style>
+            td.sub-prop, col.sub-prop {
+                width: 22%
+            }
+
+            col.sub-info, td.sub-info {
+                width: 78%
+            }
+
+            #status, #language_code {
+                visibility: hidden;
+            }
+        </style>
+    {% endif %}
+
+    <style>
+        #status-graph {
+            padding: 1rem 0;
+        }
+
+        #status-graph canvas {
+            display: block;
+            margin: 0 auto;
+        }
+
+        #submissions-table {
+            border-collapse: separate;
+            border-spacing: 0 0.45rem;
+        }
+
+        #submissions-table > tbody > tr > td,
+        #submissions-table > tr > td {
+            vertical-align: middle;
+            transition: opacity 220ms ease, transform 280ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 180ms ease,
+                background-color 180ms ease;
+        }
+
+        #submissions-table > tbody > tr,
+        #submissions-table > tr {
+            transition: transform 180ms ease, filter 180ms ease;
+        }
+
+        #submissions-table > tbody > tr:hover,
+        #submissions-table > tr:hover {
+            transform: translateY(-2px);
+            filter: saturate(1.03);
+        }
+
+        #submissions-table > tbody > tr > td,
+        #submissions-table > tr > td {
+            box-shadow: 0 10px 24px -26px rgba(15, 23, 42, 0.28);
+        }
+
+        #submissions-table > tbody > tr:hover > td,
+        #submissions-table > tr:hover > td {
+            box-shadow: 0 16px 30px -26px rgba(15, 23, 42, 0.38);
+        }
+
+        #submissions-table > tbody > tr:hover > td:nth-child(2),
+        #submissions-table > tr:hover > td:nth-child(2) {
+            background: color-mix(in srgb, var(--app-panel-elevated) 94%, white 6%);
+        }
+
+        #submissions-table > tbody > tr:hover > td:first-child,
+        #submissions-table > tr:hover > td:first-child {
+            filter: brightness(0.99);
+        }
+
+        #submissions-table > tbody > tr:hover > td:last-child,
+        #submissions-table > tr:hover > td:last-child {
+            color: var(--app-text);
+        }
+
+        .dark #submissions-table > tbody > tr:hover > td:nth-child(2),
+        .dark #submissions-table > tr:hover > td:nth-child(2) {
+            background: color-mix(in srgb, var(--app-dark-panel-elevated) 96%, white 4%);
+        }
+
+        #submissions-table > tbody > tr.submission-row-pending > td,
+        #submissions-table > tr.submission-row-pending > td {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        #submissions-table > tbody > tr.submission-row-pending.submission-row-visible > td,
+        #submissions-table > tr.submission-row-pending.submission-row-visible > td {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .submission-shell .select2-container {
+            width: 100% !important;
+        }
+
+        .submission-shell .select2-container--default .select2-selection--multiple {
+            min-height: 44px;
+            border-radius: 1rem;
+            border: 1px solid var(--app-border);
+            background: color-mix(in srgb, var(--app-panel-elevated) 92%, transparent);
+            padding: 0.35rem 0.75rem;
+        }
+
+        .dark .submission-shell .select2-container--default .select2-selection--multiple {
+            border-color: var(--app-dark-border);
+            background: color-mix(in srgb, var(--app-dark-panel-elevated) 92%, transparent);
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    {% if page_obj.has_other_pages() %}
+        <div class="top-pagination-bar">{% include "list-pages.html" %}</div>
+    {% endif %}
+
+    <div class="submission-shell flex flex-col gap-8 lg:flex-row-reverse lg:items-start">
+        <div class="flex flex-col gap-6 lg:sticky lg:top-24 lg:basis-[20rem]">
+            <div class="filter-panel">
+                <div class="flex items-center">
+                    <div class="flex-1">
+                        <div class="section-title">{{ _('Filters') }}</div>
+                        <div class="mt-1 text-xl font-bold text-app-text dark:text-app-dark-text">{{ _('Filter submissions') }}</div>
+                    </div>
+                    <div class="">
+                        <i class="search icon"></i>
+                    </div>
+                </div>
+                <form name="form" class="flex flex-col gap-3" action="" method="get">
+                    <label class="block mb-2" for="status">
+                        <span class="section-title text-[0.72rem]!">
+                            {{ _('Status') }}
+                        </span>
+                        <select class="w-full" id="status" name="status" multiple>
+                            <option value=""></option>
+                            {% for id, name in all_statuses %}
+                                <option value="{{ id }}" {% if selected_statuses and id in selected_statuses %}selected{% endif %}>{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                    <label class="block mb-2" for="language_code">
+                        <span class="section-title text-[0.72rem]!">
+                            {{ _('Language') }}
+                        </span>
+                        <select class="w-full" id="language_code" name="language_code" multiple>
+                            <option value=""></option>
+                            {% for code, name in all_languages %}
+                                <option value="{{ code }}" {% if selected_languages and code in selected_languages %}selected{% endif %}>{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                    <button class="btn-primary w-full">{{ _('Go') }}</button>
+                </form>
+            </div>
+
+            <div class="filter-panel" id="statistics-table">
+                <div class="flex items-center">
+                    <div class="flex-1">
+                        <div class="section-title">{{ _('Overview') }}</div>
+                        <div class="mt-1 text-xl font-bold text-app-text dark:text-app-dark-text">{{ _('Statistics') }}</div>
+                    </div>
+                    <div class="">
+                        <i class="pie chart icon"></i>
+                    </div>
+                </div>
+                <div>
+                    <div id="status-graph">
+                        <canvas width="230" height="170"></canvas>
+                    </div>
+                    <div class="metric mb-2 text-center">
+                        {{ _('Total:') }} <span id="total-submission-count"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="min-w-0 flex-1">
+            <div class="ws-closed sticky top-16 z-10 mb-4 hidden rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:border-red-900/60 dark:bg-red-950/50 dark:text-red-200">
+                <a href="javascript:void(0)" class="inline-flex items-center gap-2">
+                    <i class="fa-duotone fa-plug-circle-xmark"></i>
+                    <span>{{ _('You were disconnected. Refresh to show latest updates.') }}</span>
+                </a>
+            </div>
+
+            <div class="panel-elevated overflow-hidden p-3 sm:p-4">
+                <div class="mb-2 flex items-center justify-between gap-3 px-2">
+                    <div>
+                        <div class="section-title">{{ _('Queue') }}</div>
+                        <div class="mt-1 text-xl font-bold text-app-text dark:text-app-dark-text">{{ _('Recent submissions') }}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="metric">{{ submissions|length }}</div>
+                        <div class="metric-muted">{{ _('shown') }}</div>
+                    </div>
+                </div>
+                <table id="submissions-table" class="w-full">
+                    {% set profile_id = request.profile.id if request.user.is_authenticated else 0 %}
+                    {% for submission in submissions %}
+                        <tr class="transition-all" id="{{ submission.id }}">
+                            {% include "submission/row.html" %}
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+    {% if page_obj.has_other_pages() %}
+        <div class="bottom-pagination-bar">{% include "list-pages.html" %}</div>
+    {% endif %}
+{% endblock %}
+
+{% block bodyend %}
+    {# Don't load MathJax from common-content! #}
+{% endblock %}

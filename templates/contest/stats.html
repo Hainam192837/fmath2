@@ -1,0 +1,81 @@
+{% extends "common-content.html" %}
+
+{% block title_ruler %}{% endblock %}
+
+{% block title_row %}
+    {% set tab = 'stats' %}
+    {% set title = contest.name %}
+    {% include "contest/contest-tabs.html" %}
+{% endblock %}
+
+{% block content_js_media %}
+    <script type="text/javascript">
+        window.stats = {{ stats }};
+    </script>
+    {% compress js %}
+        {% include "stats/media-js.html" %}
+        <script type="text/javascript">
+            $(function () {
+                draw_stacked_bar_chart(window.stats.problem_status_count, $('#problem-status-count'));
+                draw_bar_chart(window.stats.problem_ac_rate, $('#problem-ac-rate'));
+                draw_pie_chart(window.stats.language_count, $('#language-count'));
+                draw_bar_chart(window.stats.language_ac_rate, $('#language-ac-rate'));
+            });
+        </script>
+    {% endcompress %}
+    {% include "contest/media-js.html" %}
+{% endblock %}
+
+{% block content_media %}
+    <style>
+        .chart {
+            margin: 10px 0;
+            border: 1px solid rgba(148, 163, 184, 0.16);
+            border-radius: 1.25rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.96);
+            box-shadow: 0 16px 44px rgba(15, 23, 42, 0.06);
+        }
+
+        .dark .chart {
+            border-color: rgba(148, 163, 184, 0.12);
+            background: rgba(15, 23, 42, 0.9);
+            box-shadow: 0 20px 60px rgba(2, 6, 23, 0.34);
+        }
+
+        .contest-stats-title {
+            margin-top: 1.5rem;
+            margin-bottom: 0.7rem;
+            font-size: 1.45rem;
+            font-weight: 900;
+            color: rgb(15 23 42);
+        }
+
+        .dark .contest-stats-title {
+            color: rgb(248 250 252);
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <h3 class="contest-stats-title">{{ _('Problem Status Distribution') }}</h3>
+    <div id="problem-status-count" class="chart">
+        <canvas></canvas>
+    </div>
+
+    <h3 class="contest-stats-title">{{ _('Problem AC Rate') }}</h3>
+    <div id="problem-ac-rate" class="chart">
+        <canvas></canvas>
+    </div>
+
+    <h3 class="contest-stats-title">{{ _('Submissions by Language') }}</h3>
+    <div id="language-count" class="chart">
+        <canvas width="400" height="300"></canvas>
+        <ul class="legend"></ul>
+    </div>
+
+    <h3 class="contest-stats-title">{{ _('Language AC Rate') }}</h3>
+    <div id="language-ac-rate" class="chart">
+        <canvas></canvas>
+    </div>
+{% endblock %}

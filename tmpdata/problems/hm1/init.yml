@@ -1,0 +1,6 @@
+archive: 1.zip
+checker: linecount
+test_cases:
+- in: 1.inp
+  out: 1.out
+  points: 1

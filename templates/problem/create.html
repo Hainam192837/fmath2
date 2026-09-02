@@ -1,0 +1,337 @@
+{% extends "common-content.html" %}
+
+{% block media %}
+{{ form.description.field.widget.media.css }}
+<link href="https://cdn.jsdelivr.net/npm/ace-builds@1.41.0/css/ace.min.css" rel="stylesheet">
+<style>
+    .problem-editor-form .select2-container--default .select2-selection--multiple {
+        min-height: 2.9rem;
+        border-radius: 1rem;
+        padding: 0.35rem 0.55rem;
+    }
+
+    .problem-editor-form .select2-container {
+        width: 100% !important;
+        display: block;
+        min-width: 0;
+    }
+    .required-mark {
+        color: rgb(225 29 72);
+    }
+</style>
+{% endblock %}
+
+{% block js_media %}
+{% if REQUIRE_JAX %}
+{% include "mathjax-load.html" %}
+{% endif %}
+{{ form.description.field.widget.media.js }}
+<script>
+    $(function () {
+        $('#{{ form.authors.id_for_label }}').select2({
+            placeholder: "{{ _('Type username authors...') }}",
+            ajax: {
+                url: "{{ url('problem_author_select2_ajax') }}"
+            },
+            minimumInputLength: 1,
+            multiple: 'multiple'
+        });
+        $('#{{ form.types.id_for_label }}').select2({
+            placeholder: "{{ _('Type type problem...') }}",
+            minimumInputLength: 1,
+            multiple: 'multiple'
+        });
+        $('#{{ form.organizations.id_for_label }}').select2({
+            placeholder: "{{ _('Type organization...') }}",
+            minimumInputLength: 1,
+            multiple: 'multiple'
+        });
+    });
+</script>
+{% endblock %}
+
+{% block body %}
+<div class="mx-auto flex max-w-8xl flex-col gap-6 px-4 py-4 sm:px-6">
+    <section class="relative overflow-hidden rounded-4xl border border-app-border/80 bg-[radial-gradient(circle_at_top_right,color-mix(in_srgb,var(--app-accent)_18%,transparent),transparent_34%),color-mix(in_srgb,var(--app-panel-elevated)_96%,white_4%)] p-6 shadow-[0_18px_40px_rgba(15,23,42,0.08)] dark:border-app-dark-border/80 dark:bg-[radial-gradient(circle_at_top_right,color-mix(in_srgb,var(--app-dark-accent)_18%,transparent),transparent_36%),color-mix(in_srgb,var(--app-dark-panel-elevated)_97%,black_3%)] dark:shadow-[0_20px_44px_rgba(2,6,23,0.34)]">
+        <div class="section-title">{{ _('Problem editor') }}</div>
+        <div class="mt-3 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+            <div class="max-w-3xl">
+                <h1 class="text-3xl font-black tracking-tight text-app-text dark:text-app-dark-text">
+                    {% if form.instance.pk %}
+                        {{ _('Update problem') }}
+                    {% else %}
+                        {{ _('Create problem') }}
+                    {% endif %}
+                </h1>
+                <p class="mt-2 text-sm leading-6 text-app-text-secondary dark:text-app-dark-text-secondary">
+                    {% if form.instance.pk %}
+                        {{ _('Refine statement, visibility, classification, and execution limits without leaving the problem workspace.') }}
+                    {% else %}
+                        {{ _('Set up a new problem with its statement, access rules, classification, and judging limits in one place.') }}
+                    {% endif %}
+                </p>
+            </div>
+            <div class="inline-flex items-center gap-2 rounded-full border border-app-border/70 bg-app-panel/85 px-4 py-2 text-xs font-bold uppercase tracking-[0.14em] text-app-text-muted dark:border-app-dark-border/70 dark:bg-app-dark-panel/85 dark:text-app-dark-text-muted">
+                {% if form.instance.pk %}
+                    {{ form.instance.code }}
+                {% else %}
+                    {{ _('Draft') }}
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+<form action="" method="post" class="problem-editor-form rounded-4xl border bg-app-panel/95 p-6 shadow-[0_16px_38px_rgba(15,23,42,0.06)] dark:border-app-dark-border/80 dark:bg-app-dark-panel/95 dark:shadow-[0_18px_40px_rgba(2,6,23,0.28)] {% if form.errors %}border-red-500/60{% else %}border-app-border/80{% endif %}">
+    {% csrf_token %}
+    {{ form.errors }}
+    {% if form.non_field_errors() %}
+    {% for error in form.non_field_errors() %}
+    <div class="rounded-2xl border border-red-300/70 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-400">
+        {{ error }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    <div class="grid gap-4 md:grid-cols-2 md:gap-6">
+        <div class="flex w-full flex-col gap-2 self-start rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90">
+            <label for="{{ form.code.id_for_label }}" class="block mb-2 text-sm font-bold text-app-text dark:text-app-dark-text">{{ form.code.label }}{% if form.code.field.required %}<span class="required-mark"> *</span>{% endif %}</label>
+            <input type="text" name="{{ form.code.name }}" {% if form.code.value() %} value="{{ form.code.value() }}" {% endif %} id="{{ form.code.id_for_label }}" class="min-h-[2.9rem] w-full rounded-2xl border border-app-border/80 bg-app-panel px-4 py-3 text-sm text-app-text transition focus:border-app-accent focus:outline-none focus:ring-4 focus:ring-app-accent/15 dark:border-app-dark-border/80 dark:bg-app-dark-panel dark:text-app-dark-text dark:focus:border-app-dark-accent dark:focus:ring-app-dark-accent/20" placeholder="{{ _('Type problem code') }}" required="">
+            {% if form.code.help_text %}
+                <div class="mt-2 text-xs text-app-text-muted dark:text-app-dark-text-muted">
+                    {{ form.code.help_text }}
+                </div>
+            {% endif %}
+        </div>
+        <div class="flex w-full flex-col gap-2 self-start rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90">
+            <label for="{{ form.name.id_for_label }}" class="block mb-2 text-sm font-bold text-app-text dark:text-app-dark-text">{{ form.name.label }}{% if form.name.field.required %}<span class="required-mark"> *</span>{% endif %}</label>
+            <input type="text" name="{{ form.name.name }}" {% if form.name.value() %} value="{{ form.name.value() }}" {% endif %} id="{{ form.name.id_for_label }}" class="min-h-[2.9rem] w-full rounded-2xl border border-app-border/80 bg-app-panel px-4 py-3 text-sm text-app-text transition focus:border-app-accent focus:outline-none focus:ring-4 focus:ring-app-accent/15 dark:border-app-dark-border/80 dark:bg-app-dark-panel dark:text-app-dark-text dark:focus:border-app-dark-accent dark:focus:ring-app-dark-accent/20" placeholder="{{ _('Type problem name') }}" required="">
+            {% if form.name.help_text %}
+                <div class="mt-2 text-xs text-app-text-muted dark:text-app-dark-text-muted">
+                    {{ form.name.help_text }}
+                </div>
+            {% endif %}
+        </div>
+        <div class="flex flex-col gap-2 self-start rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90 sm:col-span-2">
+            <label for="{{ form.authors.id_for_label }}" class="block mb-2 text-sm font-bold {% if form.authors.errors %} text-red-700 dark:text-red-500 {% else %} text-app-text dark:text-app-dark-text {% endif %}">{{ form.authors.label }}{% if form.authors.field.required %}<span class="required-mark"> *</span>{% endif %}</label>
+            {{ form.authors }}
+            {% if form.authors.help_text %}
+            <div class="mt-2 text-xs text-app-text-muted dark:text-app-dark-text-muted">
+                {{ form.authors.help_text }}
+            </div>
+            {% endif %}
+            {% if form.authors.errors %}
+            <div class="mt-2 text-xs text-red-700 dark:text-red-500">
+                {{ form.authors.errors }}
+            </div>
+            {% endif %}
+        </div>
+        <div class="border-b border-app-border/80 pb-3 text-[0.78rem] font-extrabold uppercase tracking-[0.12em] text-app-text-muted dark:border-app-dark-border/80 dark:text-app-dark-text-muted sm:col-span-2">
+            {{ _('Settings') }}
+        </div>
+        <label for="{{ form.is_public.id_for_label }}" class="flex cursor-pointer items-start gap-3 self-start rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 transition hover:border-app-accent/50 hover:bg-app-panel dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90 dark:hover:border-app-dark-accent/50 dark:hover:bg-app-dark-panel">
+            <div class="flex min-h-6 flex-none items-center pt-0.5">
+                <input id="{{ form.is_public.id_for_label }}" {% if form.is_public.value() %} checked {% endif %} name="{{ form.is_public.name }}" aria-describedby="{{ form.is_public.id_for_label }}-helper-checkbox-text" type="checkbox" class="h-4 w-4 rounded-md border-app-border/80 text-app-accent focus:ring-2 focus:ring-app-accent/20 dark:border-app-dark-border/80 dark:text-app-dark-accent dark:focus:ring-app-dark-accent/25">
+            </div>
+            <div class="flex min-w-0 flex-1 flex-col gap-1 text-sm">
+                <span class="font-bold text-app-text dark:text-app-dark-text">{{ form.is_public.label }}</span>
+                {% if form.is_public.help_text %}
+                <p id="{{ form.is_public.id_for_label }}-helper-checkbox-text" class="text-xs font-normal text-app-text-muted dark:text-app-dark-text-muted">
+                    {{ form.is_public.help_text }}
+                </p>
+                {% endif %}
+            </div>
+        </label>
+        <label for="{{ form.is_organization_private.id_for_label }}" class="flex cursor-pointer items-start gap-3 self-start rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 transition hover:border-app-accent/50 hover:bg-app-panel dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90 dark:hover:border-app-dark-accent/50 dark:hover:bg-app-dark-panel">
+            <div class="flex min-h-6 flex-none items-center pt-0.5">
+                <input id="{{ form.is_organization_private.id_for_label }}" {% if form.is_organization_private.value() %} checked {% endif %} name="{{ form.is_organization_private.name }}" aria-describedby="{{ form.is_organization_private.id_for_label }}-helper-checkbox-text" type="checkbox" class="h-4 w-4 rounded-md border-app-border/80 text-app-accent focus:ring-2 focus:ring-app-accent/20 dark:border-app-dark-border/80 dark:text-app-dark-accent dark:focus:ring-app-dark-accent/25">
+            </div>
+            <div class="flex min-w-0 flex-1 flex-col gap-1 text-sm">
+                <span class="font-bold text-app-text dark:text-app-dark-text">{{ form.is_organization_private.label }}</span>
+                {% if form.is_organization_private.help_text %}
+                <p id="{{ form.is_organization_private.id_for_label }}-helper-checkbox-text" class="text-xs font-normal text-app-text-muted dark:text-app-dark-text-muted">
+                    {{ form.is_organization_private.help_text }}
+                </p>
+                {% endif %}
+            </div>
+        </label>
+        <div class="flex flex-col gap-2 self-start rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90 sm:col-span-2">
+            <label for="{{ form.organizations.id_for_label }}" class="block mb-2 text-sm font-bold text-app-text dark:text-app-dark-text">{{ form.organizations.label }}</label>
+            {{ form.organizations }}
+            {% if form.organizations.help_text %}
+            <div class="mt-2 text-xs text-app-text-muted dark:text-app-dark-text-muted">
+                {{ form.organizations.help_text }}
+            </div>
+            {% endif %}
+        </div>
+        <div class="flex flex-col gap-2 self-start rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90">
+            <label for="{{ form.submission_source_visibility_mode.id_for_label }}" class="block mb-2 text-sm font-bold text-app-text dark:text-app-dark-text">{{ form.submission_source_visibility_mode.label }}</label>
+            <select id="{{ form.submission_source_visibility_mode.id_for_label }}" name="{{ form.submission_source_visibility_mode.name }}" class="min-h-[2.9rem] w-full rounded-2xl border border-app-border/80 bg-app-panel px-4 py-3 text-sm text-app-text transition focus:border-app-accent focus:outline-none focus:ring-4 focus:ring-app-accent/15 dark:border-app-dark-border/80 dark:bg-app-dark-panel dark:text-app-dark-text dark:focus:border-app-dark-accent dark:focus:ring-app-dark-accent/20">
+                {% for value, label in form.submission_source_visibility_mode.field.choices %}
+                <option value="{{ value }}" {% if form.submission_source_visibility_mode.value() == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            {% if form.submission_source_visibility_mode.help_text %}
+            <div class="mt-2 text-xs text-app-text-muted dark:text-app-dark-text-muted">
+                {{ form.submission_source_visibility_mode.help_text }}
+            </div>
+            {% endif %}
+        </div>
+        <div class="flex flex-col gap-2 self-start rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90">
+            <label for="{{ form.testcase_visibility_mode.id_for_label }}" class="block mb-2 text-sm font-bold text-app-text dark:text-app-dark-text">{{ form.testcase_visibility_mode.label }}</label>
+            <select id="{{ form.testcase_visibility_mode.id_for_label }}" name="{{ form.testcase_visibility_mode.name }}" class="min-h-[2.9rem] w-full rounded-2xl border border-app-border/80 bg-app-panel px-4 py-3 text-sm text-app-text transition focus:border-app-accent focus:outline-none focus:ring-4 focus:ring-app-accent/15 dark:border-app-dark-border/80 dark:bg-app-dark-panel dark:text-app-dark-text dark:focus:border-app-dark-accent dark:focus:ring-app-dark-accent/20">
+                {% for value, label in form.testcase_visibility_mode.field.choices %}
+                <option value="{{ value }}" {% if form.testcase_visibility_mode.value() == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            {% if form.testcase_visibility_mode.help_text %}
+            <div class="mt-2 text-xs text-app-text-muted dark:text-app-dark-text-muted">
+                {{ form.testcase_visibility_mode.help_text }}
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="border-b border-app-border/80 pb-3 text-[0.78rem] font-extrabold uppercase tracking-[0.12em] text-app-text-muted dark:border-app-dark-border/80 dark:text-app-dark-text-muted sm:col-span-2">
+            {{ _('Description') }}
+        </div>
+        <div class="flex flex-col gap-2 self-start rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90 sm:col-span-2">
+            <label for="{{ form.description.id_for_label }}" class="text-sm font-bold text-app-text dark:text-app-dark-text">{{ form.description.label }}{% if form.description.field.required %}<span class="required-mark"> *</span>{% endif %}</label>
+            {{ form.description }}
+            {% if form.description.errors %}<div class="text-xs text-red-700 dark:text-red-500">{{ form.description.errors }}</div>{% endif %}
+        </div>
+
+        <div class="border-b border-app-border/80 pb-3 text-[0.78rem] font-extrabold uppercase tracking-[0.12em] text-app-text-muted dark:border-app-dark-border/80 dark:text-app-dark-text-muted sm:col-span-2">
+            {{ _('Classify') }}
+        </div>
+        <div class="flex flex-col gap-2 self-start rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90 sm:col-span-2">
+            <label for="{{ form.types.id_for_label }}" class="block mb-2 text-sm font-bold text-app-text dark:text-app-dark-text">{{ form.types.label }}{% if form.types.field.required %}<span class="required-mark"> *</span>{% endif %}</label>
+            {{ form.types }}
+            {% if form.types.help_text %}
+            <div class="mt-2 text-xs text-app-text-muted dark:text-app-dark-text-muted">
+                {{ form.types.help_text }}
+            </div>
+            {% endif %}
+        </div>
+        <div class="flex flex-col gap-2 self-start rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90">
+            <label for="{{ form.classes.id_for_label }}" class="block mb-2 text-sm font-bold {% if form.classes.errors %} text-red-700 dark:text-red-500 {% else %} text-app-text dark:text-app-dark-text {% endif %}">{{ form.classes.label }}{% if form.classes.field.required %}<span class="required-mark"> *</span>{% endif %}</label>
+            <select id="{{ form.classes.id_for_label }}" name="{{ form.classes.name }}" class="min-h-[2.9rem] w-full rounded-2xl border border-app-border/80 bg-app-panel px-4 py-3 text-sm text-app-text transition focus:border-app-accent focus:outline-none focus:ring-4 focus:ring-app-accent/15 dark:border-app-dark-border/80 dark:bg-app-dark-panel dark:text-app-dark-text dark:focus:border-app-dark-accent dark:focus:ring-app-dark-accent/20">
+                {% for value, label in form.classes.field.choices %}
+                <option value="{{ value }}" {% if form.classes.value() == value.value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            {% if form.classes.help_text %}
+            <div class="mt-2 text-xs text-app-text-muted dark:text-app-dark-text-muted">
+                {{ form.classes.help_text }}
+            </div>
+            {% endif %}
+            {% if form.classes.errors %}
+            <div class="mt-2 text-xs text-red-700 dark:text-red-500">
+                {{ form.classes.errors }}
+            </div>
+            {% endif %}
+        </div>
+        <div class="flex flex-col gap-2 self-start rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90">
+            <label for="{{ form.group.id_for_label }}" class="block mb-2 text-sm font-bold {% if form.group.errors %} text-red-700 dark:text-red-500 {% else %} text-app-text dark:text-app-dark-text {% endif %}">{{ form.group.label }}{% if form.group.field.required %}<span class="required-mark"> *</span>{% endif %}</label>
+            <select id="{{ form.group.id_for_label }}" name="{{ form.group.name }}" class="min-h-[2.9rem] w-full rounded-2xl border border-app-border/80 bg-app-panel px-4 py-3 text-sm text-app-text transition focus:border-app-accent focus:outline-none focus:ring-4 focus:ring-app-accent/15 dark:border-app-dark-border/80 dark:bg-app-dark-panel dark:text-app-dark-text dark:focus:border-app-dark-accent dark:focus:ring-app-dark-accent/20">
+                {% for value, label in form.group.field.choices %}
+                <option value="{{ value }}" {% if form.group.value() == value.value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            {% if form.group.help_text %}
+            <div class="mt-2 text-xs text-app-text-muted dark:text-app-dark-text-muted">
+                {{ form.group.help_text }}
+            </div>
+            {% endif %}
+        </div>
+        <div class="border-b border-app-border/80 pb-3 text-[0.78rem] font-extrabold uppercase tracking-[0.12em] text-app-text-muted dark:border-app-dark-border/80 dark:text-app-dark-text-muted sm:col-span-2">
+            {{ _('Limits') }}
+        </div>
+        <div class="flex flex-col gap-2 self-start rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90">
+            <label for="{{ form.points.id_for_label }}" class="block mb-2 text-sm font-bold text-app-text dark:text-app-dark-text">{{ form.points.label }}{% if form.points.field.required %}<span class="required-mark"> *</span>{% endif %}</label>
+            <input type="number" name="{{ form.points.name }}" {% if form.points.value() %} value="{{ form.points.value() }}" {% endif %} id="{{ form.points.id_for_label }}" class="min-h-[2.9rem] w-full rounded-2xl border border-app-border/80 bg-app-panel px-4 py-3 text-sm text-app-text transition focus:border-app-accent focus:outline-none focus:ring-4 focus:ring-app-accent/15 dark:border-app-dark-border/80 dark:bg-app-dark-panel dark:text-app-dark-text dark:focus:border-app-dark-accent dark:focus:ring-app-dark-accent/20" placeholder="100" required="">
+            {% if form.points.help_text %}
+            <div class="mt-2 text-xs text-app-text-muted dark:text-app-dark-text-muted">
+                {{ form.points.help_text }}
+            </div>
+            {% endif %}
+        </div>
+        <div class="flex items-start gap-3 self-start rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90">
+            <div class="flex min-h-6 flex-none items-center pt-0.5">
+                <input id="{{ form.partial.id_for_label }}" {% if form.partial.value() %} checked {% endif %} name="{{ form.partial.name }}" aria-describedby="{{ form.partial.id_for_label }}-helper-checkbox-text" type="checkbox" class="h-4 w-4 rounded-md border-app-border/80 text-app-accent focus:ring-2 focus:ring-app-accent/20 dark:border-app-dark-border/80 dark:text-app-dark-accent dark:focus:ring-app-dark-accent/25">
+            </div>
+            <div class="flex min-w-0 flex-1 flex-col gap-1 text-sm">
+                <label for="{{ form.partial.id_for_label }}" class="font-bold text-app-text dark:text-app-dark-text">{{ form.partial.label }}</label>
+                {% if form.partial.help_text %}
+                <p id="{{ form.partial.id_for_label }}-helper-checkbox-text" class="text-xs font-normal text-app-text-muted dark:text-app-dark-text-muted">
+                    {{ form.partial.help_text }}
+                </p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="flex flex-col gap-2 self-start rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90">
+            <label for="{{ form.time_limit.id_for_label }}" class="block mb-2 text-sm font-bold text-app-text dark:text-app-dark-text">{{ form.time_limit.label }}{% if form.time_limit.field.required %}<span class="required-mark"> *</span>{% endif %}</label>
+            <input type="number" name="{{ form.time_limit.name }}" {% if form.time_limit.value() %} value="{{ form.time_limit.value() }}" {% endif %} id="{{ form.time_limit.id_for_label }}" class="min-h-[2.9rem] w-full rounded-2xl border border-app-border/80 bg-app-panel px-4 py-3 text-sm text-app-text transition focus:border-app-accent focus:outline-none focus:ring-4 focus:ring-app-accent/15 dark:border-app-dark-border/80 dark:bg-app-dark-panel dark:text-app-dark-text dark:focus:border-app-dark-accent dark:focus:ring-app-dark-accent/20" placeholder="1.0" required="">
+            {% if form.time_limit.help_text %}
+            <div class="mt-2 text-xs text-app-text-muted dark:text-app-dark-text-muted">
+                {{ form.time_limit.help_text }}
+            </div>
+            {% endif %}
+        </div>
+        <div class="flex flex-col gap-2 self-start rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90">
+            <label for="{{ form.memory_limit.id_for_label }}" class="block mb-2 text-sm font-bold text-app-text dark:text-app-dark-text">{{ form.memory_limit.label }}{% if form.memory_limit.field.required %}<span class="required-mark"> *</span>{% endif %}</label>
+            <input type="number" name="{{ form.memory_limit.name }}" {% if form.memory_limit.value() %} value="{{ form.memory_limit.value() }}" {% endif %} id="{{ form.memory_limit.id_for_label }}" class="min-h-[2.9rem] w-full rounded-2xl border border-app-border/80 bg-app-panel px-4 py-3 text-sm text-app-text transition focus:border-app-accent focus:outline-none focus:ring-4 focus:ring-app-accent/15 dark:border-app-dark-border/80 dark:bg-app-dark-panel dark:text-app-dark-text dark:focus:border-app-dark-accent dark:focus:ring-app-dark-accent/20" placeholder="256000" required="">
+            {% if form.memory_limit.help_text %}
+            <div class="mt-2 text-xs text-app-text-muted dark:text-app-dark-text-muted">
+                {{ form.memory_limit.help_text }}
+            </div>
+            {% endif %}
+        </div>
+        <div class="flex flex-col gap-2 self-start rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90 sm:col-span-2">
+            <label class="block mb-2 text-sm font-bold {% if form.allowed_languages.errors %} text-red-700 dark:text-red-500 {% else %} text-app-text dark:text-app-dark-text {% endif %}">{{ form.allowed_languages.label }}{% if form.allowed_languages.field.required %}<span class="required-mark"> *</span>{% endif %}</label>
+            <div id="allowed_languages_list" class="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-6">
+                {% set raw_allowed_languages = form.allowed_languages.value() or [] %}
+                {% set allowed_languages = raw_allowed_languages | map('string') | list %}
+                {% for language in form.allowed_languages %}
+                {% set language_value = language.data.value|string %}
+                {% set language_input_id = form.allowed_languages.id_for_label ~ '_' ~ language_value %}
+                <label for="{{ language_input_id }}" class="flex min-h-12 cursor-pointer items-center rounded-2xl border border-app-border/70 bg-app-panel px-3 py-2 transition hover:border-app-accent/50 hover:bg-app-panel-elevated dark:border-app-dark-border/70 dark:bg-app-dark-panel dark:hover:border-app-dark-accent/50 dark:hover:bg-app-dark-panel-elevated">
+                    <input id="{{ language_input_id }}" name="{{ form.allowed_languages.name }}" type="checkbox" value="{{ language.data.value }}" {% if allowed_languages and language_value in allowed_languages %}checked{% endif %}
+                           class="w-4 h-4 text-blue-600 focus:ring-2 rounded-lg">
+                    <span class="ms-2 text-sm font-medium text-app-text dark:text-app-dark-text">{{ language.choice_label }}</span>
+                </label>
+                {% endfor %}
+            </div>
+            {% if form.allowed_languages.help_text %}
+            <div class="mt-2 text-xs text-app-text-muted dark:text-app-dark-text-muted">
+                {{ form.allowed_languages.help_text }}
+            </div>
+            {% endif %}
+            {% if form.allowed_languages.errors %}
+            <div class="mt-2 text-xs text-red-700 dark:text-red-500">
+                {{ form.allowed_languages.errors }}
+            </div>
+            {% endif %}
+        </div>
+        <div class="flex items-center gap-3 self-start rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90 sm:col-span-2">
+            <input id="allowed_languages_checkall" type="checkbox" class="h-4 w-4 rounded-md border-app-border/80 text-app-accent focus:ring-2 focus:ring-app-accent/20 dark:border-app-dark-border/80 dark:text-app-dark-accent dark:focus:ring-app-dark-accent/25">
+            <label for="allowed_languages_checkall" class="ms-2 text-sm font-medium text-app-text dark:text-app-dark-text">{{ _('Check all') }}</label>
+            <script>
+                var original = document.getElementById('allowed_languages_list');
+                var checkall = document.getElementById('allowed_languages_checkall');
+                checkall.addEventListener('click', function() {
+                    original.querySelectorAll('input[type="checkbox"]').forEach(function(checkbox) {
+                        checkbox.checked = checkall.checked;
+                    });
+                });
+            </script>
+        </div>
+    </div>
+    <div class="mt-6 flex flex-col gap-3 border-t border-app-border pt-5 dark:border-app-dark-border sm:flex-row sm:items-center sm:justify-between">
+        <p class="text-sm text-app-text-muted dark:text-app-dark-text-muted">
+            {{ _('Changes here update the public-facing problem configuration.') }}
+        </p>
+        <button type="submit" class="btn-primary justify-center rounded-2xl px-6 py-3 text-sm font-bold sm:min-w-40">
+            {{ _('Save problem') }}
+        </button>
+    </div>
+</form>
+</div>
+{% endblock %}

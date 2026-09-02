@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block js_media %}{{ form.media.js }}{% endblock %}
+{% block media %}
+    {{ form.media.css }}
+    <style>
+        .organization-form-card table {
+            width: 100%;
+        }
+
+        .organization-form-card th,
+        .organization-form-card td {
+            display: block;
+            width: 100%;
+            text-align: left;
+        }
+
+        .organization-form-card th {
+            padding: 0 0 0.45rem;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: rgb(15 23 42);
+        }
+
+        .organization-form-card td {
+            padding: 0 0 1.25rem;
+        }
+
+        .organization-form-card input[type="text"],
+        .organization-form-card input[type="file"],
+        .organization-form-card textarea,
+        .organization-form-card select {
+            width: 100%;
+            border-radius: 0.9rem;
+            border: 1px solid rgb(203 213 225);
+            background: white;
+            padding: 0.8rem 1rem;
+        }
+
+        .dark .organization-form-card th {
+            color: rgb(241 245 249);
+        }
+
+        .dark .organization-form-card input[type="text"],
+        .dark .organization-form-card input[type="file"],
+        .dark .organization-form-card textarea,
+        .dark .organization-form-card select {
+            border-color: rgb(63 63 70);
+            background: rgb(24 24 27);
+            color: rgb(244 244 245);
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="mx-auto max-w-4xl">
+        <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-zinc-900 md:p-8">
+            <div class="mb-8 flex flex-col gap-3 border-b border-slate-200 pb-6 dark:border-slate-700">
+                <div class="inline-flex w-fit items-center gap-2 rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-sky-700 dark:bg-sky-950/70 dark:text-sky-300">
+                    <i class="fa-duotone fa-buildings"></i>
+                    <span>{{ _('Organization') }}</span>
+                </div>
+                <h1 class="text-3xl font-black tracking-tight text-slate-900 dark:text-white">{{ _('Create organization') }}</h1>
+                <p class="max-w-2xl text-sm text-slate-500 dark:text-slate-400">{{ _('Set up the public profile and member-facing information for your organization.') }}</p>
+            </div>
+
+            <form action="" method="post" class="organization-form-card">
+                {% csrf_token %}
+                <table border="0">{{ form.as_table() }}</table>
+                <div class="mt-4 flex flex-col gap-3 border-t border-slate-200 pt-6 dark:border-slate-700 sm:flex-row sm:justify-end">
+                    <button class="inline-flex items-center justify-center rounded-xl bg-sky-600 px-6 py-3 text-sm font-bold text-white transition hover:bg-sky-700" type="submit">
+                        {{ _('Create') }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

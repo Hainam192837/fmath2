@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}About Status Codes - TMATH{% endblock %}
+
+{% block body %}
+<div class="page-shell">
+    <div id="page_container" class="overflow-x-clip">
+        <noscript>
+            <div id="noscript" class="panel mb-4 rounded-xl px-4 py-3 text-sm font-medium">Trang web này hoạt động tốt nhất với JavaScript được cho phép.</div>
+            <br>
+        </noscript>
+        <div id="content-body" class="flex-1">
+            <div class="prose max-w-none">
+                <div>
+                    <p>Trang hướng dẫn và liệt kê tất cả các mã trạng thái gặp phải trên TMATH. Chúng tôi sẽ liệt kê các mã trạng thái theo thứ tự ưu tiên tăng dần.</p>
+                    
+                    <h2>AC - Accepted</h2>
+                    <p>Chương trình đã chạy đúng với toàn bộ test của đề bài.</p>
+
+                    <h2>WA - Wrong Answer</h2>
+                    <p>Chương trình của bạn không bị lỗi khi chạy, nhưng kết quả nó tạo ra bị sai.</p>
+
+                    <h2>IR - Invalid Return</h2>
+                    <p>Chương trình trả về một giá trị khác 0, cũng giống RTE, nhưng nó thường xuất hiện ở các ngôn ngữ Python hoặc Java khi bạn xử lý ngoại lệ (exception).</p>
+
+                    <h2>RTE - Runtime Exception</h2>
+                    <p>Thường biết với cái tên Runtime Error. Chương trình sinh lỗi và trả về một giá trị khác 0 và lỗi này đa số chỉ xuất hiện khi bạn dùng ngôn ngữ như C hoặc C++.</p>
+
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th style="min-width: 17em">Feedback</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>segmentation fault</code>, <code>bus error</code></td>
+                                <td style="text-align: left">
+                                    Chương trình của bạn đã bị sập bởi SIGSEGV hoặc SIGBUS. Nói chung, điều này có nghĩa là bạn đã hết bộ nhớ, nhưng trong số những thứ khác, nó cũng có thể có nghĩa là bạn đang truy cập các mảng ngoài giới hạn.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><code>floating point exception</code></td>
+                                <td style="text-align: left">
+                                    Chương trình của bạn đã thực hiện sai một phép toán số học, chẳng hạn như phép chia cho số không.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><code>killed</code></td>
+                                <td style="text-align: left">
+                                    Chương trình của bạn đã bị giết bởi thời gian chạy vì một số lý do (mà chúng tôi không biết).
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><code>opening files is not allowed</code></td>
+                                <td style="text-align: left">
+                                    Trừ khi một vấn đề cụ thể cho biết bạn có thể làm được, bạn không thể mở tệp - làm như vậy bạn sẽ nhận được thông báo này.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <code><a href="http://www.cplusplus.com/reference/new/bad_alloc/" target="_blank" rel="noopener noreferrer">std::bad_alloc</a></code>
+                                </td>
+                                <td style="text-align: left">
+                                    <code>new</code> không thể cấp phát thêm bộ nhớ. Tất cả các ngoại lệ C++ đều được ánh xạ tới phản hồi như thế này, mặc dù đây là ngoại lệ phổ biến nhất mà bạn có thể gặp phải.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><code>failed initializing</code></td>
+                                <td style="text-align: left">
+                                    Chương trình của bạn sử dụng quá nhiều dữ liệu được xác định trong phạm vi toàn cầu để nó nằm gọn trong các ràng buộc bộ nhớ khi khởi động. Một ví dụ điển hình là đoạn code sau:
+                                    <div class="codehilite">
+                                        <pre><span></span><code><span class="kt">int</span> <span class="n">arr</span><span class="p">[</span><span class="mi">10000</span><span class="p">][</span><span class="mi">10000</span><span class="p">];</span></code></pre>
+                                    </div>
+                                    sử dụng với bài tập giới hạn bộ nhớ 64mb - chương trình sẽ yêu cầu 381mb, vượt quá giới hạn của bài toán.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h2>OLE - Output Limit Exceeded</h2>
+                        <p>Chương trình in ra quá nhiều thông in ra output (thường giới hạn là 256MB).</p>
+                    <h2>MLE - Memory Limit Exceeded</h2>
+                    <p>Chương trình dùng quá nhiều bộ nhớ. Đôi khi lỗi này sẽ gây ra RTE thay vì MLE.</p>
+                    <h2>TLE - Time Limit Exceeded</h2>
+                    <p>Chương trình chạy quá thời gian quy định.</p>
+                    <h2>IE - Internal Error</h2>
+                    <p>Lỗi hệ thống. Lỗi này có thể do bài tập chưa được cấu hình đúng, hoặc do lỗi ở máy chấm. Nếu bạn thấy lỗi này, bạn có thể thử nộp lại bài tập của mình, nếu vẫn không được thì bạn có thể liên hệ với admin hoặc người ra đề.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const copyableCells = document.querySelectorAll('.prose table td');
+        copyableCells.forEach((cell) => {
+            cell.classList.add('hover:cursor-pointer');
+            cell.addEventListener('click', (e) => {
+                const textToCopy = cell.innerText.trim();
+                const textArea = document.createElement('textarea');
+                textArea.value = textToCopy;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+
+                const tooltip = document.createElement('div');
+                tooltip.textContent = 'Copied!';
+                tooltip.classList.add('bg-indigo-600', 'text-white', 'absolute', 'px-2', 'py-1', 'rounded-md', 'text-xs', 'z-[999]', 'pointer-events-none', 'transition-opacity', 'duration-300');
+                document.body.appendChild(tooltip);
+
+                tooltip.style.left = e.pageX + 'px';
+                tooltip.style.top = (e.pageY - 30) + 'px';
+
+                setTimeout(() => { tooltip.style.opacity = '1'; }, 50);
+                setTimeout(() => {
+                    tooltip.style.opacity = '0';
+                    setTimeout(() => { document.body.removeChild(tooltip); }, 300);
+                }, 1500);
+            });
+        });
+    });
+</script>
+{% endblock %}

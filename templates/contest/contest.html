@@ -1,0 +1,284 @@
+{% extends "common-content.html" %}
+
+{% block title_ruler %}{% endblock %}
+
+{% block title_row %}
+    {% set tab = 'detail' %}
+    {% if contest.is_joinable_by(request.user) %}
+        {% set title = contest.full_name %}
+    {% else %}
+        {% set title = contest.name %}
+    {% endif %}
+    {% include "contest/contest-tabs.html" %}
+{% endblock %}
+
+{% block content_js_media %}
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.time-remaining').each(function () {
+                count_down($(this));
+            });
+        });
+    </script>
+    {% include "contest/media-js.html" %}
+    {% include "comments/media-js.html" %}
+{% endblock %}
+
+{% block content_media %}
+    {% include "comments/media-css.html" %}
+    <style>
+        .contest-hero {
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            background:
+                radial-gradient(circle at top left, rgba(59, 130, 246, 0.16), transparent 28rem),
+                radial-gradient(circle at top right, rgba(14, 165, 233, 0.14), transparent 26rem),
+                linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.96));
+            box-shadow: 0 24px 70px rgba(15, 23, 42, 0.08);
+        }
+
+        .dark .contest-hero {
+            border-color: rgba(148, 163, 184, 0.12);
+            background:
+                radial-gradient(circle at top left, rgba(37, 99, 235, 0.28), transparent 28rem),
+                radial-gradient(circle at top right, rgba(14, 165, 233, 0.16), transparent 26rem),
+                linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(3, 7, 18, 0.96));
+            box-shadow: 0 24px 80px rgba(2, 6, 23, 0.45);
+        }
+
+        .contest-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-radius: 999px;
+            padding: 0.55rem 0.9rem;
+            font-size: 0.8125rem;
+            font-weight: 700;
+            color: #334155;
+            background: rgba(255, 255, 255, 0.72);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            backdrop-filter: blur(8px);
+        }
+
+        .dark .contest-chip {
+            color: #e2e8f0;
+            background: rgba(15, 23, 42, 0.68);
+            border-color: rgba(148, 163, 184, 0.16);
+        }
+
+        .contest-alert {
+            border-radius: 1rem;
+            padding: 1rem 1.25rem;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .contest-surface {
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            border-radius: 1.25rem;
+            background: rgba(255, 255, 255, 0.96);
+            box-shadow: 0 18px 50px rgba(15, 23, 42, 0.06);
+        }
+
+        .dark .contest-surface {
+            border-color: rgba(148, 163, 184, 0.12);
+            background: rgba(15, 23, 42, 0.88);
+            box-shadow: 0 18px 60px rgba(2, 6, 23, 0.32);
+        }
+
+        .contest-description {
+            padding: 1.75rem;
+        }
+
+        .contest-problems-table thead th {
+            letter-spacing: 0.08em;
+        }
+
+        .contest-problems-table tbody tr:last-child {
+            border-bottom: 0;
+        }
+
+        @media (max-width: 768px) {
+            .contest-hero,
+            .contest-description {
+                padding: 1.25rem;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="space-y-6">
+    <section id="banner" class="contest-hero text-center">
+        <div class="space-y-5">
+            <div class="flex flex-wrap justify-center gap-2">
+                <span class="contest-chip">
+                    <i class="fa-duotone fa-calendar-clock"></i>
+                    {{ contest.start_time|date(_("M j, Y")) }}
+                </span>
+                <span class="contest-chip">
+                    <i class="fa-duotone fa-stopwatch"></i>
+                    {% if contest.time_limit %}
+                        {{ contest.time_limit|timedelta('localized-no-seconds') }}
+                    {% else %}
+                        {{ contest.contest_window_length|timedelta('localized-no-seconds') }}
+                    {% endif %}
+                </span>
+                {% if contest.is_rated %}
+                    <span class="contest-chip text-red-600 dark:text-red-300">
+                        <i class="fa-duotone fa-badge-check"></i>
+                        {{ _('Rated contest') }}
+                    </span>
+                {% endif %}
+            </div>
+        <a href="https://www.timeanddate.com/worldclock/fixedtime.html?msg={{ contest.name|urlquote('') }}&amp;iso=
+                {{- contest.start_time|utc|date('Y-m-d\TH:i:s') }}"
+           class="date block text-3xl font-black leading-tight text-slate-900 transition hover:text-blue-700 dark:text-slate-50 dark:hover:text-blue-300 md:text-4xl">
+            {%- if contest.is_in_contest(request.user) and not request.participation.live -%}
+                {% if request.participation.spectate %}
+                    {{- _('Spectating, contest ends in %(countdown)s.', countdown=contest.time_before_end|as_countdown) -}}
+                {% elif request.participation.end_time %}
+                    {{- _('Participating virtually, %(countdown)s remaining.', countdown=request.participation.time_remaining|as_countdown) -}}
+                {% else %}
+                    {{- _('Participating virtually.') -}}
+                {% endif %}
+            {%- else -%}
+                {% if contest.start_time > now %}
+                    {{- _('Starting in %(countdown)s', countdown=contest.time_before_start|as_countdown) -}}
+                {% elif contest.end_time < now %}
+                    {{- _('Contest is over.') -}}
+                {% else %}
+                    {%- if has_joined -%}
+                        {% if live_participation.ended %}
+                            {{- _('Your time is up! Contest ends in %(countdown)s.', countdown=contest.time_before_end|as_countdown) -}}
+                        {% else %}
+                            {{- _('You have %(countdown)s remaining.', countdown=live_participation.time_remaining|as_countdown) -}}
+                        {% endif %}
+                    {%- else -%}
+                        {{ _('Contest ends in %(countdown)s.', countdown=contest.time_before_end|as_countdown) }}
+                    {%- endif -%}
+                {% endif %}
+            {%- endif -%}
+        </a>
+        <div id="time" class="mx-auto max-w-3xl text-sm leading-7 text-slate-600 dark:text-slate-300 md:text-base">
+            {% if contest.time_limit %}
+                {% trans trimmed start_time=contest.start_time|date(_("F j, Y, G:i T")), end_time=contest.end_time|date(_("F j, Y, G:i T")), time_limit=contest.time_limit|timedelta('localized-no-seconds') %}
+                    <b>{{ time_limit }}</b> window between <b>{{ start_time }}</b> and <b>{{ end_time }}</b>
+                {% endtrans %}
+            {% else %}
+                {% trans trimmed length=contest.contest_window_length|timedelta("localized-no-seconds"), start_time=contest.start_time|date(_("F j, Y, G:i T")) %}
+                    <b>{{ length }}</b> long starting on <b>{{ start_time }}</b>
+                {% endtrans %}
+            {% endif %}
+        </div>
+        {% if contest.is_rated and contest.rating_ceiling %}
+        <div id="rate-contest" class="contest-alert mx-auto max-w-3xl bg-red-50 text-red-700 ring-1 ring-red-200 dark:bg-red-500/10 dark:text-red-200 dark:ring-red-400/20">
+            {% trans trimmed ceiling=contest.rating_ceiling|floatformat(0) %}
+                <h4>The contest will be rated for participants with rating lower than {{ ceiling }}</h4>
+            {% endtrans %}
+        </div>
+        {% endif %}
+        {% if contest.is_limit_language %}
+        <div class="contest-alert mx-auto max-w-3xl bg-amber-50 text-amber-700 ring-1 ring-amber-200 dark:bg-amber-500/10 dark:text-amber-200 dark:ring-amber-400/20">
+            {% trans trimmed language=contest.limit_language.name %}
+                This contest only accepts the <span class="font-bold text-slate-900 dark:text-slate-50">{{ language }}</span> programming language.
+            {% endtrans %}
+        </div>
+        {% endif %}
+        </div>
+    </section>
+
+    <section class="contest-surface contest-description custom-typography">
+        {% cache 3600 'contest_html' contest.id MATH_ENGINE %}
+            {{ contest.description|markdown(contest.markdown_style, MATH_ENGINE)|reference|str|safe }}
+        {% endcache %}
+        {% if contest.forbidden_words %}
+        <div class="not-prose mt-6 rounded-2xl border border-red-300/40 bg-red-50/90 p-4 dark:border-red-400/25 dark:bg-red-950/20 sm:p-5">
+            <div class="flex items-center gap-2 text-sm font-black uppercase tracking-[0.16em] text-red-700 dark:text-red-200">
+                <i class="fa-duotone fa-ban"></i>
+                {{ _('Forbidden keywords') }}
+            </div>
+            <p class="mt-3 text-sm leading-6 text-slate-700 dark:text-slate-300">
+                {{ _('The following keywords are not allowed in source code submissions for this contest:') }}
+            </p>
+            <div class="mt-4 flex flex-wrap gap-2">
+                {% for word in contest.forbidden_words.split() %}
+                <span class="inline-flex items-center rounded-full border border-red-300/40 bg-white/90 px-3 py-1.5 text-sm font-bold text-red-700 dark:border-red-400/25 dark:bg-slate-950/40 dark:text-red-100"><strong>{{ word }}</strong></span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </section>
+
+    {% if (contest.started and contest.is_public_contest) or request.user.is_superuser or is_editor or is_tester %}
+    <section class="contest-surface overflow-hidden">
+        <!-- Header -->
+        <div class="border-b border-slate-200 px-6 py-5 dark:border-slate-700">
+            <h2 class="text-xl font-black text-slate-900 dark:text-slate-100">
+                {{ _('Problems') }}
+            </h2>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                {{ _('Browse tasks, points and participation footprint for this contest.') }}
+            </p>
+        </div>
+        <table class="contest-problems-table min-w-full divide-y divide-slate-200 dark:divide-slate-700">
+            <thead class="bg-slate-50/90 dark:bg-slate-900/80">
+                <tr>
+                    <th scope="col" class="px-6 py-3 text-start whitespace-nowrap">
+                        <span class="text-xs font-bold uppercase text-slate-500 dark:text-slate-400">{{ _('Order') }}</span>
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-start whitespace-nowrap">
+                        <span class="text-xs font-bold uppercase text-slate-500 dark:text-slate-400">{{ _('Problem') }}</span>
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-start whitespace-nowrap">
+                        <span class="text-xs font-bold uppercase text-slate-500 dark:text-slate-400">{{ _('Points') }}</span>
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-start whitespace-nowrap">
+                        <span class="text-xs font-bold uppercase text-slate-500 dark:text-slate-400">{{ _('Users') }}</span>
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+                {% for problem in contest_problems %}
+                <tr class="text-sm transition hover:bg-blue-50/70 dark:hover:bg-slate-800/70">
+                    <th class="size-px px-6 py-3 text-start">
+                        <span class="inline-flex h-8 min-w-8 items-center justify-center rounded-full bg-blue-100 px-3 text-sm font-bold text-blue-700 dark:bg-blue-500/15 dark:text-blue-300">{{- contest.get_label_for_problem(loop.index0) }}</span>
+                    </th>
+                    <td class="h-px w-72 px-6 py-3 text-start">
+                        {% if request.user.is_superuser %}
+                            <a class="font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300" href="{{ url('problem_detail', problem.problem.code) }}">{{ problem.problem.name }}</a>
+                        {% else %}
+                            <a class="font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300" href="{{ url('contest_problem_detail', contest.key, problem.order) }}">{{ problem.temporary_name }}</a>
+                        {% endif %}
+                    </td>
+                    <td class="size-px px-6 py-3 text-start">
+                        <span class="inline-flex rounded-full bg-slate-100 px-3 py-1 text-sm font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-200">{{ problem.points|floatformat }}</span>
+                    </td>
+                    <td class="size-px px-6 py-3 text-start">
+                        <span class="text-sm font-medium text-slate-700 dark:text-slate-200">{{ problem.problem.user_count }}</span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+    {% endif %}
+
+    <div class="flex flex-row-reverse gap-4 px-1 text-4xl dark:text-white">
+        {{ post_to_twitter(request, SITE_NAME + ':', contest, '<i class="fa-brands fa-square-twitter"></i>') }}
+        {{ post_to_facebook(request, contest, '<i class="fa-brands fa-square-facebook"></i>') }}
+    </div>
+
+    {% include "comments/list.html" %}
+    </div>
+{% endblock %}
+
+{% block description_end %}{% endblock %}
+
+{% block bodyend %}
+    {{ super() }}
+    {% include "comments/math.html" %}
+{% endblock %}

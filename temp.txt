@@ -1,0 +1,32 @@
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+u = User.objects.get(username="admin")
+u
+
+(<ManyToOneRel: admin.logentry>, <OneToOneRel: judge.loggedinuser>, <OneToOneRel: judge.profile>, <OneToOneRel: registration.registrationprofile>, <ManyToOneRel: reversion.revision>, <ManyToOneRel: social_django.usersocialauth>, <ManyToOneRel: impersonate.impersonationlog>, <ManyToOneRel: impersonate.impersonationlog>, <django.db.models.fields.AutoField: id>, <django.db.models.fields.CharField: password>, <django.db.models.fields.DateTimeField: last_login>, <django.db.models.fields.BooleanField: is_superuser>, <django.db.models.fields.CharField: username>, <django.db.models.fields.CharField: first_name>, <django.db.models.fields.CharField: last_name>, <django.db.models.fields.EmailField: email>, <django.db.models.fields.BooleanField: is_staff>, <django.db.models.fields.BooleanField: is_active>, <django.db.models.fields.DateTimeField: date_joined>, <django.db.models.fields.related.ManyToManyField: groups>, <django.db.models.fields.related.ManyToManyField: user_permissions>)
+>>> 
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+u = User.objects.get(username="admin")
+
+profile = u.profile
+profile
+
+>>> [(f.name, f.__class__.__name__) for f in profile._meta.get_fields()]
+[('admin_of', 'ManyToManyRel'), ('webauthn_credentials', 'ManyToOneRel'), ('requests', 'ManyToOneRel'), ('actions', 'ManyToOneRel'), ('authored_problems', 'ManyToManyRel'), ('curated_problems', 'ManyToManyRel'), ('tested_problems', 'ManyToManyRel'), ('problem', 'ManyToManyRel'), ('solution', 'ManyToManyRel'), ('submission', 'ManyToOneRel'), ('view_contest_scoreboard', 'ManyToManyRel'), ('contest', 'ManyToManyRel'), ('contest_history', 'ManyToOneRel'), ('ratings', 'ManyToOneRel'), ('blogpost', 'ManyToManyRel'), ('log', 'ManyToOneRel'), ('comment', 'ManyToOneRel'), ('voted_comments', 'ManyToOneRel'), ('publicsolution', 'ManyToOneRel'), ('voted_solutions', 'ManyToOneRel'), ('logdownloadtestcase', 'ManyToOneRel'), ('tickets', 'ManyToOneRel'), ('assigned_tickets', 'ManyToManyRel'), ('ticket_messages', 'ManyToOneRel'), ('id', 'AutoField'), ('user', 'OneToOneField'), ('name', 'CharField'), ('about', 'TextField'), ('timezone', 'CharField'), ('language', 'ForeignKey'), ('points', 'FloatField'), ('performance_points', 'FloatField'), ('problem_count', 'IntegerField'), ('ace_theme', 'CharField'), ('last_access', 'DateTimeField'), ('ip', 'GenericIPAddressField'), ('display_rank', 'CharField'), ('mute', 'BooleanField'), ('is_unlisted', 'BooleanField'), ('rating', 'IntegerField'), ('user_script', 'TextField'), ('current_contest', 'OneToOneField'), ('math_engine', 'CharField'), ('is_webauthn_enabled', 'BooleanField'), ('api_token', 'CharField'), ('notes', 'TextField'), ('data_last_downloaded', 'DateTimeField'), ('last_change_name', 'DateTimeField'), ('last_name', 'CharField'), ('verified', 'BooleanField'), ('expiration_date', 'DateTimeField'), ('super_admin', 'BooleanField'), ('can_download_all_testcases', 'BooleanField'), ('organizations', 'ManyToManyField')]
+>>> 
+
+profile.rating = 4500
+profile.save()
+
+from django.contrib.auth import get_user_model
+from judge.models import Profile
+
+User = get_user_model()
+
+for user in User.objects.all():
+    Profile.objects.get_or_create(user=user)
+
+<span class="arithmatex"><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>≥</mo><mn>3000</mn></mrow><annotation encoding="application/x-tex">\geq 3000</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.7719em; vertical-align: -0.136em;"></span><span class="mrel">≥</span><span class="mspace" style="margin-right: 0.2778em;"></span></span><span class="base"><span class="strut" style="height: 0.6444em;"></span><span class="mord">3000</span></span></span></span></span></span>

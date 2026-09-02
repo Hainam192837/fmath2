@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block js_media %}
+    {{ form.media.js }}
+    <script type="text/javascript">
+        window.django = {jQuery: $};
+
+        function pluralidx(count) {
+            return (count == 1) ? 0 : 1;
+        }
+
+        function gettext(msgid) {
+            return msgid;
+        }
+
+        function interpolate(fmt, obj, named) {
+            if (named) {
+                return fmt.replace(/%\(\w+\)s/g, function (match) {
+                    return String(obj[match.slice(2, -2)])
+                });
+            } else {
+                return fmt.replace(/%s/g, function (match) {
+                    return String(obj.shift())
+                });
+            }
+        }
+    </script>
+{% endblock %}
+
+{% block media %}
+    {{ form.media.css }}
+    <link rel="stylesheet" href="{{ static('admin/css/widgets.css') }}" type="text/css">
+    <link rel="stylesheet" href="{{ static('problem_edit.css') }}" type="text/css">
+    <style>
+        .organization-edit-form label {
+            display: inline-block;
+            margin-bottom: 0.45rem;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: rgb(15 23 42);
+        }
+
+        .organization-edit-form input[type="text"],
+        .organization-edit-form input[type="file"],
+        .organization-edit-form textarea,
+        .organization-edit-form select {
+            width: 100%;
+            border-radius: 0.9rem;
+            border: 1px solid rgb(203 213 225);
+            background: white;
+            padding: 0.8rem 1rem;
+        }
+
+        .organization-edit-form .help {
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            color: rgb(100 116 139);
+        }
+
+        .dark .organization-edit-form label {
+            color: rgb(241 245 249);
+        }
+
+        .dark .organization-edit-form input[type="text"],
+        .dark .organization-edit-form input[type="file"],
+        .dark .organization-edit-form textarea,
+        .dark .organization-edit-form select {
+            border-color: rgb(63 63 70);
+            background: rgb(24 24 27);
+            color: rgb(244 244 245);
+        }
+
+        .dark .organization-edit-form .help {
+            color: rgb(148 163 184);
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="mx-auto max-w-4xl">
+        <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-zinc-900 md:p-8">
+            <div class="mb-8 flex flex-col gap-3 border-b border-slate-200 pb-6 dark:border-slate-700">
+                <div class="inline-flex w-fit items-center gap-2 rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-amber-700 dark:bg-amber-950/70 dark:text-amber-300">
+                    <i class="fa-duotone fa-pen-to-square"></i>
+                    <span>{{ _('Management') }}</span>
+                </div>
+                <h1 class="text-3xl font-black tracking-tight text-slate-900 dark:text-white">{{ _('Edit organization') }}</h1>
+                <p class="max-w-2xl text-sm text-slate-500 dark:text-slate-400">{{ _('Update organization content, branding, and administrative access.') }}</p>
+            </div>
+
+            <form action="" method="post" class="organization-edit-form flex flex-col gap-6">
+                {% csrf_token %}
+                <div class="rounded-2xl border border-slate-200 p-5 dark:border-slate-700">
+                    <div class="mb-4">
+                        {{ form.about.label_tag() }}
+                        {{ form.about }}
+                    </div>
+                </div>
+
+                <div class="rounded-2xl border border-slate-200 p-5 dark:border-slate-700">
+                    <div>
+                        {{ form.logo_override_image.label_tag() }}
+                        {{ form.logo_override_image }}
+                        <div class="help">{{ form.logo_override_image.help_text }}</div>
+                    </div>
+                </div>
+
+                <div class="rounded-2xl border border-slate-200 p-5 dark:border-slate-700">
+                    <div>
+                        {{ form.admins.label_tag() }}
+                        {{ form.admins }}
+                        <div class="help">{{ form.admins.help_text }}</div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end border-t border-slate-200 pt-6 dark:border-slate-700">
+                    <button class="inline-flex items-center justify-center rounded-xl bg-sky-600 px-6 py-3 text-sm font-bold text-white transition hover:bg-sky-700" type="submit">
+                        {{ _('Update') }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

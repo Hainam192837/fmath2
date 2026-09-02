@@ -1,0 +1,125 @@
+{% extends "submission/info-base.html" %}
+{% block js_media %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"></script>
+    {% if not submission.is_graded %}
+        <script type="text/javascript">
+            $(function () {
+                var blocked = false, request = false;
+                var list = $('#test-cases');
+                var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+                var ws_path = ws_scheme + '://' + window.location.host + '/ws/submission/{{ submission.id_secret }}/';
+                var ws = new WebSocket(ws_path);
+                
+                function update() {
+                    if (blocked) {
+                        request = true;
+                        return;
+                    }
+                    request = false;
+                    blocked = true;
+                    $.ajax({
+                        url: '{{ url('submission_testcases_query') }}',
+                        data: {id: '{{ submission.id }}'}
+                    }).done(function (data) {
+                        list.empty().html(data);
+                        setTimeout(function () {
+                            blocked = false;
+                            if (request)
+                                update();
+                        }, 500);
+                    }).fail(function (data) {
+                        console.log('Failed to update testcases!');
+                    });
+
+                    if ($(window).scrollTop() + $(window).height() > $(document).height() - 100)
+                        $("html, body").animate({scrollTop: $(document).height()}, 0);
+                }
+
+                ws.onmessage = function (event) {
+                    var data = JSON.parse(event.data);
+                    switch (data['type']) {
+                        case 'internal-error':
+                        case 'grading-end':
+                        case 'compile-error':
+                            $('#abort-button').remove();
+                            $('#grading-label').remove();
+                            ws.close();
+                        case 'test-case':
+                        case 'grading-begin':
+                        case 'processing':
+                            update();
+                    }
+                };
+                ws.onclose = function (event) {
+                    console.log('Websocket closed!');
+                };
+            });
+        </script>
+    {% endif %}
+    {% if not submission.is_graded %}
+        <script type="text/javascript">
+            $(function () {
+                $(document).keydown(function(e) {
+                    // Ctrl-Enter or Command-Enter
+                    if ((e.metaKey || e.ctrlKey) && e.which == 13) {
+                        $('#abort-button form').submit();
+                    }
+                });
+            });
+        </script>
+    {% endif %}
+{% endblock %}
+
+{% block body %}
+    <div class="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+        <div class="min-w-0">
+            <div id="test-cases" class="flex flex-col">{% include "submission/status-testcases.html" %}</div>
+        </div>
+
+        <aside class="flex flex-col gap-4 lg:sticky lg:top-24 lg:self-start">
+            <section class="panel-elevated p-5">
+                <div class="section-title">{{ _('Actions') }}</div>
+                <div class="mt-1 text-xl font-bold text-app-text dark:text-app-dark-text">{{ _('Submission tools') }}</div>
+                <div class="mt-4 flex flex-col gap-3">
+                    <a class="btn-secondary justify-center"
+                    {% if not submission.language.file_only %}
+                        href="{{ url('submission_source', submission.id) }}"
+                    {% else %}
+                        href="{{ submission.source.file }}"
+                    {% endif %}
+                    >{{ _('View source') }}</a>
+                    {% if request.user == submission.user.user or perms.judge.resubmit_other %}
+                        {% if not submission.contest_object %}
+                        <a class="btn-ghost justify-center" href="{{ url('problem_submit', submission.problem.code, submission.id) }}">{{ _('Resubmit') }}</a>
+                        {% else %}
+                        <a class="btn-ghost justify-center" href="{{ url('contest_problem_submit', submission.contest_object.key, submission.contest.problem.order, submission.id) }}">{{ _('Resubmit') }}</a>
+                        {% endif %}
+                    {% endif %}
+                    {% if perms.judge.rejudge_submission and not submission.is_locked %}
+                        <form action="{{ url('submission_rejudge') }}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="id" value="{{ submission.id }}">
+                            <input type="hidden" name="path" value="{{ url('submission_status', submission.id) }}">
+                            <button class="btn-primary w-full justify-center" type="submit">{{ _('Rejudge') }}</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </section>
+
+            {% if not submission.is_graded %}
+                {% if request.user == submission.user.user or perms.judge.abort_any_submission %}
+                    <section id="abort-button" class="panel-elevated p-5">
+                        <div class="section-title text-red-500!">{{ _('Danger zone') }}</div>
+                        <div class="mt-1 text-xl font-bold text-app-text dark:text-app-dark-text">{{ _('Abort grading') }}</div>
+                        <p class="mt-2 text-sm text-app-text-secondary dark:text-app-dark-text-secondary">{{ _('Press Ctrl-Enter or Command-Enter to abort.') }}</p>
+                        <form class="mt-4" action="{{ url('submission_abort', submission.id) }}" method="post"
+                              title="{{ _('Press Ctrl-Enter or Command-Enter to abort.') }}">
+                            {% csrf_token %}
+                            <input type="submit" value="{{ _('Abort') }}" class="w-full cursor-pointer rounded-2xl bg-red-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-red-600">
+                        </form>
+                    </section>
+                {% endif %}
+            {% endif %}
+        </aside>
+    </div>
+{% endblock %}

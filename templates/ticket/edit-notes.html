@@ -1,0 +1,22 @@
+<form id="edit-notes" action="{{ url('ticket_notes', ticket.id) }}" method="post" class="space-y-5 p-5 md:p-6">
+    {% csrf_token %}
+    <div class="space-y-1">
+        <p class="section-title">{{ _('Internal notes') }}</p>
+        <h2 class="section-heading !text-xl">{{ _('Edit assignee notes') }}</h2>
+        <p class="text-sm text-app-text-secondary dark:text-app-dark-text-secondary">
+            {{ _('These notes are visible to ticket assignees and staff only.') }}
+        </p>
+    </div>
+
+    <textarea
+        id="id_notes"
+        name="notes"
+        rows="10"
+        class="block w-full rounded-2xl border border-app-border bg-app-panel-elevated px-4 py-3 text-sm text-app-text shadow-sm outline-none transition focus:border-app-border-interactive focus:ring-4 focus:ring-sky-400/10 dark:border-app-dark-border dark:bg-app-dark-panel-elevated dark:text-app-dark-text dark:focus:border-app-dark-border-interactive"
+        placeholder="{{ _('Add context for other assignees...') }}"
+    >{{ form.notes.value() or '' }}</textarea>
+
+    <div class="flex justify-end">
+        <button type="submit" class="submit btn-primary">{{ _('Update') }}</button>
+    </div>
+</form>

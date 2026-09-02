@@ -1,0 +1,109 @@
+{% macro render_result_cell(user) %}
+    <td class="w-10 min-w-10 max-w-10 border-l border-slate-200/90 bg-white/95 px-0.5 py-1 text-center align-middle dark:border-slate-700/80 dark:bg-slate-950/95">
+        <span class="flex flex-col items-center gap-1">
+            <span class="text-[0.95rem] font-extrabold leading-none text-slate-900 dark:text-white" title="{{ user.performance_points|floatformat(2) }}">
+                {{ user.performance_points|floatformat(0) }}
+            </span>
+        </span>
+    </td>
+{% endmacro %}
+
+<div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white/90 shadow-sm dark:border-slate-800 dark:bg-slate-950/85">
+    <table id="users-table" class="w-full min-w-max border-separate border-spacing-0 text-left text-sm">
+        <thead>
+            <tr class="text-[0.68rem] uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                <th class="sticky left-0 z-30 size-px border-b border-slate-200 bg-slate-50/95 px-1 py-2 text-center font-bold dark:border-slate-800 dark:bg-slate-900/95">{{ rank_header or _("Rank") }}</th>
+                {% block after_rank_head %}{% endblock %}
+                <th class="hidden size-px border-b border-slate-200 bg-slate-50/95 px-2 py-2.5 font-bold dark:border-slate-800 dark:bg-slate-900/95 username-column">{{ _('Username') }}</th>
+                <th class="size-px border-b border-slate-200 bg-slate-50/95 px-3 py-2.5 font-bold dark:border-slate-800 dark:bg-slate-900/95 username">{{ _('Fullname') }}</th>
+                {% block before_point_head %}{% endblock %}
+                <th class="sticky right-0 z-30 size-px border-b border-slate-200 bg-slate-50/95 px-0.5 py-2 text-center font-bold dark:border-slate-800 dark:bg-slate-900/95">
+                    {% if sort_links %}<a href="{{ sort_links.performance_points }}" class="inline-flex items-center gap-1 text-slate-700 hover:text-blue-600 dark:text-slate-200 dark:hover:text-blue-300">{% endif %}
+                        {{ _('Points') }}
+                        {% if sort_links %}{{ sort_order.performance_points }}</a>{% endif %}
+                </th>
+                {% block after_point_head %}{% endblock %}
+            </tr>
+        </thead>
+
+        <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
+            {% for rank, user in users %}
+            <tr id="user-{{ user.user.username }}"
+                class="group transition hover:bg-blue-50/50 dark:hover:bg-slate-900/60 {% block row_extra scoped %}{% endblock %}">
+                <td class="sticky left-0 z-20 size-px border-r border-slate-200 bg-white/95 px-1 py-1.5 text-center align-middle text-sm font-semibold text-slate-700 dark:border-slate-800 dark:bg-slate-950/95 dark:text-slate-200">{{ rank }}</td>
+                {% block after_rank scoped %}{% endblock %}
+                <td class="hidden size-px border-r border-slate-200 bg-white/95 px-2 py-1.5 align-middle dark:border-slate-800 dark:bg-slate-950/95 username-column">
+                    {{ link_user(user.user, noname=True) }}
+                </td>
+                <td class="size-px border-r border-slate-200 bg-white/95 px-3 py-1.5 align-middle dark:border-slate-800 dark:bg-slate-950/95">
+                    <div class="flex items-center gap-2 user-name">
+                        <div class="group relative min-w-0 flex-1">
+                            <div class="user-name-link truncate text-sm font-semibold">
+                                {{ link_user(user.user) }}
+                            </div>
+                            {% block user_name_meta scoped %}{% endblock %}
+                        </div>
+                        <div class="flex shrink-0 items-center justify-end user-actions">
+                            {% block user_data scoped %}{% endblock %}
+                        </div>
+                    </div>
+                </td>
+                {% block before_point scoped %}{% endblock %}
+                {% block point scoped %}
+                    {{ render_result_cell(user) }}
+                {% endblock %}
+                {% block after_point scoped %}{% endblock %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    (function () {
+        var table = document.getElementById('users-table');
+        if (!table) {
+            return;
+        }
+
+        function timeToSeconds(time) {
+            if (!time || time.indexOf(':') === -1) {
+                return Number.POSITIVE_INFINITY;
+            }
+            var parts = time.split(':').map(Number);
+            if (parts.some(Number.isNaN)) {
+                return Number.POSITIVE_INFINITY;
+            }
+            while (parts.length < 3) {
+                parts.unshift(0);
+            }
+            return parts[0] * 3600 + parts[1] * 60 + parts[2];
+        }
+
+        table.querySelectorAll('th[data-problem]').forEach(function (header) {
+            var problem = header.getAttribute('data-problem');
+            var bestCell = null;
+            var bestTime = Number.POSITIVE_INFINITY;
+
+            table.querySelectorAll('td[data-problem="' + problem + '"]').forEach(function (cell) {
+                var state = cell.getAttribute('data-state') || '';
+                if (!state.endsWith('full-score')) {
+                    return;
+                }
+                var time = timeToSeconds(cell.getAttribute('data-time') || '');
+                if (time < bestTime) {
+                    bestTime = time;
+                    bestCell = cell;
+                }
+            });
+
+            if (bestCell) {
+                bestCell.classList.add('first-accept');
+                var scorePill = bestCell.querySelector('[data-score-pill]');
+                if (scorePill) {
+                    scorePill.classList.add('first-accept-pill');
+                }
+            }
+        });
+    })();
+</script>

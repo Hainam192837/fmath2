@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Task Progress - {{ SITE_LONG_NAME }}</title>
+    <link rel="stylesheet" href="{{ static('full_style.css') }}?v={{ version }}">
+    <script src="{{ static('libs/jquery-3.6.0.min.js') }}"></script>
+    <style>
+        @keyframes indeterminate {
+            0%   { left: -35%; right: 100%; }
+            60%  { left: 100%; right: -90%; }
+            100% { left: 100%; right: -90%; }
+        }
+        @keyframes indeterminate-short {
+            0%   { left: -200%; right: 100%; }
+            60%  { left: 107%; right: -8%; }
+            100% { left: 107%; right: -8%; }
+        }
+        .bar-indeterminate::before {
+            content: '';
+            position: absolute;
+            inset-block: 0;
+            background: inherit;
+            border-radius: inherit;
+            animation: indeterminate 2.1s cubic-bezier(.65,.815,.735,.395) infinite;
+        }
+        .bar-indeterminate::after {
+            content: '';
+            position: absolute;
+            inset-block: 0;
+            background: inherit;
+            border-radius: inherit;
+            animation: indeterminate-short 2.1s cubic-bezier(.5,.825,.445,.95) 1.15s infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .spinner {
+            width: 42px; height: 42px;
+            border: 4px solid rgba(99,102,241,0.2);
+            border-top-color: #6366f1;
+            border-radius: 50%;
+            animation: spin 0.85s linear infinite;
+        }
+        @keyframes check-draw {
+            to { stroke-dashoffset: 0; }
+        }
+        .check-path {
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            animation: check-draw 0.45s ease-out 0.1s forwards;
+        }
+    </style>
+    <script type="text/javascript">
+        $(function () {
+            var $card       = $('.task-container');
+            var task_id     = $card.attr('data-task-id');
+            var status      = JSON.parse($card.attr('data-task-status'));
+            var redirect    = $card.attr('data-redirect');
+
+            var $icon_wrap  = $('#icon-wrap');
+            var $stage      = $('#stage-text');
+            var $pct_text   = $('#pct-text');
+            var $bar_track  = $('#bar-track');
+            var $bar_fill   = $('#bar-fill');
+            var $err_box    = $('#error-box');
+            var $err_msg    = $('#error-msg');
+
+            function setIcon(type) {
+                if (type === 'success') {
+                    $icon_wrap.html(
+                        '<svg viewBox="0 0 52 52" class="w-16 h-16" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+                        '<circle cx="26" cy="26" r="25" fill="#22c55e" opacity="0.15"/>' +
+                        '<circle cx="26" cy="26" r="25" stroke="#22c55e" stroke-width="2"/>' +
+                        '<polyline class="check-path" points="14,27 22,35 38,18" stroke="#22c55e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>' +
+                        '</svg>'
+                    );
+                } else if (type === 'failure') {
+                    $icon_wrap.html(
+                        '<svg viewBox="0 0 52 52" class="w-16 h-16" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+                        '<circle cx="26" cy="26" r="25" fill="#ef4444" opacity="0.15"/>' +
+                        '<circle cx="26" cy="26" r="25" stroke="#ef4444" stroke-width="2"/>' +
+                        '<line x1="17" y1="17" x2="35" y2="35" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>' +
+                        '<line x1="35" y1="17" x2="17" y2="35" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>' +
+                        '</svg>'
+                    );
+                } else {
+                    $icon_wrap.html('<div class="spinner"></div>');
+                }
+            }
+
+            function show_status(s) {
+                $bar_track.show();
+                $err_box.hide();
+
+                switch (s.code) {
+                    case 'SUCCESS':
+                        setIcon('success');
+                        $bar_fill.removeClass('bar-indeterminate relative overflow-hidden')
+                                 .css('width', '100%')
+                                 .addClass('bg-green-500');
+                        $pct_text.text('Hoàn thành!').removeClass('text-gray-400').addClass('text-green-400 font-semibold');
+                        break;
+
+                    case 'FAILURE':
+                        setIcon('failure');
+                        $bar_fill.removeClass('bar-indeterminate relative overflow-hidden')
+                                 .css('width', '100%')
+                                 .addClass('bg-red-500');
+                        $pct_text.text('Thất bại').removeClass('text-gray-400').addClass('text-red-400 font-semibold');
+                        $err_msg.text(s.error || 'Đã xảy ra lỗi không xác định.');
+                        $err_box.show();
+                        break;
+
+                    case 'PROGRESS':
+                        var pct = s.total > 0 ? Math.round(100 * s.done / s.total) : 0;
+                        $bar_fill.removeClass('bar-indeterminate relative overflow-hidden')
+                                 .css('width', pct + '%');
+                        $pct_text.text(s.done + ' / ' + s.total + ' (' + pct + '%)');
+                        break;
+
+                    case 'WORKING':
+                    default:
+                        $bar_fill.addClass('bar-indeterminate relative overflow-hidden').css('width', '100%');
+                        $pct_text.text('Đang xử lý…');
+                        break;
+                }
+
+                $stage.text(s.stage || '');
+            }
+
+            function need_ajax(s) {
+                return s.code !== 'SUCCESS' && s.code !== 'FAILURE';
+            }
+
+            function do_ajax(backoff) {
+                backoff = backoff || 500;
+                $.get("{{ url('task_status_ajax') }}", { id: task_id })
+                    .done(function (data) {
+                        show_status(data);
+                        if (data.code === 'SUCCESS') {
+                            setTimeout(function () { window.location.href = redirect; }, 600);
+                        } else if (need_ajax(data)) {
+                            setTimeout(do_ajax, 500);
+                        }
+                    })
+                    .fail(function () {
+                        setTimeout(function () { do_ajax(Math.min(backoff * 2, 8000)); }, backoff);
+                    });
+            }
+
+            setIcon('working');
+            show_status(status);
+            if (need_ajax(status)) {
+                do_ajax();
+            }
+        });
+    </script>
+</head>
+<body class="bg-gray-950 min-h-screen flex items-center justify-center font-sans antialiased">
+    <div class="task-container w-full max-w-md mx-auto px-4"
+         data-task-id="{{ task_id }}"
+         data-task-status="{{ task_status }}"
+         data-redirect="{{ redirect }}">
+
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl p-8 flex flex-col items-center gap-6">
+
+            <!-- Icon area -->
+            <div id="icon-wrap" class="flex items-center justify-center h-16 w-16">
+                <div class="spinner"></div>
+            </div>
+
+            <!-- Title & stage -->
+            <div class="text-center space-y-1">
+                <p class="text-xl font-semibold text-gray-100 leading-snug">{{ message }}</p>
+                <p id="stage-text" class="text-sm text-gray-400 min-h-[1.25rem]"></p>
+            </div>
+
+            <!-- Progress bar -->
+            <div id="bar-track" class="w-full">
+                <div class="relative w-full h-3 bg-gray-800 rounded-full overflow-hidden">
+                    <div id="bar-fill"
+                         class="h-full rounded-full bg-indigo-500 transition-[width] duration-500 ease-in-out bar-indeterminate relative overflow-hidden"
+                         style="width: 100%">
+                    </div>
+                </div>
+                <p id="pct-text" class="mt-2 text-xs text-gray-400 text-center">Đang xử lý…</p>
+            </div>
+
+            <!-- Error box -->
+            <div id="error-box" class="hidden w-full bg-red-950 border border-red-800 rounded-xl px-4 py-3 text-sm text-red-300">
+                <span class="font-semibold text-red-400">Lỗi:</span>
+                <span id="error-msg"></span>
+            </div>
+
+        </div>
+
+        <!-- Branding -->
+        <div class="mt-5 flex items-center justify-center gap-2 text-gray-600 text-xs">
+            <img src="{{ static('icons/icon.svg') }}" class="w-5 h-5 opacity-60" alt="">
+            <span>{{ SITE_LONG_NAME }}</span>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,296 @@
+{% extends "user/user-base.html" %}
+
+{% block user_media %}
+    {% include "timezone/media-css.html" %}
+    {{ form.media.css }}
+    <style>
+        #edit-form input[type="text"],
+        #edit-form input[type="email"],
+        #edit-form input[type="number"],
+        #edit-form input[type="password"],
+        #edit-form input[type="datetime-local"],
+        #edit-form input[type="date"],
+        #edit-form input[type="time"],
+        #edit-form textarea,
+        #edit-form select {
+            width: 100%;
+            border: 1px solid #cbd5e1;
+            border-radius: 0.5rem;
+            background: #fff;
+            color: #0f172a;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        #edit-form textarea {
+            min-height: 10rem;
+            resize: vertical;
+        }
+
+        #edit-form input[type="text"]:focus,
+        #edit-form input[type="email"]:focus,
+        #edit-form input[type="number"]:focus,
+        #edit-form input[type="password"]:focus,
+        #edit-form input[type="datetime-local"]:focus,
+        #edit-form input[type="date"]:focus,
+        #edit-form input[type="time"]:focus,
+        #edit-form textarea:focus,
+        #edit-form select:focus {
+            outline: none;
+            border-color: #0ea5e9;
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
+        }
+
+        #edit-form input:disabled,
+        #edit-form textarea:disabled,
+        #edit-form select:disabled {
+            background: #f1f5f9;
+            color: #64748b;
+            cursor: not-allowed;
+        }
+
+        #edit-form input[type="checkbox"] {
+            width: 1rem;
+            height: 1rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 0.25rem;
+            accent-color: #0284c7;
+            margin-top: 0.2rem;
+        }
+
+        #edit-form .select2-container {
+            width: 100% !important;
+            max-width: 100%;
+        }
+
+        #edit-form .select2-container .select2-selection--single,
+        #edit-form .select2-container .select2-selection--multiple {
+            border: 1px solid #cbd5e1 !important;
+            border-radius: 0.5rem !important;
+            min-height: 2.35rem;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+            background: #fff;
+        }
+
+        #edit-form .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: #0f172a;
+            line-height: 2.35rem;
+            padding-left: 0.75rem;
+        }
+
+        #edit-form .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 2.35rem;
+        }
+
+        #edit-form .select2-container--default.select2-container--focus .select2-selection--single,
+        #edit-form .select2-container--default.select2-container--focus .select2-selection--multiple,
+        #edit-form .select2-container--default.select2-container--open .select2-selection--single,
+        #edit-form .select2-container--default.select2-container--open .select2-selection--multiple {
+            border-color: #0ea5e9 !important;
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
+        }
+
+        /* Select2 dropdown is appended outside #edit-form; cap width defensively. */
+        .select2-dropdown {
+            max-width: min(92vw, 28rem);
+        }
+
+        #organizations-readonly .selector,
+        #organizations-readonly .sortedm2m-container {
+            width: 100%;
+            max-width: none;
+            float: none;
+        }
+
+        #organizations-readonly .selector-available,
+        #organizations-readonly .selector-chooser,
+        #organizations-readonly .selector-filter,
+        #organizations-readonly a.selector-chooseall,
+        #organizations-readonly a.selector-clearall {
+            display: none !important;
+        }
+
+        #organizations-readonly .selector-chosen {
+            float: none;
+            width: 100%;
+            margin: 0;
+        }
+
+        #organizations-readonly .selector-chosen h2 {
+            display: none;
+        }
+
+        #organizations-readonly .selector-chosen select,
+        #organizations-readonly ul.sortedm2m {
+            width: 100%;
+            max-width: none;
+            min-height: 8rem;
+            height: auto;
+            background: #f8fafc;
+            pointer-events: none;
+        }
+
+        .sortedm2m-container, .sortedm2m-container p.selector-filter {
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .sortedm2m-container p.selector-filter input {
+            width: 100%;
+            max-width: 262px;
+        }
+
+        ul.sortedm2m {
+            width: 100%;
+            max-width: 284px;
+            min-height: 70px;
+            max-height: 200px;
+            height: 70px;
+        }
+
+    </style>
+{% endblock %}
+
+{% block js_media %}
+    {% include "timezone/media-js.html" %}
+    {{ form.media.js }}
+    <script type="text/javascript">
+        $(function () {
+            $('#ace_user_script').on('ace_load', function (e, editor) {
+                editor.getSession().setMode("ace/mode/javascript");
+            });
+
+            // Keep Select2 dropdown aligned to the control width (avoid fullscreen dropdowns).
+            $(document).on('select2:open', function (event) {
+                var $target = $(event.target);
+                var $container = $target.next('.select2-container');
+                var width = $container.outerWidth() || 320;
+                width = Math.min(width, 448);
+                $('.select2-container--open .select2-dropdown').css({
+                    width: width + 'px',
+                    minWidth: width + 'px',
+                });
+            });
+
+            $('#organizations-readonly select').attr('tabindex', '-1');
+        });
+    </script>
+{% endblock %}
+
+{% block title_ruler %}{% endblock %}
+
+{% block title_row %}
+    {% set tab = 'edit' %}
+    {% set user = request.profile %}
+    {% include "user/user-tabs.html" %}
+{% endblock %}
+
+{% block body %}
+    <div class="mx-auto max-w-5xl px-3 pb-6">
+        <form id="edit-form" action="" method="post" class="form-area mx-auto max-w-5xl rounded-2xl border border-slate-200 bg-linear-to-tr from-white to-teal-50/50 p-4 shadow-lg md:p-6">
+            {% if form.errors %}
+            {% if form.name.errors %}
+            <div class="message relative mb-4 rounded-lg border border-rose-300 bg-rose-50 px-4 py-3 text-rose-800">
+                <button type="button" class="close absolute right-2 top-2 text-lg leading-none text-rose-500 hover:text-rose-700" aria-label="Close">&times;</button>
+                <div class="mb-1 text-sm font-semibold">
+                    Fullname errors
+                </div>
+                {% for error in form.name.errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% if form.about.errors %}
+            <div class="message relative mb-4 rounded-lg border border-rose-300 bg-rose-50 px-4 py-3 text-rose-800">
+                <button type="button" class="close absolute right-2 top-2 text-lg leading-none text-rose-500 hover:text-rose-700" aria-label="Close">&times;</button>
+                <div class="mb-1 text-sm font-semibold">
+                    Description errors
+                </div>
+                {% for error in form.about.errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endif %}
+
+            {% csrf_token %}
+            <div class="flex flex-col gap-5">
+                <section class="rounded-xl border border-slate-200 bg-white p-4 md:p-5">
+                    <div class="mb-3 text-lg font-bold text-slate-800">{{ _('Self-description') }}:</div>
+                    {{ form.about }}
+                </section>
+
+                <section class="rounded-xl border border-slate-200 bg-white p-4 md:p-5">
+                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <div>
+                            <table class="w-full border-collapse">
+                                <tr>
+                                    <td class="block w-full py-1 pr-0 align-top text-sm font-medium text-slate-600 md:table-cell md:w-1/3 md:pr-3">{{ _('Fullname') }}</td>
+                                    <td class="block w-full py-1 align-top md:table-cell">{{ form.name }}</td>
+                                </tr>
+                                <tr title="{{ _('Select your closest major city') }}">
+                                    <td class="block w-full py-1 pr-0 align-top text-sm font-medium text-slate-600 md:table-cell md:w-1/3 md:pr-3">{{ _('Timezone') }}:</td>
+                                    <td class="block w-full py-1 align-top md:table-cell">{{ form.timezone }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="block w-full py-1 pr-0 align-top text-sm font-medium text-slate-600 md:table-cell md:w-1/3 md:pr-3">{{ _('Language') }}:</td>
+                                    <td class="block w-full py-1 align-top md:table-cell">{{ form.language }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="block w-full py-1 pr-0 align-top text-sm font-medium text-slate-600 md:table-cell md:w-1/3 md:pr-3">{{ _('Editor theme') }}:</td>
+                                    <td class="block w-full py-1 align-top md:table-cell">{{ form.ace_theme }}</td>
+                                </tr>
+                                {% if has_math_config %}
+                                    <tr>
+                                        <td class="block w-full py-1 pr-0 align-top text-sm font-medium text-slate-600 md:table-cell md:w-1/3 md:pr-3">{{ _('Math engine') }}:</td>
+                                        <td class="block w-full py-1 align-top md:table-cell">{{ form.math_engine }}</td>
+                                    </tr>
+                                {% endif %}
+                                <tr>
+                                    <td class="block w-full py-1 pr-0 align-top text-sm font-medium text-slate-600 md:table-cell md:w-1/3 md:pr-3">{{ _('Last change name ')}}</td>
+                                    <td class="block w-full py-1 align-top md:table-cell">{{ form.last_change_name }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        {% if form.organizations %}
+                            <div id="organizations-readonly">
+                                <div class="mb-3 text-lg font-bold text-slate-800">{{ _('Affiliated organizations') }}:</div>
+                                {{ form.organizations }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <p class="mt-2 px-2 text-center text-sm font-semibold text-sky-700">{{ form.name.help_text }}</p>
+                </section>
+
+                <section class="rounded-xl border border-slate-200 bg-white p-4 md:p-5">
+                    <table border="0" class="w-full border-collapse">
+                        <tr><td>
+                            <a href="http://www.gravatar.com/" title="{{ _('Change your avatar') }}"
+                               target="_blank" class="inline-block py-1 text-sky-700 hover:text-sky-800" rel="noopener">
+                                {{ _('Change your avatar') }}
+                            </a>
+                        </td></tr>
+                        <tr><td>
+                            <a href="{{ url('password_change') }}" class="inline-block py-1 text-sky-700 hover:text-sky-800">
+                                {{ _('Change your password') }}
+                            </a>
+                        </td></tr>
+                    </table>
+                </section>
+
+                <hr class="my-1 border-slate-200">
+                <div class="flex justify-stretch md:justify-end">
+                    <input type="submit" class="w-full rounded-lg bg-sky-600 px-4 py-2 font-semibold text-white transition hover:bg-sky-700 md:w-auto" value="{{ _('Update profile') }}">
+                </div>
+            </div>
+        </form>
+    </div>
+    <script>
+        $('.message .close').on('click', function() {
+            $(this).closest('.message').fadeOut(180);
+        });
+    </script>
+{% endblock %}
