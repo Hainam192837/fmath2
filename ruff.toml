@@ -17,3 +17,6 @@ known-first-party = ["django_ace", "judge", "tmath", "typeracer", "websocket"]
 "*/migrations/*.py" = ["E501"]
 "judge/management/commands/runmoss.py" = ["F403", "F405"]
 "judge/widgets/pagedown.py" = ["E303"]
+
+[tool.ruff]
+exclude = [".venv", "venv", ".git", "__pycache__", "*.egg-info"]
