@@ -217,7 +217,7 @@ class ContestTestCase(CommonDataMixin, TestCase):
     def setUp(self):
         self.users["normal"].profile.refresh_from_db()
 
-        self.rejudge_problem = create_problem(code="contest_rejudge_problem")
+        self.rejudge_problem = create_problem(code="rejudge")
         self.rejudge_contest_problem = create_contest_problem(
             contest=self.basic_contest,
             problem=self.rejudge_problem,
