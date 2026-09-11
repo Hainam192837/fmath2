@@ -413,6 +413,7 @@ BLEACH_USER_SAFE_TAGS = [
     "center",
     "details",
     "summary",
+    "iframe",
     # "ins",
 ]
 

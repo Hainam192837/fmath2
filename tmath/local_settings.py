@@ -59,6 +59,8 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
+CORS_ALLOW_ALL_ORIGINS = True
+
 ## django-compressor settings, for speeding up page load times by minifying CSS and JavaScript files.
 # Documentation: <https://django-compressor.readthedocs.io/en/latest/>
 COMPRESS_OUTPUT_DIR = 'cache'
@@ -189,6 +191,10 @@ BAD_MAIL_PROVIDERS = set()
 # only after you have a working event server.
 #EVENT_DAEMON_AMQP = '<amqp:// URL to connect to, including username and password>'
 #EVENT_DAEMON_AMQP_EXCHANGE = '<AMQP exchange to use>'
+
+#Secret key for examclient flutter
+DMOJ_API_JWT_SECRET_KEY = 'tTy9x+5q5HJzeR8/fRu+xNlUDM1sjjWTSh3MukeGKoa/eswcVxM0U+bG4/cDcmC3'
+
 
 ## Celery
 CELERY_BROKER_URL = 'redis://localhost:6379'
