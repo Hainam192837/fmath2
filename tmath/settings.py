@@ -441,6 +441,7 @@ BLEACH_USER_SAFE_ATTRS = {
         "width",
     ],
     "source": ["src", "srcset", "type"],
+    "iframe": ["src", "width", "height", "frameborder", "allow", "allowfullscreen", "style", "title"],
 }
 
 MARKDOWN_STAFF_EDITABLE_STYLE = {

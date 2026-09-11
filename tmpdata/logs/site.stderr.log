@@ -13896,3 +13896,55 @@ uWSGI worker 4 cheaped.
 {address space usage: 411914240 bytes/392MB} {rss usage: 202559488 bytes/193MB} [pid: 502800|app: 0|req: 6/8] 172.68.211.64 () {80 vars in 1533 bytes} [Fri Sep 11 07:31:49 2026] GET /edit/profile/ => generated 82442 bytes in 51 msecs (HTTP/1.1 200) 11 headers in 480 bytes (1 switches on core 0)
 {address space usage: 411914240 bytes/392MB} {rss usage: 202690560 bytes/193MB} [pid: 502800|app: 0|req: 7/9] 172.68.211.64 () {78 vars in 1502 bytes} [Fri Sep 11 07:32:02 2026] GET /user/adminbao => generated 50782 bytes in 29 msecs (HTTP/1.1 200) 11 headers in 480 bytes (1 switches on core 0)
 {address space usage: 411914240 bytes/392MB} {rss usage: 202690560 bytes/193MB} [pid: 502800|app: 0|req: 8/10] 172.71.218.201 () {78 vars in 1547 bytes} [Fri Sep 11 07:35:11 2026] GET /edit/profile/ => generated 75807 bytes in 35 msecs (HTTP/1.1 200) 11 headers in 480 bytes (1 switches on core 0)
+SIGINT/SIGTERM received...killing workers...
+worker 5 buried after 1 seconds
+goodbye to uWSGI.
+[uWSGI] getting INI configuration from uwsgi.ini
+*** Starting uWSGI 2.0.31 (64bit) on [Fri Sep 11 07:38:14 2026] ***
+compiled with version: 13.3.0 on 20 August 2026 11:44:20
+os: Linux-7.0.0-1011-aws #11~24.04.1-Ubuntu SMP PREEMPT Mon Aug 10 15:20:57 UTC 2026
+nodename: ip-172-31-8-108
+machine: x86_64
+clock source: unix
+detected number of CPU cores: 2
+current working directory: /home/ubuntu/tmath
+writing pidfile to /tmp/tmath-wsgi-site.pid
+detected binary path: /home/ubuntu/tmath/.venv/bin/uwsgi
+!!! no internal routing support, rebuild with pcre support !!!
+uWSGI running as root, you can use --uid/--gid/--chroot options
+*** WARNING: you are running uWSGI as root !!! (use the --uid flag) *** 
+chdir() to /home/ubuntu/tmath
+your processes number limit is 27191
+your memory page size is 4096 bytes
+detected max file descriptor number: 1024
+lock engine: pthread robust mutexes
+thunder lock: disabled (you can enable it with --thunder-lock)
+uwsgi socket 0 bound to UNIX address /tmp/tmath-wsgi-site.sock fd 3
+uWSGI running as root, you can use --uid/--gid/--chroot options
+*** WARNING: you are running uWSGI as root !!! (use the --uid flag) *** 
+Python version: 3.12.3 (main, Jun 19 2026, 12:46:00) [GCC 13.3.0]
+PEP 405 virtualenv detected: /home/ubuntu/tmath/.venv
+Set PythonHome to /home/ubuntu/tmath/.venv
+Python main interpreter initialized at 0x7582d7ea4668
+uWSGI running as root, you can use --uid/--gid/--chroot options
+*** WARNING: you are running uWSGI as root !!! (use the --uid flag) *** 
+python threads support enabled
+your server socket listen backlog is limited to 100 connections
+your mercy for graceful operations on workers is 60 seconds
+mapped 583360 bytes (569 KB) for 7 cores
+*** Operational MODE: preforking ***
+added /home/ubuntu/tmath/ to pythonpath.
+WSGI app 0 (mountpoint='') ready in 0 seconds on interpreter 0x7582d7ea4668 pid: 503796 (default app)
+uWSGI running as root, you can use --uid/--gid/--chroot options
+*** WARNING: you are running uWSGI as root !!! (use the --uid flag) *** 
+*** uWSGI is running in multiple interpreter mode ***
+spawned uWSGI master process (pid: 503796)
+spawned uWSGI worker 1 (pid: 503809, cores: 1)
+spawned uWSGI worker 2 (pid: 503810, cores: 1)
+spawned uWSGI worker 3 (pid: 503811, cores: 1)
+spawned uWSGI worker 4 (pid: 503812, cores: 1)
+spawned uWSGI worker 5 (pid: 503813, cores: 1)
+worker 1 killed successfully (pid: 503809)
+uWSGI worker 1 cheaped.
+worker 2 killed successfully (pid: 503810)
+uWSGI worker 2 cheaped.
