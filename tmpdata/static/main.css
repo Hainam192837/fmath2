@@ -1,0 +1,701 @@
+@import './select2-custom.css';
+@import './ace-custom.css';
+@import 'tailwindcss';
+@plugin "@tailwindcss/typography";
+@plugin "@tailwindcss/forms";
+@config "./tailwind.config.js";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-awesome: 'FontAwesome';
+  --color-newbie: theme('colors.gray.500');
+  --color-amateur: theme('colors.green.500');
+  --color-expert: theme('colors.blue.500');
+  --color-candidate-master: theme('colors.purple.500');
+  --color-master: theme('colors.orange.500');
+  --color-grandmaster: theme('colors.red.500');
+  --color-target: theme('colors.red.500');
+  --container-8xl: 96rem;
+
+  --color-app-panel: rgba(255, 255, 255, 0.94);
+  --color-app-panel-elevated: rgba(255, 255, 255, 0.98);
+  --color-app-panel-strong: #ffffff;
+  --color-app-overlay: rgba(10, 18, 33, 0.68);
+  --color-app-text: #09111f;
+  --color-app-text-secondary: #314155;
+  --color-app-text-muted: #5d6b7d;
+  --color-app-text-inverse: #f8fbff;
+  --color-app-border: rgba(86, 108, 134, 0.22);
+  --color-app-border-strong: rgba(41, 63, 92, 0.42);
+  --color-app-border-interactive: rgba(42, 157, 244, 0.55);
+  --color-app-accent: #0ea5e9;
+  --color-app-accent-strong: #0284c7;
+  --color-app-accent-soft: rgba(14, 165, 233, 0.12);
+  --color-app-success: #22c55e;
+  --color-app-success-soft: rgba(42, 204, 101, 0.784);
+  --color-app-warning: #f59e0b;
+  --color-app-warning-soft: rgba(245, 159, 11, 0.595);
+  --color-app-danger: #ef4444;
+  --color-app-danger-soft: rgba(250, 22, 22, 0.586);
+  --color-app-info: #38bdf8;
+  --color-app-info-soft: rgba(56, 189, 248, 0.12);
+  --color-app-table-stripe: rgba(219, 229, 241, 0.68);
+  --color-app-table-hover: rgba(186, 230, 253, 0.18);
+
+  --color-app-dark-panel: rgba(14, 23, 35, 0.92);
+  --color-app-dark-panel-elevated: rgba(19, 31, 47, 0.96);
+  --color-app-dark-panel-strong: #172334;
+  --color-app-dark-overlay: rgba(2, 8, 23, 0.82);
+  --color-app-dark-text: #e7eef8;
+  --color-app-dark-text-secondary: #b6c3d4;
+  --color-app-dark-text-muted: #7f91a8;
+  --color-app-dark-text-inverse: #07111d;
+  --color-app-dark-border: rgba(120, 145, 177, 0.2);
+  --color-app-dark-border-strong: rgba(125, 156, 196, 0.34);
+  --color-app-dark-border-interactive: rgba(56, 189, 248, 0.6);
+  --color-app-dark-accent: #38bdf8;
+  --color-app-dark-accent-strong: #0ea5e9;
+  --color-app-dark-accent-soft: rgba(56, 189, 248, 0.14);
+  --color-app-dark-success: #4ade80;
+  --color-app-dark-success-soft: rgba(15, 229, 94, 0.545);
+  --color-app-dark-warning: #fbbf24;
+  --color-app-dark-warning-soft: rgba(251, 190, 36, 0.57);
+  --color-app-dark-danger: #f87171;
+  --color-app-dark-danger-soft: rgba(240, 42, 42, 0.706);
+  --color-app-dark-info: #67e8f9;
+  --color-app-dark-info-soft: rgba(103, 232, 249, 0.16);
+  --color-app-dark-table-stripe: rgba(20, 33, 49, 0.96);
+  --color-app-dark-table-hover: rgba(14, 165, 233, 0.12);
+}
+
+@layer base {
+  :root {
+    --app-bg: #eff4fb;
+    --app-bg-muted: #dbe5f1;
+    --app-panel: rgba(255, 255, 255, 0.94);
+    --app-panel-elevated: rgba(255, 255, 255, 0.98);
+    --app-panel-strong: #ffffff;
+    --app-overlay: rgba(10, 18, 33, 0.68);
+    --app-text: #09111f;
+    --app-text-secondary: #314155;
+    --app-text-muted: #5d6b7d;
+    --app-text-inverse: #f8fbff;
+    --app-border: rgba(86, 108, 134, 0.22);
+    --app-border-strong: rgba(41, 63, 92, 0.42);
+    --app-border-interactive: rgba(42, 157, 244, 0.55);
+    --app-accent: #0ea5e9;
+    --app-accent-strong: #0284c7;
+    --app-accent-soft: rgba(14, 165, 233, 0.12);
+    --app-success: #22c55e;
+    --app-success-soft: rgba(34, 197, 94, 0.14);
+    --app-warning: #f59e0b;
+    --app-warning-soft: rgba(245, 158, 11, 0.16);
+    --app-danger: #ef4444;
+    --app-danger-soft: rgba(239, 68, 68, 0.14);
+    --app-info: #38bdf8;
+    --app-info-soft: rgba(56, 189, 248, 0.12);
+    --app-table-stripe: rgba(219, 229, 241, 0.68);
+    --app-table-hover: rgba(186, 230, 253, 0.18);
+    --app-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+  }
+
+  .dark {
+    --app-bg: #0a101b;
+    --app-bg-muted: #111a28;
+    --app-panel: rgba(14, 23, 35, 0.92);
+    --app-panel-elevated: rgba(19, 31, 47, 0.96);
+    --app-panel-strong: #172334;
+    --app-overlay: rgba(2, 8, 23, 0.82);
+    --app-text: #e7eef8;
+    --app-text-secondary: #b6c3d4;
+    --app-text-muted: #7f91a8;
+    --app-text-inverse: #07111d;
+    --app-border: rgba(120, 145, 177, 0.2);
+    --app-border-strong: rgba(125, 156, 196, 0.34);
+    --app-border-interactive: rgba(56, 189, 248, 0.6);
+    --app-accent: #38bdf8;
+    --app-accent-strong: #0ea5e9;
+    --app-accent-soft: rgba(56, 189, 248, 0.14);
+    --app-success: #4ade80;
+    --app-success-soft: rgba(74, 222, 128, 0.18);
+    --app-warning: #fbbf24;
+    --app-warning-soft: rgba(251, 191, 36, 0.18);
+    --app-danger: #f87171;
+    --app-danger-soft: rgba(248, 113, 113, 0.18);
+    --app-info: #67e8f9;
+    --app-info-soft: rgba(103, 232, 249, 0.16);
+    --app-table-stripe: rgba(20, 33, 49, 0.96);
+    --app-table-hover: rgba(14, 165, 233, 0.12);
+    --app-shadow: 0 24px 48px rgba(2, 8, 23, 0.42);
+  }
+
+  html {
+    font-size: 14px;
+  }
+
+  body {
+    @apply font-sans antialiased;
+    background:
+      radial-gradient(circle at top, rgba(56, 189, 248, 0.08), transparent 28rem),
+      linear-gradient(180deg, var(--app-bg-muted) 0%, var(--app-bg) 22rem);
+    @apply text-app-text dark:text-app-dark-text;
+  }
+
+  .dark body {
+    background:
+      radial-gradient(circle at top, rgba(14, 165, 233, 0.12), transparent 26rem),
+      linear-gradient(180deg, #101a29 0%, var(--app-bg) 24rem);
+  }
+
+  a {
+    color: inherit;
+  }
+
+  ::selection {
+    background: rgba(56, 189, 248, 0.24);
+    color: inherit;
+  }
+}
+
+.container {
+  @apply mx-auto w-full max-w-xl px-3 md:max-w-3xl lg:max-w-6xl xl:max-w-7xl 2xl:max-w-8xl;
+}
+
+.row {
+  @apply -mx-3 mt-0 flex flex-wrap *:max-w-full *:px-3;
+}
+
+.app-shell {
+  @apply min-h-screen;
+}
+
+.page-shell {
+  @apply mx-auto w-full max-w-8xl px-4 py-5 sm:px-6 md:px-8 lg:py-8  bg-transparent;
+}
+
+.page-main {
+  @apply flex flex-col gap-5 bg-transparent;
+}
+
+.panel {
+  @apply rounded-2xl backdrop-blur-sm bg-app-panel dark:bg-app-dark-panel border-app-border dark:border-app-dark-border border;
+  box-shadow: var(--app-shadow);
+}
+
+.panel-elevated {
+  @apply bg-app-panel-elevated dark:bg-app-dark-panel-elevated;
+  @apply border-app-border-strong dark:border-app-dark-border-strong border;
+  box-shadow: var(--app-shadow);
+  @apply rounded-2xl;
+}
+
+.panel-muted {
+  @apply bg-app-panel-strong dark:bg-app-dark-panel-strong border-app-border dark:border-app-dark-border border;
+  @apply rounded-xl;
+}
+
+.section-title {
+  @apply text-app-text-secondary dark:text-app-dark-text-secondary;
+  @apply font-mono text-[0.78rem] font-semibold uppercase tracking-[0.22em];
+}
+
+.section-heading {
+  @apply text-app-text dark:text-app-dark-text;
+  @apply text-2xl font-semibold md:text-3xl;
+}
+
+.nav-link {
+  @apply text-app-text-secondary dark:text-app-dark-text-secondary;
+  border: 1px solid transparent;
+  @apply inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition whitespace-nowrap
+}
+
+.nav-link:hover {
+  @apply bg-app-accent-soft dark:bg-app-dark-accent-soft;
+  @apply text-app-text dark:text-app-dark-text;
+}
+
+.nav-link-active {
+  @apply bg-app-accent-soft dark:bg-app-dark-accent-soft;
+  @apply border-app-border-interactive dark:border-app-dark-border-interactive;
+  @apply text-app-text dark:text-app-dark-text;
+}
+
+.tab-link {
+  @apply text-app-text-secondary dark:text-app-dark-text-secondary;
+  border: 1px solid transparent;
+  @apply inline-flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition;
+}
+
+.tab-link:hover {
+  @apply bg-app-accent-soft dark:bg-app-dark-accent-soft;
+  @apply text-app-text dark:text-app-dark-text;
+}
+
+.tab-link-active {
+  @apply bg-app-panel-elevated dark:bg-app-dark-panel-elevated;
+  @apply border-app-border-interactive dark:border-app-dark-border-interactive;
+  @apply text-app-text dark:text-app-dark-text;
+  box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.08);
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-ghost,
+.btn-danger {
+  @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition focus:outline-none;
+}
+
+.btn-primary {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--app-accent) 88%, white 12%), var(--app-accent-strong));
+  color: #f8fbff;
+  border: 1px solid color-mix(in srgb, var(--app-accent) 64%, black 18%);
+}
+
+.btn-primary:hover {
+  filter: brightness(1.04);
+}
+
+.btn-secondary {
+  @apply bg-app-panel-elevated dark:bg-app-dark-panel-elevated;
+  @apply border-app-border-strong dark:border-app-dark-border-strong border;
+  @apply text-app-text dark:text-app-dark-text;
+}
+
+.btn-secondary:hover {
+  @apply bg-app-accent-soft dark:bg-app-dark-accent-soft;
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid transparent;
+  @apply text-app-text-secondary dark:text-app-dark-text-secondary;
+}
+
+.btn-ghost:hover {
+  @apply bg-app-accent-soft dark:bg-app-dark-accent-soft;
+  @apply text-app-text dark:text-app-dark-text;
+}
+
+.btn-danger {
+  @apply bg-app-danger-soft dark:bg-app-dark-danger-soft;
+  @apply border-app-danger dark:border-app-dark-danger border;
+  @apply text-app-danger dark:text-app-dark-danger;
+}
+
+.btn-danger:hover {
+  filter: brightness(1.06);
+}
+
+.metric {
+  @apply text-app-text dark:text-app-dark-text;
+  @apply font-mono text-sm font-semibold;
+}
+
+.metric-muted {
+  @apply text-app-text-muted dark:text-app-dark-text-muted;
+  @apply font-mono text-xs font-medium uppercase tracking-[0.16em];
+}
+
+.status-badge {
+  @apply inline-flex items-center gap-1 rounded-lg px-2.5 py-1 font-mono text-xs font-semibold uppercase tracking-[0.12em];
+}
+
+.status-badge-ac,
+.accepted-result,
+.AC {
+  @apply bg-app-success-soft dark:bg-app-dark-success-soft;
+  @apply text-app-success dark:text-app-dark-success;
+}
+
+.status-badge-wa,
+.wrong-result,
+.WA {
+  @apply bg-app-danger-soft dark:bg-app-dark-danger-soft;
+  @apply text-app-danger dark:text-app-dark-danger;
+}
+
+.status-badge-warn,
+.TLE,
+.MLE,
+.OLE,
+.RTE,
+.runtime-error-result,
+.output-limit-exceeded-result {
+  @apply bg-app-warning-soft dark:bg-app-dark-warning-soft;
+  color: color-mix(in srgb, var(--app-warning) 75%, white 10%);
+}
+
+.status-badge-info,
+.default-result,
+.grade-result,
+.compile-error-result,
+.time-limit-exceeded-result,
+.memory-limit-exceeded-result,
+.internal-error-result {
+  background: var(--app-info-soft);
+  color: var(--app-info);
+}
+
+.table-base {
+  @apply min-w-full border-separate border-spacing-0 overflow-hidden;
+}
+
+.table-base thead tr {
+  background: color-mix(in srgb, var(--app-panel-elevated) 78%, transparent);
+}
+
+.table-base thead th {
+  @apply text-app-text-secondary dark:text-app-dark-text-secondary;
+  border-bottom: 1px solid var(--app-border-strong);
+  @apply px-3 py-3 text-left font-mono text-[0.78rem] font-semibold uppercase tracking-[0.16em];
+}
+
+.table-base tbody tr {
+  background: transparent;
+  border-bottom: 1px solid var(--app-border);
+  @apply transition;
+}
+
+.table-base tbody tr:nth-child(even) {
+  background: var(--app-table-stripe);
+}
+
+.table-base tbody tr:hover {
+  background: var(--app-table-hover);
+}
+
+.table-base tbody td {
+  @apply text-app-text dark:text-app-dark-text;
+  @apply px-3 py-3 align-middle;
+}
+
+.filter-panel {
+  @apply bg-app-panel dark:bg-app-dark-panel;
+  @apply border-app-border dark:border-app-dark-border border;
+  box-shadow: var(--app-shadow);
+  @apply flex flex-col gap-3 rounded-2xl p-4 backdrop-blur-sm;
+}
+
+.input-base,
+.select-base {
+  background: color-mix(in srgb, var(--app-panel-elevated) 88%, transparent);
+  @apply text-app-text dark:text-app-dark-text;
+  @apply border-app-border dark:border-app-dark-border border;
+  @apply block w-full rounded-xl px-3 py-2.5 text-sm shadow-none transition outline-none;
+}
+
+.input-base::placeholder {
+  color: var(--app-text-muted);
+}
+
+.input-base:focus,
+.select-base:focus {
+  @apply border-app-border-interactive dark:border-app-dark-border-interactive;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.12);
+}
+
+.checkbox-base {
+  @apply rounded border-slate-400 text-sky-500;
+}
+
+.info-card {
+  background: color-mix(in srgb, var(--app-panel-elevated) 88%, transparent);
+  @apply border-app-border dark:border-app-dark-border border;
+  @apply rounded-2xl p-4;
+}
+
+.info-grid {
+  @apply grid grid-cols-1 gap-3 md:grid-cols-2;
+}
+
+.code-accent {
+  color: var(--app-accent);
+  @apply font-mono font-semibold;
+}
+
+.inactive_tab {
+  @apply text-app-text-secondary dark:text-app-dark-text-secondary;
+  border: 1px solid transparent;
+  @apply inline-flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition;
+}
+
+.active_tab {
+  @apply bg-app-panel-elevated dark:bg-app-dark-panel-elevated;
+  border: 1px solid var(--app-border-interactive);
+  @apply text-app-text dark:text-app-dark-text;
+  box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.08);
+  @apply inline-flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition;
+}
+
+.btn-default,
+.btn-purple-red,
+.btn-light-red {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--app-accent) 88%, white 12%), var(--app-accent-strong));
+  color: #f8fbff;
+  border: 1px solid color-mix(in srgb, var(--app-accent) 64%, black 18%);
+  background-image: none;
+  box-shadow: none;
+  @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition focus:outline-none;
+}
+
+.floating-label {
+  @apply pointer-events-none absolute top-0 left-0 z-10 h-full origin-top-left transform overflow-hidden whitespace-nowrap border border-transparent text-start text-ellipsis transition-all duration-100 ease-in-out;
+  @apply peer-focus:translate-x-1 peer-focus:-translate-y-2 peer-focus:scale-75 peer-focus:text-slate-500 peer-[:not(:placeholder-shown)]:translate-x-1 peer-[:not(:placeholder-shown)]:-translate-y-2 peer-[:not(:placeholder-shown)]:scale-75 peer-[:not(:placeholder-shown)]:text-slate-500;
+}
+
+.ranking-result-cell {
+  @apply sticky right-0 z-20 size-px border-l border-slate-200/90 bg-white/95 px-0.5 py-1 text-center align-middle shadow-[-10px_0_18px_-18px_rgba(15,23,42,0.35)] backdrop-blur-sm dark:border-slate-700/80 dark:bg-slate-950/95;
+}
+
+.ranking-result-link {
+  @apply flex flex-col items-center gap-1 rounded-xl px-2 py-1 font-semibold text-slate-900 transition hover:bg-blue-50 hover:text-blue-700 dark:text-white dark:hover:bg-slate-800 dark:hover:text-blue-300;
+}
+
+.solving-time {
+  @apply text-[0.58rem] font-medium tracking-[0.04em] text-slate-500 dark:text-slate-400 block;
+}
+
+.solved-problem-color,
+.case-AC {
+  color: var(--app-success);
+}
+
+.unsolved-problem-color,
+.case-WA {
+  color: var(--app-danger);
+}
+
+.attempted-problem-color,
+.partial-score {
+  color: var(--app-warning);
+}
+
+.case-OLE,
+.case-TLE,
+.case-MLE,
+.case-IR {
+  color: var(--app-warning);
+}
+
+.case-RTE {
+  color: var(--app-warning);
+}
+
+.top-pagination-bar {
+  @apply mb-4;
+}
+
+.bottom-pagination-bar {
+  @apply mt-4;
+}
+
+.rating {
+  @apply font-bold;
+}
+
+.rate-none {
+  @apply text-app-text-muted dark:text-app-dark-text-muted;
+}
+
+.rate-newbie {
+  @apply text-newbie;
+}
+
+.rate-amateur {
+  @apply text-amateur;
+}
+
+.rate-expert {
+  @apply text-expert;
+}
+
+.rate-candidate-master {
+  @apply text-candidate-master;
+}
+
+.rate-master {
+  @apply text-master;
+}
+
+.rate-grandmaster {
+  @apply text-grandmaster;
+}
+
+.rate-target {
+  @apply text-target;
+}
+
+.rate-box {
+  @apply w-5;
+}
+
+.rate-box circle {
+  fill: none;
+  stroke: currentColor;
+}
+
+.rate-box path {
+  fill: currentColor;
+  stroke: none;
+}
+
+.rate-box.rate-target circle:last-child {
+  fill: currentColor;
+}
+
+.activity-label {
+  @apply relative rounded-md whitespace-nowrap;
+}
+
+.activity-0 {
+  background: color-mix(in srgb, var(--app-border) 80%, transparent);
+}
+
+.activity-1 {
+  background: rgba(74, 222, 128, 0.38);
+}
+
+.activity-2 {
+  background: rgba(74, 222, 128, 0.56);
+}
+
+.activity-3 {
+  background: rgba(74, 222, 128, 0.74);
+}
+
+.activity-4 {
+  background: rgba(74, 222, 128, 0.92);
+}
+
+.content_title {
+  color: var(--app-accent);
+  @apply cursor-pointer transition hover:opacity-85;
+}
+
+.custom-typography {
+  @apply prose prose-lg max-w-none text-app-text dark:text-app-dark-text;
+  @apply prose-headings:text-app-text prose-headings:dark:text-app-dark-text prose-headings:font-semibold;
+  @apply prose-p:text-app-text prose-p:dark:text-app-dark-text;
+  @apply prose-strong:text-app-text prose-strong:dark:text-app-dark-text prose-strong:font-semibold;
+  @apply prose-li:text-app-text prose-li:dark:text-app-dark-text;
+  @apply prose-a:text-app-accent prose-a:dark:text-app-dark-accent prose-a:font-medium prose-a:no-underline hover:prose-a:opacity-80;
+  @apply prose-code:text-app-text prose-code:dark:text-app-dark-text prose-code:bg-app-accent-soft prose-code:dark:bg-app-dark-accent-soft prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:before:content-none prose-code:after:content-none;
+  @apply prose-pre:bg-app-panel-elevated prose-pre:dark:bg-app-dark-panel-elevated prose-pre:text-app-text prose-pre:dark:text-app-dark-text prose-pre:border prose-pre:border-app-border-strong prose-pre:dark:border-app-dark-border-strong prose-pre:rounded-2xl prose-pre:shadow-none;
+  @apply prose-blockquote:border-l-4 prose-blockquote:border-app-border-interactive prose-blockquote:dark:border-app-dark-border-interactive prose-blockquote:text-app-text-secondary prose-blockquote:dark:text-app-dark-text-secondary;
+  @apply prose-th:text-app-text prose-th:dark:text-app-dark-text prose-th:font-semibold;
+  @apply prose-td:text-app-text prose-td:dark:text-app-dark-text;
+}
+
+.custom-typography .code-copy-wrapper {
+  @apply relative my-6;
+}
+
+.custom-typography .code-copy-wrapper pre {
+  margin: 0;
+}
+
+.custom-typography .code-copy-wrapper pre code {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  color: inherit;
+}
+
+.custom-typography .copy-button {
+  @apply absolute z-10 rounded-lg border px-3 py-1.5 text-xs font-semibold transition;
+  @apply border-app-border-strong bg-app-panel text-app-text hover:opacity-85;
+  top: 0.55rem;
+  right: 0.55rem;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+}
+
+.custom-typography .copy-button:hover {
+  background: color-mix(in srgb, var(--app-accent-soft) 60%, var(--app-panel));
+  border-color: color-mix(in srgb, var(--app-accent) 30%, var(--app-border-strong));
+}
+
+.dark .custom-typography .copy-button {
+  @apply border-app-dark-border-strong bg-app-dark-panel text-app-dark-text;
+}
+
+.dark .custom-typography .copy-button:hover {
+  background: color-mix(in srgb, var(--app-dark-accent-soft) 70%, var(--app-dark-panel));
+  border-color: color-mix(in srgb, var(--app-dark-accent) 35%, var(--app-dark-border-strong));
+}
+
+
+.custom-typography .table {
+  @apply table-fixed;
+  border-color: var(--app-border-strong);
+}
+
+.custom-typography :where(h1, h2, h3, h4) {
+  scroll-margin-top: 5rem;
+}
+
+.custom-typography :where(h2, h3) {
+  border-bottom: 1px solid var(--app-border);
+  padding-bottom: 0.45rem;
+}
+
+.custom-typography :where(hr) {
+  border-color: var(--app-border);
+}
+
+.custom-typography :where(table) {
+  overflow: hidden;
+  border: 1px solid var(--app-border-strong);
+  border-radius: 1rem;
+}
+
+.custom-typography :where(thead tr) {
+  background: color-mix(in srgb, var(--app-panel-elevated) 78%, transparent);
+}
+
+.custom-typography :where(tbody tr:nth-child(even)) {
+  background: var(--app-table-stripe);
+}
+
+.custom-typography :where(tbody tr:hover) {
+  background: var(--app-table-hover);
+}
+
+.dark .custom-typography :where(h2, h3),
+.dark .custom-typography :where(hr),
+.dark .custom-typography :where(table) {
+  border-color: var(--app-dark-border);
+}
+
+.messages {
+  @apply mb-4 flex flex-col gap-2;
+}
+
+.messages li {
+  @apply bg-app-panel dark:bg-app-dark-panel;
+  @apply border-app-border dark:border-app-dark-border border;
+  box-shadow: var(--app-shadow);
+  @apply rounded-xl px-4 py-3 text-sm font-medium backdrop-blur-sm;
+}
+
+.messages li.error {
+  border-color: color-mix(in srgb, var(--app-danger) 45%, transparent);
+  color: var(--app-danger);
+}
+
+.messages li.success {
+  border-color: color-mix(in srgb, var(--app-success) 45%, transparent);
+  color: var(--app-success);
+}
+
+.messages li.warning {
+  border-color: color-mix(in srgb, var(--app-warning) 45%, transparent);
+  color: var(--app-warning);
+}
+
+.messages li.info {
+  border-color: color-mix(in srgb, var(--app-info) 45%, transparent);
+  color: var(--app-info);
+}
