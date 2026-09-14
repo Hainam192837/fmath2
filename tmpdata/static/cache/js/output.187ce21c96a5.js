@@ -1,4 +1,0 @@
-$(function(){var $form=$('form#filter-form');var $search=$('#search');$('#category').select2({placeholder:"Select category"});function prep_form(){$search.prop('disabled',!$search.val());}
-function clean_submit(){prep_form();$form.submit();}
-$search.keypress(function(e){if(e.keyCode==13)
-$('#go').click();});$('#go').click(clean_submit);$('input#full_text, input#hide_solved').click(function(){prep_form();($('<form>').attr('action',window.location.pathname+'?'+$form.serialize()).append($('<input>').attr('type','hidden').attr('name','csrfmiddlewaretoken').attr('value',$.cookie('csrftoken'))).attr('method','POST').appendTo($('body')).submit());});});;
