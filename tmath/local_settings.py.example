@@ -13,11 +13,11 @@
 SECRET_KEY = 'This key is not very secure and you should change it.'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False  # Change to False once you are done with runserver testing.
+DEBUG = True  # Change to False once you are done with runserver testing.
 
 # Uncomment and set to the domain names this site is intended to serve.
 # You must do this once you set DEBUG to False.
-ALLOWED_HOSTS = ['hnpct.io.vn','54.79.169.199','127.0.0.1','localhost']
+ALLOWED_HOSTS = ['YourDomain or IP address here']
 
 # Optional apps that DMOJ can make use of.
 INSTALLED_APPS += (
@@ -88,8 +88,8 @@ STATICFILES_FINDERS += ('compressor.finders.CompressorFinder',)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'huuanhquan219@gmail.com'
-EMAIL_HOST_PASSWORD = 'lpygwpkttvnwcwqp'
+EMAIL_HOST_USER = 'EmailToSendActivationAndErrorMails'
+EMAIL_HOST_PASSWORD = 'YourApplicationPasswordForTheAboveEmail'
 EMAIL_PORT = 587
 
 # To use Mailgun, uncomment this block.
@@ -108,7 +108,7 @@ EMAIL_PORT = 587
 # A tuple of (name, email) pairs that specifies those who will be mailed
 # when the server experiences an error when DEBUG = False.
 ADMINS = (
-    ('HaiNamPCT', 'huuanhquan219@gmail.com'),
+    ('YourName', 'YourEmailAddrToSendErrorsTo'),
 )
 
 # The sender for the aforementioned emails.
@@ -124,7 +124,7 @@ SERVER_EMAIL = 'Fmath'
 # webserver to serve the static files. This is the directory where all the
 # static files DMOJ uses will be collected to.
 # You must configure your webserver to serve this directory as /static/ in production.
-STATIC_ROOT = '/home/ubuntu/tmath/tmpdata/static/'
+STATIC_ROOT = '<static root path example: /home/ubuntu/tmath/tmpdata/static/>'
 
 # URL to access static files.
 STATIC_URL = '/static/'
@@ -173,7 +173,8 @@ EVENT_DAEMON_USE = True
 
 # If you are using the defaults from the guide, it is this:
 EVENT_DAEMON_POST = 'ws://127.0.0.1:15101/'
-EVENT_DAEMON_POST_SECRET = "HaiNamPCTWSEvent"
+EVENT_DAEMON_POST_SECRET = "<secret key for the event server>"
+
 # These are the publicly accessed interface configurations.
 # They should match those used by the script.
 #EVENT_DAEMON_GET = '<public ws:// URL for clients>'
@@ -193,7 +194,7 @@ EVENT_DAEMON_POST_SECRET = "HaiNamPCTWSEvent"
 #EVENT_DAEMON_AMQP_EXCHANGE = '<AMQP exchange to use>'
 
 #Secret key for examclient flutter
-DMOJ_API_JWT_SECRET_KEY = 'tTy9x+5q5HJzeR8/fRu+xNlUDM1sjjWTSh3MukeGKoa/eswcVxM0U+bG4/cDcmC3'
+DMOJ_API_JWT_SECRET_KEY = '<secret key for JWT signing>'
 
 
 ## Celery

@@ -4053,3 +4053,28 @@ INFO 2026-09-10 15:51:21,438 judge_handler HaiNamPCT: Grading has begun on: 348
 INFO 2026-09-10 15:51:21,475 judge_handler HaiNamPCT: 5 test case(s) completed on: 348
 INFO 2026-09-10 15:51:21,484 judge_handler HaiNamPCT: Grading has ended on: 348
 INFO 2026-09-10 15:51:21,484 judge_list Judge available after grading 348: HaiNamPCT
+INFO 2026-09-11 08:54:28,575 judge_list Free judges: 1
+INFO 2026-09-11 08:54:28,575 judge_list Dispatched submission 349 to: HaiNamPCT
+INFO 2026-09-11 08:54:28,581 judge_handler Submission acknowledged: 349
+INFO 2026-09-11 08:54:28,861 judge_handler HaiNamPCT: Submission generated compiler messages: 349
+INFO 2026-09-11 08:54:28,867 judge_handler HaiNamPCT: Grading has begun on: 349
+INFO 2026-09-11 08:54:28,943 judge_handler HaiNamPCT: 7 test case(s) completed on: 349
+INFO 2026-09-11 08:54:29,194 judge_handler HaiNamPCT: 3 test case(s) completed on: 349
+INFO 2026-09-11 08:54:29,445 judge_handler HaiNamPCT: 3 test case(s) completed on: 349
+INFO 2026-09-11 08:54:29,499 judge_handler HaiNamPCT: 7 test case(s) completed on: 349
+INFO 2026-09-11 08:54:29,509 judge_handler HaiNamPCT: Grading has ended on: 349
+INFO 2026-09-11 08:54:29,509 judge_list Judge available after grading 349: HaiNamPCT
+INFO 2026-09-12 06:53:03,078 daemon Exiting due to SIGINT
+INFO 2026-09-12 06:53:32,183 judge_handler Judge connected from: ('127.0.0.1', 52978)
+INFO 2026-09-12 06:53:32,190 judge_handler Judge authenticated: ('127.0.0.1', 52978) (HaiNamPCT)
+INFO 2026-09-12 06:53:36,910 daemon Exiting due to SIGINT
+INFO 2026-09-12 06:54:00,435 judge_handler Judge connected from: ('127.0.0.1', 56450)
+INFO 2026-09-12 06:54:00,438 judge_handler Judge authenticated: ('127.0.0.1', 56450) (HaiNamPCT)
+INFO 2026-09-13 01:12:11,629 judge_list Free judges: 1
+INFO 2026-09-13 01:12:11,629 judge_list Dispatched submission 350 to: HaiNamPCT
+INFO 2026-09-13 01:12:11,635 judge_handler Submission acknowledged: 350
+INFO 2026-09-13 01:12:12,571 judge_handler HaiNamPCT: Submission generated compiler messages: 350
+INFO 2026-09-13 01:12:12,577 judge_handler HaiNamPCT: Grading has begun on: 350
+INFO 2026-09-13 01:12:12,693 judge_handler HaiNamPCT: 16 test case(s) completed on: 350
+INFO 2026-09-13 01:12:12,702 judge_handler HaiNamPCT: Grading has ended on: 350
+INFO 2026-09-13 01:12:12,702 judge_list Judge available after grading 350: HaiNamPCT
