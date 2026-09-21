@@ -30,7 +30,10 @@ SECRET_KEY = "5*9f5q57mqmlz2#f$x1h76&jxy#yortjl1v+l*6hd18$d*yx#0"
 DEBUG = True
 
 ALLOWED_HOSTS = []
-CSRF_TRUSTED_ORIGINS = []
+CSRF_TRUSTED_ORIGINS = [
+    'https://hnpct.io.vn',
+    'https://*.hnpct.io.vn',
+]
 # CSRF_USE_SESSIONS = True
 
 SITE_ID = 1
@@ -652,3 +655,13 @@ try:
         exec(f.read(), globals())
 except IOError:
     pass
+
+# Cho phép cookie session dùng chung cho domain chính và mọi subdomain
+SESSION_COOKIE_DOMAIN = '.hnpct.io.vn'
+SESSION_COOKIE_SECURE = True
+# Nếu có dùng CSRF cookie qua subdomain thì thêm dòng này:
+#CSRF_COOKIE_DOMAIN = '.yourdomain.com'
+
+SESSION_COOKIE_SAMESITE = 'Lax'
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

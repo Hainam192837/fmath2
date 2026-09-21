@@ -20,6 +20,12 @@ def class_view_decorator(function_decorator):
 
     return simple_decorator
 
+from django.http import HttpResponse
+
+def verify_admin(request):
+    if request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser):
+        return HttpResponse(status=200)
+    return HttpResponse(status=403)
 
 def generic_message(request, title, message, status=None):
     return render(

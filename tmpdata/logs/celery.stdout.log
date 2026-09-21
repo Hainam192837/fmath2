@@ -230,3 +230,75 @@ worker: Warm shutdown (MainProcess)
                 .> celery           exchange=celery(direct) key=celery
                 
 
+
+worker: Warm shutdown (MainProcess)
+ 
+ -------------- celery@ip-172-31-8-108 v5.6.3 (recovery)
+--- ***** ----- 
+-- ******* ---- Linux-7.0.0-1012-aws-x86_64-with-glibc2.39 2026-09-19 13:29:49
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         tmath:0x747f40a81a90
+- ** ---------- .> transport:   redis://localhost:6379//
+- ** ---------- .> results:     redis://localhost:6379/
+- *** --- * --- .> concurrency: 2 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+                
+
+
+worker: Warm shutdown (MainProcess)
+ 
+ -------------- celery@ip-172-31-8-108 v5.6.3 (recovery)
+--- ***** ----- 
+-- ******* ---- Linux-7.0.0-1012-aws-x86_64-with-glibc2.39 2026-09-20 14:57:46
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         tmath:0x740b28780ec0
+- ** ---------- .> transport:   redis://localhost:6379//
+- ** ---------- .> results:     redis://localhost:6379/
+- *** --- * --- .> concurrency: 2 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+                
+
+
+worker: Warm shutdown (MainProcess)
+ 
+ -------------- celery@ip-172-31-8-108 v5.6.3 (recovery)
+--- ***** ----- 
+-- ******* ---- Linux-7.0.0-1012-aws-x86_64-with-glibc2.39 2026-09-20 14:57:56
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         tmath:0x72e9d548d160
+- ** ---------- .> transport:   redis://localhost:6379//
+- ** ---------- .> results:     redis://localhost:6379/
+- *** --- * --- .> concurrency: 2 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+                
+
+
+worker: Warm shutdown (MainProcess)
+ 
+ -------------- celery@ip-172-31-8-108 v5.6.3 (recovery)
+--- ***** ----- 
+-- ******* ---- Linux-7.0.0-1012-aws-x86_64-with-glibc2.39 2026-09-20 15:06:11
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         tmath:0x72151fb89370
+- ** ---------- .> transport:   redis://localhost:6379//
+- ** ---------- .> results:     redis://localhost:6379/
+- *** --- * --- .> concurrency: 2 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+                
+

@@ -4078,3 +4078,318 @@ INFO 2026-09-13 01:12:12,577 judge_handler HaiNamPCT: Grading has begun on: 350
 INFO 2026-09-13 01:12:12,693 judge_handler HaiNamPCT: 16 test case(s) completed on: 350
 INFO 2026-09-13 01:12:12,702 judge_handler HaiNamPCT: Grading has ended on: 350
 INFO 2026-09-13 01:12:12,702 judge_list Judge available after grading 350: HaiNamPCT
+INFO 2026-09-16 14:38:46,237 judge_list Free judges: 1
+INFO 2026-09-16 14:38:46,237 judge_list Dispatched submission 351 to: HaiNamPCT
+INFO 2026-09-16 14:38:46,243 judge_handler Submission acknowledged: 351
+INFO 2026-09-16 14:38:47,876 judge_handler HaiNamPCT: Submission generated compiler messages: 351
+INFO 2026-09-16 14:38:47,882 judge_handler HaiNamPCT: Grading has begun on: 351
+INFO 2026-09-16 14:38:47,891 judge_handler HaiNamPCT: 1 test case(s) completed on: 351
+INFO 2026-09-16 14:38:47,898 judge_handler HaiNamPCT: Grading has ended on: 351
+INFO 2026-09-16 14:38:47,898 judge_list Judge available after grading 351: HaiNamPCT
+INFO 2026-09-16 14:41:00,169 judge_list Free judges: 1
+INFO 2026-09-16 14:41:00,169 judge_list Dispatched submission 352 to: HaiNamPCT
+INFO 2026-09-16 14:41:00,175 judge_handler Submission acknowledged: 352
+INFO 2026-09-16 14:41:00,484 judge_handler HaiNamPCT: Submission generated compiler messages: 352
+INFO 2026-09-16 14:41:00,491 judge_handler HaiNamPCT: Grading has begun on: 352
+INFO 2026-09-16 14:41:00,535 judge_handler HaiNamPCT: 2 test case(s) completed on: 352
+INFO 2026-09-16 14:41:00,752 judge_handler HaiNamPCT: 18 test case(s) completed on: 352
+INFO 2026-09-16 14:41:00,763 judge_handler HaiNamPCT: Grading has ended on: 352
+INFO 2026-09-16 14:41:00,764 judge_list Judge available after grading 352: HaiNamPCT
+INFO 2026-09-16 14:41:40,672 judge_list Free judges: 1
+INFO 2026-09-16 14:41:40,672 judge_list Dispatched submission 353 to: HaiNamPCT
+INFO 2026-09-16 14:41:40,677 judge_handler Submission acknowledged: 353
+INFO 2026-09-16 14:41:40,952 judge_handler HaiNamPCT: Submission generated compiler messages: 353
+INFO 2026-09-16 14:41:40,958 judge_handler HaiNamPCT: Grading has begun on: 353
+INFO 2026-09-16 14:41:41,065 judge_handler HaiNamPCT: 14 test case(s) completed on: 353
+INFO 2026-09-16 14:41:41,106 judge_handler HaiNamPCT: 6 test case(s) completed on: 353
+INFO 2026-09-16 14:41:41,115 judge_handler HaiNamPCT: Grading has ended on: 353
+INFO 2026-09-16 14:41:41,115 judge_list Judge available after grading 353: HaiNamPCT
+INFO 2026-09-16 14:41:57,721 judge_list Free judges: 1
+INFO 2026-09-16 14:41:57,721 judge_list Dispatched submission 354 to: HaiNamPCT
+INFO 2026-09-16 14:41:57,727 judge_handler Submission acknowledged: 354
+INFO 2026-09-16 14:41:58,038 judge_handler HaiNamPCT: Submission generated compiler messages: 354
+INFO 2026-09-16 14:41:58,045 judge_handler HaiNamPCT: Grading has begun on: 354
+INFO 2026-09-16 14:41:58,077 judge_handler HaiNamPCT: 4 test case(s) completed on: 354
+INFO 2026-09-16 14:41:58,260 judge_handler HaiNamPCT: 16 test case(s) completed on: 354
+INFO 2026-09-16 14:41:58,270 judge_handler HaiNamPCT: Grading has ended on: 354
+INFO 2026-09-16 14:41:58,270 judge_list Judge available after grading 354: HaiNamPCT
+INFO 2026-09-16 14:42:42,202 judge_list Free judges: 1
+INFO 2026-09-16 14:42:42,203 judge_list Dispatched submission 355 to: HaiNamPCT
+INFO 2026-09-16 14:42:42,208 judge_handler Submission acknowledged: 355
+INFO 2026-09-16 14:42:42,498 judge_handler HaiNamPCT: Submission generated compiler messages: 355
+INFO 2026-09-16 14:42:42,504 judge_handler HaiNamPCT: Grading has begun on: 355
+INFO 2026-09-16 14:42:42,607 judge_handler HaiNamPCT: 4 test case(s) completed on: 355
+INFO 2026-09-16 14:42:42,859 judge_handler HaiNamPCT: 6 test case(s) completed on: 355
+INFO 2026-09-16 14:42:43,006 judge_handler HaiNamPCT: 10 test case(s) completed on: 355
+INFO 2026-09-16 14:42:43,016 judge_handler HaiNamPCT: Grading has ended on: 355
+INFO 2026-09-16 14:42:43,016 judge_list Judge available after grading 355: HaiNamPCT
+INFO 2026-09-16 14:43:08,097 judge_list Free judges: 1
+INFO 2026-09-16 14:43:08,098 judge_list Dispatched submission 356 to: HaiNamPCT
+INFO 2026-09-16 14:43:08,103 judge_handler Submission acknowledged: 356
+INFO 2026-09-16 14:43:08,470 judge_handler HaiNamPCT: Submission generated compiler messages: 356
+INFO 2026-09-16 14:43:08,477 judge_handler HaiNamPCT: Grading has begun on: 356
+INFO 2026-09-16 14:43:08,625 judge_handler HaiNamPCT: 10 test case(s) completed on: 356
+INFO 2026-09-16 14:43:08,786 judge_handler HaiNamPCT: 10 test case(s) completed on: 356
+INFO 2026-09-16 14:43:08,795 judge_handler HaiNamPCT: Grading has ended on: 356
+INFO 2026-09-16 14:43:08,796 judge_list Judge available after grading 356: HaiNamPCT
+INFO 2026-09-19 09:50:38,771 daemon Exiting due to SIGINT
+INFO 2026-09-19 13:30:23,789 judge_handler Judge connected from: ('127.0.0.1', 49946)
+INFO 2026-09-19 13:30:23,793 judge_handler Judge authenticated: ('127.0.0.1', 49946) (HaiNamPCT)
+INFO 2026-09-19 13:34:58,516 judge_list Free judges: 1
+INFO 2026-09-19 13:34:58,516 judge_list Dispatched submission 357 to: HaiNamPCT
+INFO 2026-09-19 13:34:58,523 judge_handler Submission acknowledged: 357
+INFO 2026-09-19 13:34:59,251 judge_handler HaiNamPCT: Submission generated compiler messages: 357
+INFO 2026-09-19 13:34:59,257 judge_handler HaiNamPCT: Grading has begun on: 357
+INFO 2026-09-19 13:34:59,363 judge_handler HaiNamPCT: 16 test case(s) completed on: 357
+INFO 2026-09-19 13:34:59,374 judge_handler HaiNamPCT: Grading has ended on: 357
+INFO 2026-09-19 13:34:59,374 judge_list Judge available after grading 357: HaiNamPCT
+INFO 2026-09-19 15:03:56,161 judge_handler HaiNamPCT: Updated problem list
+INFO 2026-09-19 15:04:06,687 judge_handler HaiNamPCT: Updated problem list
+INFO 2026-09-19 15:04:44,238 judge_list Free judges: 1
+INFO 2026-09-19 15:04:44,238 judge_list Dispatched submission 358 to: HaiNamPCT
+INFO 2026-09-19 15:04:44,244 judge_handler Submission acknowledged: 358
+INFO 2026-09-19 15:04:45,560 judge_handler HaiNamPCT: Submission generated compiler messages: 358
+INFO 2026-09-19 15:04:45,569 judge_handler HaiNamPCT: Grading has begun on: 358
+INFO 2026-09-19 15:04:45,633 judge_handler HaiNamPCT: 2 test case(s) completed on: 358
+INFO 2026-09-19 15:04:45,883 judge_handler HaiNamPCT: 24 test case(s) completed on: 358
+INFO 2026-09-19 15:04:46,134 judge_handler HaiNamPCT: 31 test case(s) completed on: 358
+INFO 2026-09-19 15:04:46,384 judge_handler HaiNamPCT: 13 test case(s) completed on: 358
+INFO 2026-09-19 15:04:46,635 judge_handler HaiNamPCT: 2 test case(s) completed on: 358
+INFO 2026-09-19 15:04:46,886 judge_handler HaiNamPCT: 2 test case(s) completed on: 358
+INFO 2026-09-19 15:04:47,136 judge_handler HaiNamPCT: 3 test case(s) completed on: 358
+INFO 2026-09-19 15:04:47,388 judge_handler HaiNamPCT: 3 test case(s) completed on: 358
+INFO 2026-09-19 15:04:47,638 judge_handler HaiNamPCT: 2 test case(s) completed on: 358
+INFO 2026-09-19 15:04:47,888 judge_handler HaiNamPCT: 3 test case(s) completed on: 358
+INFO 2026-09-19 15:04:48,139 judge_handler HaiNamPCT: 2 test case(s) completed on: 358
+INFO 2026-09-19 15:04:48,389 judge_handler HaiNamPCT: 3 test case(s) completed on: 358
+INFO 2026-09-19 15:04:48,639 judge_handler HaiNamPCT: 2 test case(s) completed on: 358
+INFO 2026-09-19 15:04:48,890 judge_handler HaiNamPCT: 2 test case(s) completed on: 358
+INFO 2026-09-19 15:04:49,140 judge_handler HaiNamPCT: 3 test case(s) completed on: 358
+INFO 2026-09-19 15:04:49,390 judge_handler HaiNamPCT: 2 test case(s) completed on: 358
+INFO 2026-09-19 15:04:49,455 judge_handler HaiNamPCT: 1 test case(s) completed on: 358
+INFO 2026-09-19 15:04:49,464 judge_handler HaiNamPCT: Grading has ended on: 358
+INFO 2026-09-19 15:04:49,465 judge_list Judge available after grading 358: HaiNamPCT
+INFO 2026-09-19 15:05:15,740 judge_list Free judges: 1
+INFO 2026-09-19 15:05:15,740 judge_list Dispatched submission 359 to: HaiNamPCT
+INFO 2026-09-19 15:05:15,745 judge_handler Submission acknowledged: 359
+INFO 2026-09-19 15:05:15,955 judge_handler HaiNamPCT: Submission failed to compile: 359
+INFO 2026-09-19 15:05:15,956 judge_list Judge available after grading 359: HaiNamPCT
+INFO 2026-09-19 15:05:54,317 judge_list Free judges: 1
+INFO 2026-09-19 15:05:54,318 judge_list Dispatched submission 360 to: HaiNamPCT
+INFO 2026-09-19 15:05:54,323 judge_handler Submission acknowledged: 360
+INFO 2026-09-19 15:05:54,644 judge_handler HaiNamPCT: Submission generated compiler messages: 360
+INFO 2026-09-19 15:05:54,650 judge_handler HaiNamPCT: Grading has begun on: 360
+INFO 2026-09-19 15:05:54,678 judge_handler HaiNamPCT: 3 test case(s) completed on: 360
+INFO 2026-09-19 15:05:54,929 judge_handler HaiNamPCT: 31 test case(s) completed on: 360
+INFO 2026-09-19 15:05:55,179 judge_handler HaiNamPCT: 30 test case(s) completed on: 360
+INFO 2026-09-19 15:05:55,430 judge_handler HaiNamPCT: 32 test case(s) completed on: 360
+INFO 2026-09-19 15:05:55,464 judge_handler HaiNamPCT: 4 test case(s) completed on: 360
+INFO 2026-09-19 15:05:55,472 judge_handler HaiNamPCT: Grading has ended on: 360
+INFO 2026-09-19 15:05:55,472 judge_list Judge available after grading 360: HaiNamPCT
+INFO 2026-09-19 15:15:13,695 judge_list Free judges: 1
+INFO 2026-09-19 15:15:13,695 judge_list Dispatched submission 361 to: HaiNamPCT
+INFO 2026-09-19 15:15:13,701 judge_handler Submission acknowledged: 361
+INFO 2026-09-19 15:15:14,010 judge_handler HaiNamPCT: Submission generated compiler messages: 361
+INFO 2026-09-19 15:15:14,016 judge_handler HaiNamPCT: Grading has begun on: 361
+INFO 2026-09-19 15:15:14,255 judge_handler HaiNamPCT: 29 test case(s) completed on: 361
+INFO 2026-09-19 15:15:14,506 judge_handler HaiNamPCT: 31 test case(s) completed on: 361
+INFO 2026-09-19 15:15:14,756 judge_handler HaiNamPCT: 30 test case(s) completed on: 361
+INFO 2026-09-19 15:15:14,832 judge_handler HaiNamPCT: 10 test case(s) completed on: 361
+INFO 2026-09-19 15:15:14,842 judge_handler HaiNamPCT: Grading has ended on: 361
+INFO 2026-09-19 15:15:14,843 judge_list Judge available after grading 361: HaiNamPCT
+INFO 2026-09-19 15:17:41,335 judge_list Free judges: 1
+INFO 2026-09-19 15:17:41,335 judge_list Dispatched submission 362 to: HaiNamPCT
+INFO 2026-09-19 15:17:41,341 judge_handler Submission acknowledged: 362
+INFO 2026-09-19 15:17:41,652 judge_handler HaiNamPCT: Submission generated compiler messages: 362
+INFO 2026-09-19 15:17:41,662 judge_handler HaiNamPCT: Grading has begun on: 362
+INFO 2026-09-19 15:17:41,845 judge_handler HaiNamPCT: 22 test case(s) completed on: 362
+INFO 2026-09-19 15:17:42,096 judge_handler HaiNamPCT: 32 test case(s) completed on: 362
+INFO 2026-09-19 15:17:42,347 judge_handler HaiNamPCT: 30 test case(s) completed on: 362
+INFO 2026-09-19 15:17:42,477 judge_handler HaiNamPCT: 16 test case(s) completed on: 362
+INFO 2026-09-19 15:17:42,487 judge_handler HaiNamPCT: Grading has ended on: 362
+INFO 2026-09-19 15:17:42,488 judge_list Judge available after grading 362: HaiNamPCT
+INFO 2026-09-19 15:32:33,496 judge_list Free judges: 1
+INFO 2026-09-19 15:32:33,496 judge_list Dispatched submission 363 to: HaiNamPCT
+INFO 2026-09-19 15:32:33,504 judge_handler Submission acknowledged: 363
+INFO 2026-09-19 15:32:33,829 judge_handler HaiNamPCT: Submission generated compiler messages: 363
+INFO 2026-09-19 15:32:33,842 judge_handler HaiNamPCT: Grading has begun on: 363
+INFO 2026-09-19 15:32:33,877 judge_handler HaiNamPCT: 3 test case(s) completed on: 363
+INFO 2026-09-19 15:32:34,128 judge_handler HaiNamPCT: 29 test case(s) completed on: 363
+INFO 2026-09-19 15:32:34,378 judge_handler HaiNamPCT: 29 test case(s) completed on: 363
+INFO 2026-09-19 15:32:34,629 judge_handler HaiNamPCT: 31 test case(s) completed on: 363
+INFO 2026-09-19 15:32:34,692 judge_handler HaiNamPCT: 8 test case(s) completed on: 363
+INFO 2026-09-19 15:32:34,702 judge_handler HaiNamPCT: Grading has ended on: 363
+INFO 2026-09-19 15:32:34,702 judge_list Judge available after grading 363: HaiNamPCT
+INFO 2026-09-20 01:40:22,635 judge_list Free judges: 1
+INFO 2026-09-20 01:40:22,635 judge_list Dispatched submission 364 to: HaiNamPCT
+INFO 2026-09-20 01:40:22,640 judge_handler Submission acknowledged: 364
+INFO 2026-09-20 01:40:23,118 judge_handler HaiNamPCT: Submission generated compiler messages: 364
+INFO 2026-09-20 01:40:23,124 judge_handler HaiNamPCT: Grading has begun on: 364
+INFO 2026-09-20 01:40:23,260 judge_handler HaiNamPCT: 20 test case(s) completed on: 364
+INFO 2026-09-20 01:40:23,270 judge_handler HaiNamPCT: Grading has ended on: 364
+INFO 2026-09-20 01:40:23,270 judge_list Judge available after grading 364: HaiNamPCT
+INFO 2026-09-20 01:41:29,082 judge_list Free judges: 1
+INFO 2026-09-20 01:41:29,082 judge_list Dispatched submission 365 to: HaiNamPCT
+INFO 2026-09-20 01:41:29,087 judge_handler Submission acknowledged: 365
+INFO 2026-09-20 01:41:29,586 judge_handler HaiNamPCT: Submission generated compiler messages: 365
+INFO 2026-09-20 01:41:29,593 judge_handler HaiNamPCT: Grading has begun on: 365
+INFO 2026-09-20 01:41:29,659 judge_handler HaiNamPCT: 5 test case(s) completed on: 365
+INFO 2026-09-20 01:41:29,911 judge_handler HaiNamPCT: 7 test case(s) completed on: 365
+INFO 2026-09-20 01:41:29,978 judge_handler HaiNamPCT: 8 test case(s) completed on: 365
+INFO 2026-09-20 01:41:29,987 judge_handler HaiNamPCT: Grading has ended on: 365
+INFO 2026-09-20 01:41:29,987 judge_list Judge available after grading 365: HaiNamPCT
+INFO 2026-09-20 01:43:12,837 judge_list Free judges: 1
+INFO 2026-09-20 01:43:12,837 judge_list Dispatched submission 366 to: HaiNamPCT
+INFO 2026-09-20 01:43:12,842 judge_handler Submission acknowledged: 366
+INFO 2026-09-20 01:43:13,463 judge_handler HaiNamPCT: Submission generated compiler messages: 366
+INFO 2026-09-20 01:43:13,469 judge_handler HaiNamPCT: Grading has begun on: 366
+INFO 2026-09-20 01:43:13,725 judge_handler HaiNamPCT: 12 test case(s) completed on: 366
+INFO 2026-09-20 01:43:13,828 judge_handler HaiNamPCT: 8 test case(s) completed on: 366
+INFO 2026-09-20 01:43:13,837 judge_handler HaiNamPCT: Grading has ended on: 366
+INFO 2026-09-20 01:43:13,837 judge_list Judge available after grading 366: HaiNamPCT
+INFO 2026-09-20 01:54:22,552 judge_list Free judges: 1
+INFO 2026-09-20 01:54:22,553 judge_list Dispatched submission 367 to: HaiNamPCT
+INFO 2026-09-20 01:54:22,558 judge_handler Submission acknowledged: 367
+INFO 2026-09-20 01:54:23,044 judge_handler HaiNamPCT: Submission generated compiler messages: 367
+INFO 2026-09-20 01:54:23,050 judge_handler HaiNamPCT: Grading has begun on: 367
+INFO 2026-09-20 01:54:23,133 judge_handler HaiNamPCT: 12 test case(s) completed on: 367
+INFO 2026-09-20 01:54:23,383 judge_handler HaiNamPCT: 21 test case(s) completed on: 367
+INFO 2026-09-20 01:54:23,634 judge_handler HaiNamPCT: 9 test case(s) completed on: 367
+INFO 2026-09-20 01:54:23,795 judge_handler HaiNamPCT: 8 test case(s) completed on: 367
+INFO 2026-09-20 01:54:23,805 judge_handler HaiNamPCT: Grading has ended on: 367
+INFO 2026-09-20 01:54:23,805 judge_list Judge available after grading 367: HaiNamPCT
+INFO 2026-09-20 01:55:10,791 judge_list Free judges: 1
+INFO 2026-09-20 01:55:10,791 judge_list Dispatched submission 368 to: HaiNamPCT
+INFO 2026-09-20 01:55:10,796 judge_handler Submission acknowledged: 368
+INFO 2026-09-20 01:55:11,292 judge_handler HaiNamPCT: Submission generated compiler messages: 368
+INFO 2026-09-20 01:55:11,299 judge_handler HaiNamPCT: Grading has begun on: 368
+INFO 2026-09-20 01:55:11,412 judge_handler HaiNamPCT: 16 test case(s) completed on: 368
+INFO 2026-09-20 01:55:11,663 judge_handler HaiNamPCT: 18 test case(s) completed on: 368
+INFO 2026-09-20 01:55:11,913 judge_handler HaiNamPCT: 8 test case(s) completed on: 368
+INFO 2026-09-20 01:55:12,067 judge_handler HaiNamPCT: 8 test case(s) completed on: 368
+INFO 2026-09-20 01:55:12,077 judge_handler HaiNamPCT: Grading has ended on: 368
+INFO 2026-09-20 01:55:12,077 judge_list Judge available after grading 368: HaiNamPCT
+INFO 2026-09-20 01:56:11,313 judge_list Free judges: 1
+INFO 2026-09-20 01:56:11,314 judge_list Dispatched submission 369 to: HaiNamPCT
+INFO 2026-09-20 01:56:11,320 judge_handler Submission acknowledged: 369
+INFO 2026-09-20 01:56:11,757 judge_handler HaiNamPCT: Submission generated compiler messages: 369
+INFO 2026-09-20 01:56:11,764 judge_handler HaiNamPCT: Grading has begun on: 369
+INFO 2026-09-20 01:56:11,806 judge_handler HaiNamPCT: 3 test case(s) completed on: 369
+INFO 2026-09-20 01:56:11,815 judge_handler HaiNamPCT: Grading has ended on: 369
+INFO 2026-09-20 01:56:11,815 judge_list Judge available after grading 369: HaiNamPCT
+INFO 2026-09-20 01:56:31,400 judge_list Free judges: 1
+INFO 2026-09-20 01:56:31,400 judge_list Dispatched submission 370 to: HaiNamPCT
+INFO 2026-09-20 01:56:31,405 judge_handler Submission acknowledged: 370
+INFO 2026-09-20 01:56:31,849 judge_handler HaiNamPCT: Submission generated compiler messages: 370
+INFO 2026-09-20 01:56:31,855 judge_handler HaiNamPCT: Grading has begun on: 370
+INFO 2026-09-20 01:56:31,899 judge_handler HaiNamPCT: 3 test case(s) completed on: 370
+INFO 2026-09-20 01:56:31,907 judge_handler HaiNamPCT: Grading has ended on: 370
+INFO 2026-09-20 01:56:31,907 judge_list Judge available after grading 370: HaiNamPCT
+INFO 2026-09-20 01:57:25,574 judge_list Free judges: 1
+INFO 2026-09-20 01:57:25,574 judge_list Dispatched submission 371 to: HaiNamPCT
+INFO 2026-09-20 01:57:25,579 judge_handler Submission acknowledged: 371
+INFO 2026-09-20 01:57:26,068 judge_handler HaiNamPCT: Submission generated compiler messages: 371
+INFO 2026-09-20 01:57:26,074 judge_handler HaiNamPCT: Grading has begun on: 371
+INFO 2026-09-20 01:57:26,245 judge_handler HaiNamPCT: 16 test case(s) completed on: 371
+INFO 2026-09-20 01:57:26,275 judge_handler HaiNamPCT: 4 test case(s) completed on: 371
+INFO 2026-09-20 01:57:26,283 judge_handler HaiNamPCT: Grading has ended on: 371
+INFO 2026-09-20 01:57:26,283 judge_list Judge available after grading 371: HaiNamPCT
+INFO 2026-09-20 01:58:01,991 judge_list Free judges: 1
+INFO 2026-09-20 01:58:01,991 judge_list Dispatched submission 372 to: HaiNamPCT
+INFO 2026-09-20 01:58:01,997 judge_handler Submission acknowledged: 372
+INFO 2026-09-20 01:58:02,445 judge_handler HaiNamPCT: Submission generated compiler messages: 372
+INFO 2026-09-20 01:58:02,451 judge_handler HaiNamPCT: Grading has begun on: 372
+INFO 2026-09-20 01:58:02,517 judge_handler HaiNamPCT: 9 test case(s) completed on: 372
+INFO 2026-09-20 01:58:02,587 judge_handler HaiNamPCT: 11 test case(s) completed on: 372
+INFO 2026-09-20 01:58:02,597 judge_handler HaiNamPCT: Grading has ended on: 372
+INFO 2026-09-20 01:58:02,597 judge_list Judge available after grading 372: HaiNamPCT
+INFO 2026-09-20 01:58:43,938 judge_list Free judges: 1
+INFO 2026-09-20 01:58:43,938 judge_list Dispatched submission 373 to: HaiNamPCT
+INFO 2026-09-20 01:58:43,944 judge_handler Submission acknowledged: 373
+INFO 2026-09-20 01:58:44,463 judge_handler HaiNamPCT: Submission generated compiler messages: 373
+INFO 2026-09-20 01:58:44,471 judge_handler HaiNamPCT: Grading has begun on: 373
+INFO 2026-09-20 01:58:44,542 judge_handler HaiNamPCT: 10 test case(s) completed on: 373
+INFO 2026-09-20 01:58:44,793 judge_handler HaiNamPCT: 27 test case(s) completed on: 373
+INFO 2026-09-20 01:58:45,044 judge_handler HaiNamPCT: 4 test case(s) completed on: 373
+INFO 2026-09-20 01:58:45,291 judge_handler HaiNamPCT: 9 test case(s) completed on: 373
+INFO 2026-09-20 01:58:45,300 judge_handler HaiNamPCT: Grading has ended on: 373
+INFO 2026-09-20 01:58:45,300 judge_list Judge available after grading 373: HaiNamPCT
+INFO 2026-09-20 02:05:50,849 judge_list Free judges: 1
+INFO 2026-09-20 02:05:50,849 judge_list Dispatched submission 374 to: HaiNamPCT
+INFO 2026-09-20 02:05:50,854 judge_handler Submission acknowledged: 374
+INFO 2026-09-20 02:05:52,668 judge_handler HaiNamPCT: Submission generated compiler messages: 374
+INFO 2026-09-20 02:05:52,673 judge_handler HaiNamPCT: Grading has begun on: 374
+INFO 2026-09-20 02:05:52,807 judge_handler HaiNamPCT: 19 test case(s) completed on: 374
+INFO 2026-09-20 02:05:53,057 judge_handler HaiNamPCT: 37 test case(s) completed on: 374
+INFO 2026-09-20 02:05:53,308 judge_handler HaiNamPCT: 37 test case(s) completed on: 374
+INFO 2026-09-20 02:05:53,354 judge_handler HaiNamPCT: 7 test case(s) completed on: 374
+INFO 2026-09-20 02:05:53,363 judge_handler HaiNamPCT: Grading has ended on: 374
+INFO 2026-09-20 02:05:53,363 judge_list Judge available after grading 374: HaiNamPCT
+INFO 2026-09-20 02:06:16,516 judge_list Free judges: 1
+INFO 2026-09-20 02:06:16,516 judge_list Dispatched submission 362 to: HaiNamPCT
+INFO 2026-09-20 02:06:16,521 judge_handler Submission acknowledged: 362
+INFO 2026-09-20 02:06:16,854 judge_handler HaiNamPCT: Submission generated compiler messages: 362
+INFO 2026-09-20 02:06:16,859 judge_handler HaiNamPCT: Grading has begun on: 362
+INFO 2026-09-20 02:06:17,073 judge_handler HaiNamPCT: 23 test case(s) completed on: 362
+INFO 2026-09-20 02:06:17,323 judge_handler HaiNamPCT: 28 test case(s) completed on: 362
+INFO 2026-09-20 02:06:17,574 judge_handler HaiNamPCT: 28 test case(s) completed on: 362
+INFO 2026-09-20 02:06:17,762 judge_handler HaiNamPCT: 21 test case(s) completed on: 362
+INFO 2026-09-20 02:06:17,772 judge_handler HaiNamPCT: Grading has ended on: 362
+INFO 2026-09-20 02:06:17,772 judge_list Judge available after grading 362: HaiNamPCT
+INFO 2026-09-20 02:06:35,194 judge_list Free judges: 1
+INFO 2026-09-20 02:06:35,194 judge_list Dispatched submission 375 to: HaiNamPCT
+INFO 2026-09-20 02:06:35,200 judge_handler Submission acknowledged: 375
+INFO 2026-09-20 02:06:35,663 judge_handler HaiNamPCT: Submission generated compiler messages: 375
+INFO 2026-09-20 02:06:35,669 judge_handler HaiNamPCT: Grading has begun on: 375
+INFO 2026-09-20 02:06:35,836 judge_handler HaiNamPCT: 19 test case(s) completed on: 375
+INFO 2026-09-20 02:06:36,086 judge_handler HaiNamPCT: 30 test case(s) completed on: 375
+INFO 2026-09-20 02:06:36,337 judge_handler HaiNamPCT: 30 test case(s) completed on: 375
+INFO 2026-09-20 02:06:36,503 judge_handler HaiNamPCT: 21 test case(s) completed on: 375
+INFO 2026-09-20 02:06:36,513 judge_handler HaiNamPCT: Grading has ended on: 375
+INFO 2026-09-20 02:06:36,513 judge_list Judge available after grading 375: HaiNamPCT
+INFO 2026-09-20 02:10:15,778 judge_list Free judges: 1
+INFO 2026-09-20 02:10:15,778 judge_list Dispatched submission 376 to: HaiNamPCT
+INFO 2026-09-20 02:10:15,783 judge_handler Submission acknowledged: 376
+INFO 2026-09-20 02:10:16,305 judge_handler HaiNamPCT: Submission generated compiler messages: 376
+INFO 2026-09-20 02:10:16,311 judge_handler HaiNamPCT: Grading has begun on: 376
+INFO 2026-09-20 02:10:16,466 judge_handler HaiNamPCT: 20 test case(s) completed on: 376
+INFO 2026-09-20 02:10:16,717 judge_handler HaiNamPCT: 31 test case(s) completed on: 376
+INFO 2026-09-20 02:10:16,967 judge_handler HaiNamPCT: 21 test case(s) completed on: 376
+INFO 2026-09-20 02:10:17,218 judge_handler HaiNamPCT: 15 test case(s) completed on: 376
+INFO 2026-09-20 02:10:17,468 judge_handler HaiNamPCT: 11 test case(s) completed on: 376
+INFO 2026-09-20 02:10:17,497 judge_handler HaiNamPCT: 2 test case(s) completed on: 376
+INFO 2026-09-20 02:10:17,506 judge_handler HaiNamPCT: Grading has ended on: 376
+INFO 2026-09-20 02:10:17,506 judge_list Judge available after grading 376: HaiNamPCT
+INFO 2026-09-20 03:35:59,988 judge_list Free judges: 1
+INFO 2026-09-20 03:35:59,988 judge_list Dispatched submission 377 to: HaiNamPCT
+INFO 2026-09-20 03:35:59,993 judge_handler Submission acknowledged: 377
+INFO 2026-09-20 03:36:00,588 judge_handler HaiNamPCT: Submission generated compiler messages: 377
+INFO 2026-09-20 03:36:00,593 judge_handler HaiNamPCT: Grading has begun on: 377
+INFO 2026-09-20 03:36:00,612 judge_handler HaiNamPCT: 2 test case(s) completed on: 377
+INFO 2026-09-20 03:36:00,735 judge_handler HaiNamPCT: 18 test case(s) completed on: 377
+INFO 2026-09-20 03:36:00,744 judge_handler HaiNamPCT: Grading has ended on: 377
+INFO 2026-09-20 03:36:00,744 judge_list Judge available after grading 377: HaiNamPCT
+INFO 2026-09-20 04:18:31,735 judge_list Free judges: 1
+INFO 2026-09-20 04:18:31,735 judge_list Dispatched submission 378 to: HaiNamPCT
+INFO 2026-09-20 04:18:31,740 judge_handler Submission acknowledged: 378
+INFO 2026-09-20 04:18:32,008 judge_handler HaiNamPCT: Submission generated compiler messages: 378
+INFO 2026-09-20 04:18:32,015 judge_handler HaiNamPCT: Grading has begun on: 378
+INFO 2026-09-20 04:18:32,158 judge_handler HaiNamPCT: 20 test case(s) completed on: 378
+INFO 2026-09-20 04:18:32,169 judge_handler HaiNamPCT: Grading has ended on: 378
+INFO 2026-09-20 04:18:32,169 judge_list Judge available after grading 378: HaiNamPCT
+INFO 2026-09-20 04:23:21,921 judge_list Free judges: 1
+INFO 2026-09-20 04:23:21,921 judge_list Dispatched submission 379 to: HaiNamPCT
+INFO 2026-09-20 04:23:21,926 judge_handler Submission acknowledged: 379
+INFO 2026-09-20 04:23:22,289 judge_handler HaiNamPCT: Submission generated compiler messages: 379
+INFO 2026-09-20 04:23:22,294 judge_handler HaiNamPCT: Grading has begun on: 379
+INFO 2026-09-20 04:23:22,338 judge_handler HaiNamPCT: 6 test case(s) completed on: 379
+INFO 2026-09-20 04:23:22,434 judge_handler HaiNamPCT: 14 test case(s) completed on: 379
+INFO 2026-09-20 04:23:22,444 judge_handler HaiNamPCT: Grading has ended on: 379
+INFO 2026-09-20 04:23:22,444 judge_list Judge available after grading 379: HaiNamPCT
+INFO 2026-09-20 14:54:37,289 daemon Exiting due to SIGINT
+INFO 2026-09-20 14:57:48,516 daemon Exiting due to SIGINT
+INFO 2026-09-20 14:57:56,967 judge_handler Judge connected from: ('127.0.0.1', 44976)
+INFO 2026-09-20 14:57:56,970 judge_handler Judge authenticated: ('127.0.0.1', 44976) (HaiNamPCT)
+INFO 2026-09-20 15:05:55,881 daemon Exiting due to SIGINT
+INFO 2026-09-20 15:07:06,143 judge_handler Judge connected from: ('127.0.0.1', 36712)
+INFO 2026-09-20 15:07:06,146 judge_handler Judge authenticated: ('127.0.0.1', 36712) (HaiNamPCT)

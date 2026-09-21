@@ -210,6 +210,16 @@ def paged_list_view(view, name, template=None):
         ]
     )
 
+from django.http import HttpResponse
+
+def verify_admin(request):
+    try:
+        user = getattr(request, 'user', None)
+        if user and user.is_authenticated and (user.is_staff or user.is_superuser):
+            return HttpResponse(status=200)
+    except Exception:
+        pass
+    return HttpResponse(status=403)
 
 urlpatterns = [
     # path('', blog.IndexView.as_view()),
@@ -737,6 +747,7 @@ urlpatterns = [
         ),
     ),
     path("modules/", user.ListModule.as_view(), name="list_module"),
+    path('api/verify-admin/', verify_admin, name='verify_admin'),
 ]
 
 favicon_paths = [
