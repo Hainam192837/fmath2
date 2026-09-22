@@ -1,0 +1,242 @@
+{% extends "common-content.html" %}
+
+{% block content_media %}
+    <style>
+        .contest-problem-meta .info-card {
+            min-height: 100%;
+        }
+
+        .contest-clarifications {
+            margin-top: 1rem;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            border-radius: 1.25rem;
+            background: rgba(255, 255, 255, 0.96);
+            box-shadow: 0 16px 40px rgba(15, 23, 42, 0.06);
+            overflow: hidden;
+        }
+
+        .dark .contest-clarifications {
+            border-color: rgba(148, 163, 184, 0.12);
+            background: rgba(15, 23, 42, 0.9);
+            box-shadow: 0 20px 55px rgba(2, 6, 23, 0.3);
+        }
+
+        .contest-clarification-item + .contest-clarification-item {
+            border-top: 1px solid rgba(226, 232, 240, 0.9);
+        }
+
+        .dark .contest-clarification-item + .contest-clarification-item {
+            border-top-color: rgba(51, 65, 85, 0.8);
+        }
+    </style>
+{% endblock %}
+
+{% block title_row %}
+    <div class="flex w-full py-2">
+        <div class="flex min-w-0 flex-1 flex-col justify-center lg:max-w-[60%]">
+            <div class="flex items-center gap-4">
+                {% if request.user.is_authenticated %}
+                    {% if problem.problem.id in completed_problem_ids %}
+                        <a class="text-3xl" href="{{ url('user_contest_problem_submissions', contest.key, problem.order, request.user.username) }}">
+                            <i class="text-green-500 fa-duotone fa-check-circle"></i>
+                        </a>
+                    {% elif problem.problem.id in attempted_problems %}
+                        <a class="text-3xl" href="{{ url('user_contest_problem_submissions', contest.key, problem.order, request.user.username) }}">
+                            <i class="text-yellow-500 fa-duotone fa-minus-circle"></i>
+                        </a>
+                    {% endif %}
+                {% endif %}
+                <div class="line-clamp-1 text-3xl font-bold text-app-text dark:text-app-dark-text">{{ title }}</div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block info_float %}
+    <div class="panel flex flex-col gap-5 p-5 contest-problem-meta" id="problem_info">
+        <div class="flex flex-col gap-4">
+            <div>
+                <div class="section-title">{{ _('Info') }}</div>
+                <div class="mt-1 text-lg font-semibold text-app-text dark:text-app-dark-text">{{ _('Problem info') }}</div>
+            </div>
+
+            {% if problem.can_view(request) %}
+                {% if submission_limit %}
+                    {% if submissions_left > 0 %}
+                    <div class="flex flex-col gap-2">
+                        <a href="{{ url('contest_problem_submit', contest.key, problem.order) }}" class="btn-primary w-full">{{ _('Submit solution') }}</a>
+                        <div class="metric text-center">
+                            {% trans trimmed counter=submissions_left %}
+                                {{ counter }} submission left
+                                {% pluralize %}
+                                {{ counter }} submissions left
+                            {% endtrans %}
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="flex flex-col gap-2">
+                        <div class="btn-secondary w-full cursor-not-allowed opacity-70">{{ _('Submit solution') }}</div>
+                        <div class="text-center font-semibold text-app-danger dark:text-app-dark-danger">{{ _('0 submissions left') }}</div>
+                    </div>
+                    {% endif %}
+                {% else %}
+                    <a href="{{ url('contest_problem_submit', contest.key, problem.order) }}" class="btn-primary w-full">{{ _('Submit solution') }}</a>
+                {% endif %}
+            {% else %}
+                <div class="btn-secondary w-full cursor-not-allowed opacity-80">{{ _('Need at least') }} {{ problem.limit_problem }} {{ _('accepted problems') }}</div>
+            {% endif %}
+        </div>
+
+        <div class="info-grid">
+            <div class="info-card">
+                <div class="metric-muted">{{ _('Points') }}</div>
+                <div class="metric mt-2 text-lg">{{ problem.points }}</div>
+            </div>
+            <div class="info-card">
+                <div class="metric-muted">{{ _('Time limit') }}</div>
+                <div class="metric mt-2 text-lg">{{ problem.problem.time_limit }}s</div>
+                {% if problem.problem.language_time_limit %}
+                <div class="mt-2 text-sm text-app-text-secondary dark:text-app-dark-text-secondary">
+                    {% for name, limit in problem.problem.language_time_limit %}
+                    <div>{{ name }}: {{ limit }}s</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            <div class="info-card">
+                <div class="metric-muted">{{ _('Memory limit') }}</div>
+                <div class="metric mt-2 text-lg">{{ problem.problem.memory_limit|kbsimpleformat }}B</div>
+                {% if problem.problem.language_memory_limit %}
+                <div class="mt-2 text-sm text-app-text-secondary dark:text-app-dark-text-secondary">
+                    {% for name, limit in problem.problem.language_memory_limit %}
+                    <div>{{ name }}: {{ limit|kbsimpleformat }}B</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% if problem.problem.io_method.method != 'unknown' %}
+            <div class="info-card">
+                <div class="metric-muted">{{ _('I/O') }}</div>
+                <div class="mt-2 text-sm text-app-text dark:text-app-dark-text">
+                    {% if problem.problem.io_method.method == 'standard' %}
+                        <div>stdin -> stdout</div>
+                    {% elif problem.problem.io_method.method == 'file' %}
+                        <div><span class="font-semibold">{{ _('Input') }}:</span> <span class="code-accent">{{ problem.problem.io_method.input }}</span></div>
+                        <div><span class="font-semibold">{{ _('Output') }}:</span> <span class="code-accent">{{ problem.problem.io_method.output }}</span></div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="grid grid-cols-1 gap-2">
+            {% if request.user.is_authenticated and has_submissions %}
+            <a class="btn-secondary justify-start!" href="{{ url('user_contest_problem_submissions', contest.key, problem.order, request.user.username) }}">{{ _('My submissions') }}</a>
+            {% endif %}
+            <a class="btn-secondary justify-start!" href="{{ url('contest_problem_submissions', contest.key, problem.order) }}">{{ _('Submissions') }}</a>
+            <div class="btn-secondary justify-start! cursor-not-allowed opacity-70">{{ _('Leaderboard') }}</div>
+        </div>
+
+        {% if can_edit_problem %}
+        <div class="grid grid-cols-1 gap-2">
+            <a class="btn-secondary justify-start!" href="{{ url('problem_ticket_list', problem.problem.code) }}">{{ _('Tickets') }}
+                {% if num_open_tickets %}<span class="inline-block rounded-full bg-slate-700 px-2 text-center text-white">{{ num_open_tickets }}</span>{% endif %}
+            </a>
+            <a class="btn-secondary justify-start!" href="{{ url('problem_update', problem.problem.code) }}">{{ _('Edit') }}</a>
+            {% if not problem.problem.is_manually_managed %}
+            <a class="btn-secondary justify-start!" href="{{ url('problem_data', problem.problem.code) }}">{{ _('Test data') }}</a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="flex flex-col gap-3">
+            {% if show_languages %}
+            <div class="info-card">
+                <div class="metric-muted">{{ _('Allowed languages') }}</div>
+                <div class="mt-2 text-sm text-app-text-secondary dark:text-app-dark-text-secondary">
+                    {% with usable=problem.problem.usable_common_names, langs=problem.problem.languages_list() %}
+                        {% for lang in langs %}
+                            {%- if lang in usable -%}
+                                {{ lang }}
+                            {%- else -%}
+                                <s title="{{ _('No %(lang)s judge online', lang=lang) }}">{{ lang }}</s>
+                            {%- endif -%}
+                            {% if not loop.last %}, {% endif -%}
+                        {% endfor %}
+                    {% endwith %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if problem.problem.is_editable_by(request.user) %}
+            <div class="info-card">
+                <div class="metric-muted">
+                    {% trans trimmed count=available_judges|length %}
+                        Available judge
+                        {% pluralize %}
+                        Available judges
+                    {% endtrans %}
+                </div>
+                <div class="mt-2 text-sm">
+                    {% if available_judges %}
+                        {% if perms.judge.change_judge %}
+                            {% for judge in available_judges %}
+                                <a href="{{ url('admin:judge_judge_change', judge.id) }}" class="code-accent">{{ judge.name }}</a>{% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <span class="text-app-text-secondary dark:text-app-dark-text-secondary">{{ available_judges|join(", ") }}</span>
+                        {% endif %}
+                    {% else %}
+                        <i class="text-app-text-muted dark:text-app-dark-text-muted">{{ _('none available') }}</i>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block description %}
+{% if problem.can_view(request) %}
+<div class="flex flex-col gap-4">
+    <div class="flex flex-col gap-3 border-b border-app-border pb-4 dark:border-app-dark-border">
+        <div class="section-title text-app-accent dark:text-app-dark-accent">{{ _('Statement') }}</div>
+    </div>
+    <div class="custom-typography prose-td:font-roboto text-app-text dark:text-app-dark-text">
+        {% cache 86400 'problem_html' problem.problem.id MATH_ENGINE LANGUAGE_CODE %}
+            {{ description|markdown(problem.problem.markdown_style, MATH_ENGINE)|reference|str|safe }}
+        {% endcache %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block comments %}
+    {% if contest.use_clarifications %}
+        <section class="contest-clarifications">
+            <div class="border-b border-app-border px-5 py-4 dark:border-app-dark-border">
+                <div class="section-title">{{ _('Clarifications') }}</div>
+                <div class="mt-1 text-lg font-semibold text-app-text dark:text-app-dark-text">{{ _('Contest clarifications') }}</div>
+            </div>
+            {% if has_clarifications %}
+                {% for clarification in clarifications %}
+                    <div class="contest-clarification-item px-5 py-4">
+                        <div class="text-sm font-semibold text-app-text-muted dark:text-app-dark-text-muted">{{ relative_time(clarification.date) }}</div>
+                        <div class="custom-typography mt-2 text-app-text dark:text-app-dark-text">
+                            {{ clarification.description|markdown('problem', MATH_ENGINE)|reference }}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="px-5 py-6 text-sm text-app-text-secondary dark:text-app-dark-text-secondary">
+                    {{ _('No clarifications have been made at this time.') }}
+                </div>
+            {% endif %}
+        </section>
+    {% endif %}
+{% endblock %}
+
+{% block bodyend %}
+{% include "mathjax-load.html" %}
+{% include "copybuttonload.html" %}
+{% endblock bodyend %}

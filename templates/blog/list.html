@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title_row %}{% endblock %}
+{% block title_ruler %}{% endblock %}
+
+{% block media %}
+    <link rel="alternate" type="application/atom+xml" href="{{ url('blog_atom') }}" title="Atom Blog Feed">
+    <link rel="alternate" type="application/rss+xml" href="{{ url('blog_rss') }}" title="RSS Blog Feed">
+    {% include "blog/media-css.html" %}
+{% endblock %}
+
+{% block body %}
+    {% block before_posts %}{% endblock %}
+    <section class="space-y-6">
+        <div class="rounded-[1.75rem] border border-app-border bg-app-panel px-5 py-6 dark:border-app-dark-border dark:bg-app-dark-panel sm:px-6">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                    <div class="text-sm font-semibold uppercase tracking-[0.18em] text-app-text-secondary dark:text-app-dark-text-secondary">
+                        TMATH
+                    </div>
+                    <h1 class="mt-2 text-3xl font-semibold text-app-text dark:text-app-dark-text sm:text-4xl">
+                        {{ _('Blog') }}
+                    </h1>
+                    <p class="mt-2 max-w-2xl text-sm leading-6 text-app-text-muted dark:text-app-dark-text-muted sm:text-base">
+                        {{ _('Announcements, platform updates, and shared learning resources are collected here.') }}
+                    </p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <a href="{{ url('blog_rss') }}" class="btn-ghost rounded-xl px-4 py-2">RSS</a>
+                    <a href="{{ url('blog_atom') }}" class="btn-secondary rounded-xl px-4 py-2">Atom</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-5">
+            {% for post in posts %}
+                <article class="rounded-[1.75rem] border border-app-border bg-app-panel px-5 py-5 dark:border-app-dark-border dark:bg-app-dark-panel sm:px-6">
+                    <div class="flex flex-col gap-3">
+                        <div class="flex flex-wrap items-center gap-3 text-sm text-app-text-muted dark:text-app-dark-text-muted">
+                            {% if post.sticky %}
+                                <span class="inline-flex items-center gap-2 rounded-full bg-amber-100 px-3 py-1 font-semibold text-amber-700 dark:bg-amber-500/15 dark:text-amber-300">
+                                    <i class="fa-duotone fa-thumbtack"></i>
+                                    {{ _('Pinned') }}
+                                </span>
+                            {% endif %}
+                            {% with authors=post.authors.all() %}
+                                {% if authors %}
+                                    <span>{{ link_users(authors) }}</span>
+                                {% endif %}
+                            {% endwith %}
+                            <span>{{ relative_time(post.publish_on, abs=_('posted on {time}'), rel=_('posted {time}')) }}</span>
+                            <a href="{{ url('blog_post', post.id, post.slug) }}#comments" class="inline-flex items-center gap-1">
+                                <i class="fa-duotone fa-comments"></i>
+                                {{ post_comment_counts[post.id] or 0 }}
+                            </a>
+                        </div>
+
+                        <h2 class="text-2xl font-semibold leading-snug text-app-text dark:text-app-dark-text sm:text-3xl">
+                            <a href="{{ url('blog_post', post.id, post.slug) }}">{{ post.title }}</a>
+                        </h2>
+                    </div>
+
+                    <div class="custom-typography mt-4 text-app-text dark:text-app-dark-text">
+                        {% cache 86400 'post_summary' post.id %}
+                            {{ post.summary|default(post.content, true)|markdown('blog', 'svg', lazy_load=True)|reference|str|safe }}
+                        {% endcache %}
+                    </div>
+
+                    <div class="mt-5">
+                        <a href="{{ url('blog_post', post.id, post.slug) }}" class="btn-secondary rounded-xl px-4 py-2">
+                            {{ _('Read article') }}
+                        </a>
+                    </div>
+                </article>
+            {% else %}
+                <div class="rounded-[1.75rem] border border-dashed border-app-border bg-app-panel px-5 py-8 text-center text-sm text-app-text-muted dark:border-app-dark-border dark:bg-app-dark-panel dark:text-app-dark-text-muted sm:px-6">
+                    {{ _('No posts have been published yet.') }}
+                </div>
+            {% endfor %}
+        </div>
+
+        {% if page_obj.has_other_pages() %}
+            <div class="bottom-pagination-bar">{% include "list-pages.html" %}</div>
+        {% endif %}
+    </section>
+    {% block after_posts %}{% endblock %}
+{% endblock %}
+
+{% block bodyend %}
+    {% if REQUIRE_JAX %}
+        {% include "mathjax-load.html" %}
+    {% endif %}
+    {% include "copybuttonload.html" %}
+{% endblock bodyend %}

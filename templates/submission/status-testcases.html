@@ -1,0 +1,284 @@
+{% if submission.contest_or_none %}
+    {% set prefix_length = submission.contest_or_none.problem.output_prefix_override %}
+{% else %}
+    {% set prefix_length = None %}
+{% endif %}
+{% set is_pretest = submission.is_pretested %}
+
+{% if submission.status != 'IE' %}
+    {% if submission.status == 'QU' %}
+        <section class="panel-elevated mt-4 p-6">
+            <div class="flex items-center gap-3 text-app-text dark:text-app-dark-text">
+                <i class="fa-duotone fa-hourglass-half text-xl text-app-accent dark:text-app-dark-accent"></i>
+                <div class="text-xl font-bold">{{ _('We are waiting for a suitable judge to process your submission...') }}</div>
+            </div>
+        </section>
+    {% elif submission.status == 'P' %}
+        <section class="panel-elevated mt-4 p-6">
+            <div class="flex items-center gap-3 text-app-text dark:text-app-dark-text">
+                <i class="fa-duotone fa-gears text-xl text-app-accent dark:text-app-dark-accent"></i>
+                <div class="text-xl font-bold">{{ _('Your submission is being processed...') }}</div>
+            </div>
+        </section>
+    {% elif submission.status == 'CE' %}
+        <section class="panel-elevated mt-4 p-6">
+            <div class="section-title text-red-500!">{{ _('Build') }}</div>
+            <div class="mt-1 text-2xl font-bold text-app-text dark:text-app-dark-text">{{ _('Compilation Error') }}</div>
+            <pre class="mt-4 overflow-x-auto rounded-2xl border border-red-200 bg-red-50 px-4 py-4 text-sm text-red-900 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-100">{{ submission.error|ansi2html }}</pre>
+        </section>
+    {% else %}
+        {% if submission.error %}
+        <section class="panel-elevated mt-4 p-6">
+            <div class="section-title text-amber-500!">{{ _('Build') }}</div>
+            <div class="mt-1 text-2xl font-bold text-app-text dark:text-app-dark-text">{{ _('Compilation Warnings') }}</div>
+            <pre class="mt-4 overflow-x-auto rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-100">{{ submission.error|ansi2html }}</pre>
+        </section>
+        {% endif %}
+        <section class="panel-elevated mt-4 p-6">
+            <div class="flex flex-col gap-5">
+                <div class="flex flex-wrap items-start justify-between gap-4">
+                    <div>
+                        <div class="section-title">{{ _('Results') }}</div>
+                        {% if is_pretest %}
+                            <div class="mt-1 text-2xl font-bold text-app-text dark:text-app-dark-text">{{ _('Pretest Execution Results') }}</div>
+                        {% else %}
+                            <div class="mt-1 text-2xl font-bold text-app-text dark:text-app-dark-text">{{ _('Execution Results') }}</div>
+                        {% endif %}
+                    </div>
+                    {% if statuses or not submission.is_graded %}
+                    <div class="flex flex-wrap items-center gap-2 rounded-2xl border border-app-border/70 bg-app-panel px-4 py-3 dark:border-app-dark-border/70 dark:bg-app-dark-panel">
+                        {% for case in statuses %}
+                            {% if case.status == "AC" %}
+                                <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-green-100 text-green-700 dark:bg-green-950/60 dark:text-green-300">
+                                    <i class="fa-duotone fa-check font-bold"></i>
+                                </span>
+                            {% elif case.status == "SC" %}
+                                <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-app-panel-elevated text-app-text-muted dark:bg-app-dark-panel-elevated dark:text-app-dark-text-muted">
+                                    <span class="case-SC">&ndash;</span>
+                                </span>
+                            {% else %}
+                                <a href="#{{ case.id }}" class="inline-flex h-8 min-w-8 items-center justify-center rounded-full bg-red-100 px-2 text-red-700 dark:bg-red-950/60 dark:text-red-300">
+                                    <i class="case-{{ case.status }} fa-duotone fa-xmark font-bold"></i>
+                                </a>
+                            {% endif %}
+                            {% if case.num_combined > 1 %}
+                                <sup class="case-{{ case.status }} -ml-1 text-xs font-semibold">&times;{{ case.num_combined }}</sup>
+                            {% endif %}
+                        {% endfor %}
+                        {% if not submission.is_graded %}
+                            <div class="inline animate-spin text-app-accent dark:text-app-dark-accent">
+                                <i class="fa-duotone fa-spinner-third"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="grid gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(17rem,0.8fr)]">
+                    <div class="min-w-0">
+                        <div class="accordion overflow-hidden rounded-[1.5rem] border border-app-border bg-app-panel-elevated/90 dark:border-app-dark-border dark:bg-app-dark-panel-elevated/90">
+                        {% set test_case_id = counter() %}
+                        {% for batch in batches %}
+                        {% if batch.id %}
+                        <div class="title cursor-pointer border-b border-app-border/70 px-5 py-4 dark:border-app-dark-border/70">
+                            <div class="inline-flex flex-wrap items-center gap-3 text-sm text-app-text dark:text-app-dark-text">
+                                <div class="metric-muted">
+                                    {{ _('Batch ') }}
+                                </div>
+                                <div class="font-semibold">
+                                    #{{ test_case_id() }}
+                                </div>
+                                <div class="text-app-text-secondary dark:text-app-dark-text-secondary">
+                                    ({{ _('%(points)s/%(total)s points', points=batch.points|floatformat(0), total=batch.total|floatformat(0)) }})
+                                </div>
+                            </div>
+                        </div>
+                        <div class="content">
+                            <div class="accordion border-b border-app-border/70 dark:border-app-dark-border/70">
+                        {% endif %}
+                        {% for case in batch.cases %}
+                        {% set curr_data = cases_data.get(case.case, None) %}
+                        <div class="title cursor-pointer border-b border-app-border/60 px-5 py-4 dark:border-app-dark-border/60">
+                            <div class="inline-flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
+                                <div class="w-28 whitespace-nowrap text-app-text dark:text-app-dark-text">
+                                    {%- if batch.id -%}
+                                        <b>{{ _('Case') }}</b>
+                                    {%- elif is_pretest -%}
+                                        <b>{{ _('Pretest') }}</b>
+                                    {%- else -%}
+                                        <b>{{ _('Test case') }}</b>
+                                    {%- endif -%}
+                                </div>
+                                <div class="w-16 text-app-text dark:text-app-dark-text">
+                                    {%- if batch.id -%}
+                                        <b>#{{ loop.index }}</b>
+                                    {%- elif is_pretest -%}
+                                        <b>#{{ test_case_id() }}</b>
+                                    {%- else -%}
+                                        <b>#{{ test_case_id() }}</b>
+                                    {%- endif -%}
+                                </div>
+                                <div class="min-w-[12rem] flex-1">
+                                    <span title="{{ case.long_status }}" class="font-semibold case-{{ case.status }}">
+                                        {%- if case.status == 'SC' %}&mdash;{% else %}{{ case.long_status }}{% endif -%}
+                                    </span>
+                                    {%- if case.feedback %}&nbsp;({{ case.feedback }}){% endif -%}
+                                </div>
+                                <div class="min-w-[10rem] text-app-text-secondary dark:text-app-dark-text-secondary">
+                                    {%- if case.status != 'SC' -%}
+                                    {%- if case.status == 'TLE' -%}
+                                        [&gt;<span>{{ time_limit|floatformat(3) }}s,</span>
+                                    {%- else -%}
+                                        [<span title="{{ case.time }}s">{{ case.time|floatformat(3) }}s,</span>
+                                    {%- endif -%}
+                                    {%- endif -%}
+                                    {% if case.status != 'SC' %}{{ case.memory|kbdetailformat }}]{% endif %}
+                                </div>
+                                {% if not batch.id %}
+                                    <div class="w-24 text-app-text-secondary dark:text-app-dark-text-secondary">({{ case.points|floatformat(0) }}/{{ case.total|floatformat(0) }})</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="bg-app-panel/40 px-4 py-4 dark:bg-app-dark-panel/40">
+                            {% set print_case_output = case.status != 'AC' and case.output and (prefix_length is none or prefix_length > 0) %}
+                            {% if print_case_output %}
+                            <div class="mb-4 flex flex-col rounded-2xl border border-sky-200 bg-sky-50 p-4 dark:border-sky-900/50 dark:bg-sky-950/30">
+                                <div class="text-lg font-bold text-sky-900 dark:text-sky-100">{{ _('Your output (clipped)') }}</div>
+                                {% if prefix_length is none %}
+                                    <pre class="case-output mt-3">{{ case.output|linebreaksbr }}</pre>
+                                {% else %}
+                                    <pre class="case-output mt-3">{{ case.output[:prefix_length]|linebreaksbr }}</pre>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                            {% if case.extended_feedback %}
+                            <div class="flex flex-col rounded-2xl border p-4 {% if case.status == "AC" %}border-green-200 bg-green-50 dark:border-green-900/50 dark:bg-green-950/30{% else %}border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-950/30{% endif %}">
+                                {% if can_view_test and curr_data %}
+                                    <strong>{{ _('Input:') }}</strong>
+                                    <pre class="case-output mt-2">{{ curr_data['input']|linebreaksbr }}</pre>
+                                    <br>
+                                    <strong>{{ _('Answer:') }}</strong>
+                                    <pre class="case-output mt-2">{{ curr_data['answer']|linebreaksbr }}</pre>
+                                {% endif %}
+                                {% if print_case_output %}
+                                    <strong class="mt-3">{{ _('Your output (clipped)') }}</strong>
+                                    {% if prefix_length is none %}
+                                        <pre class="case-output mt-2">{{ case.output|linebreaksbr }}</pre>
+                                    {% else %}
+                                        <pre class="case-output mt-2">{{ case.output[:prefix_length]|linebreaksbr }}</pre>
+                                    {% endif %}
+                                {% endif %}
+                                <div class="mt-3 text-lg font-bold">{{ _('Judge feedback') }}</div>
+                                {% if not request.in_contest %}
+                                    <pre class="case-output mt-2">{{ case.extended_feedback|linebreaksbr }}</pre>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                        {% if batch.id %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                        </div>
+                    </div>
+                    {% if submission.is_graded %}
+                    <div class="flex flex-col gap-5">
+                        <div class="rounded-[1.75rem] border border-app-border bg-app-panel-elevated/90 p-6 dark:border-app-dark-border dark:bg-app-dark-panel-elevated/90">
+                            <div class="section-title">{{ _('Summary') }}</div>
+                            <div class="mt-4 flex justify-center">
+                                <div class="relative h-64 w-64 rounded-full border {{ submission.result }} text-white!">
+                                    <div class="absolute top-1/2 left-1/2 text-center text-4xl font-bold -translate-x-1/2 -translate-y-1/2">
+                                        {% if submission.result in ['AB', 'TLE', 'RTE', 'OLE', 'IE'] %}
+                                        ---
+                                        {% else %}
+                                        {% if request.in_contest and submission.contest_or_none %}
+                                        {% with contest=submission.contest_or_none %}
+                                            {{ _('%(points)s/%(total)s', points=contest.points|roundfloat(3),
+                                                    total=contest.problem.points|floatformat(-1)) }}
+                                        {% endwith %}
+                                        {% else %}
+                                            {{ _('%(points)s/%(total)s', points=submission.points|roundfloat(3),
+                                                total=submission.problem.points|floatformat(-1)) }}
+                                        {% endif %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% if submission.result != "AB" %}
+                        <div class="rounded-[1.75rem] border border-app-border bg-app-panel-elevated/90 p-6 dark:border-app-dark-border dark:bg-app-dark-panel-elevated/90">
+                            <div class="grid gap-5">
+                                <div class="flex flex-col gap-2 resources md:flex-row md:items-center md:justify-between">
+                                    <div>
+                                        <div class="metric-muted">{{ _('Resources') }}</div>
+                                        <div class="mt-1 text-lg font-semibold text-app-text dark:text-app-dark-text">{{ _('Total runtime and memory') }}</div>
+                                    </div>
+                                    <div class="text-lg font-semibold text-indigo-600 dark:text-sky-400">
+                                        {% if submission.result == "TLE" %}
+                                        <span>---,</span>
+                                        {% else %}
+                                            <span title="{{ submission.time }}s">{{ submission.time|floatformat(3) }}s,</span>
+                                        {% endif %}
+                                        {{ submission.memory|kbdetailformat }}
+                                    </div>
+                                </div>
+                                {% if submission.result == "AC" %}
+                                <div class="flex flex-col gap-2 runtime md:flex-row md:items-center md:justify-between">
+                                    <div>
+                                        <div class="metric-muted">{{ _('Peak runtime') }}</div>
+                                        <div class="mt-1 text-lg font-semibold text-app-text dark:text-app-dark-text">{{ _('Maximum runtime on single test case:') }}</div>
+                                    </div>
+                                    <div class="text-lg font-semibold text-indigo-600 dark:text-sky-400" title="{{ max_execution_time }}s">{{ max_execution_time|floatformat(3) }}s</div>
+                                </div>
+                                {% endif %}
+                                <div class="flex flex-col gap-2 score md:flex-row md:items-center md:justify-between">
+                                    <div>
+                                        <div class="metric-muted">{{ _('Score') }}</div>
+                                        <div class="mt-1 text-lg font-semibold text-app-text dark:text-app-dark-text">
+                                            {% if is_pretest %}
+                                                {{ _('Final pretest score:') }}
+                                            {% else %}
+                                                {{ _('Final score:') }}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="text-lg font-semibold text-indigo-600 dark:text-sky-400">
+                                        {{ submission.case_points|floatformat(0) }}/{{ submission.case_total|floatformat(0) }}
+                                        {% if request.in_contest and submission.contest_or_none %}
+                                        {% with contest=submission.contest_or_none %}
+                                            ({{ _('%(points)s/%(total)s points', points=contest.points|roundfloat(3),
+                                                    total=contest.problem.points|floatformat(-1)) }})
+                                        {% endwith %}
+                                        {% else %}
+                                            ({{ _('%(points)s/%(total)s points', points=submission.points|roundfloat(3),
+                                                total=submission.problem.points|floatformat(-1)) }})
+                                        {% endif %}
+                                        {% if is_pretest and submission.result == "AC" %}
+                                            <div class="mt-2 text-sm text-red-500">({{ _('Passing pretests does not guarantee a full score on system tests.') }})</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="rounded-[1.75rem] border border-red-200 bg-red-50 p-6 text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-200">
+                            <b>{{ _('Submission aborted!') }}</b>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+        <script>
+            $(".accordion").accordion({
+                collapsible: true,
+                active: false,
+                heightStyle: "content",
+            });
+        </script>
+    {% endif %}
+{% else %}
+    {% include "submission/internal-error-message.html" %}
+{% endif %}

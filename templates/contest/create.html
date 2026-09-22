@@ -1,0 +1,506 @@
+{% extends "base.html" %}
+
+{% block media %}
+{{ form.description.field.widget.media.css }}
+<style>
+    .contest-problem-placeholder {
+        border: 1px dashed color-mix(in srgb, var(--app-accent) 45%, transparent);
+        background: color-mix(in srgb, var(--app-accent) 10%, transparent);
+        border-radius: 1rem;
+        visibility: visible !important;
+    }
+
+    .dark .contest-problem-placeholder {
+        border-color: color-mix(in srgb, var(--app-dark-accent) 55%, transparent);
+        background: color-mix(in srgb, var(--app-dark-accent) 14%, transparent);
+    }
+
+    .problem-drag-handle {
+        cursor: grab;
+    }
+
+    .problem-drag-handle:active {
+        cursor: grabbing;
+    }
+
+    .problem-drag-dots {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.2rem;
+    }
+
+    .problem-drag-dots span {
+        width: 0.28rem;
+        height: 0.28rem;
+        border-radius: 999px;
+        background: currentColor;
+        opacity: 0.72;
+    }
+
+    .contest-editor-form .select2-container {
+        width: 100% !important;
+        display: block;
+        min-width: 0;
+    }
+
+    .contest-editor-form .select2-container--default .select2-selection--multiple,
+    .contest-editor-form .select2-container--default .select2-selection--single {
+        min-height: 2.9rem;
+        border-radius: 1rem;
+        border-color: color-mix(in srgb, var(--app-border) 80%, transparent);
+        padding: 0.35rem 0.55rem;
+        background: var(--app-panel);
+    }
+
+    .dark .contest-editor-form .select2-container--default .select2-selection--multiple,
+    .dark .contest-editor-form .select2-container--default .select2-selection--single {
+        border-color: color-mix(in srgb, var(--app-dark-border) 80%, transparent);
+        background: var(--app-dark-panel);
+    }
+
+    .contest-editor-form .select2-container.problem-select2-container .select2-selection__rendered,
+    .select2-dropdown.problem-select2-dropdown .select2-results__option {
+        font-weight: 700;
+    }
+
+    .required-mark {
+        color: rgb(225 29 72);
+    }
+</style>
+{% endblock %}
+
+{% block js_media %}
+{% if REQUIRE_JAX %}
+{% include "mathjax-load.html" %}
+{% endif %}
+{{ form.description.field.widget.media.js }}
+<script src="{{ static('libs/jquery-sortable.js') }}"></script>
+<script>
+    $(function () {
+        function initAjaxSelect2(selector, placeholder, url) {
+            const $field = $(selector);
+            if (!$field.length) return;
+            $field.select2({
+                placeholder: placeholder,
+                ajax: {
+                    url: url,
+                    dataType: 'json',
+                    delay: 200,
+                    data: function (params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data.results || [],
+                            pagination: {more: data.more || false}
+                        };
+                    }
+                },
+                minimumInputLength: 1,
+                multiple: true
+            });
+        }
+
+        function initProblemSelect2($field) {
+            if (!$field.length || $field.data('select2')) return;
+            $field.select2({
+                placeholder: "{{ _('Search problem by code or name...') }}",
+                width: '100%',
+                minimumInputLength: parseInt($field.attr('data-minimum-input-length') || '1', 10),
+                ajax: {
+                    url: $field.attr('data-ajax--url'),
+                    type: $field.attr('data-ajax--type') || 'GET',
+                    cache: ($field.attr('data-ajax--cache') || 'true') === 'true',
+                    dataType: 'json',
+                    delay: 200,
+                    data: function (params) {
+                        return {
+                            term: params.term,
+                            page: params.page,
+                            field_id: $field.data('field_id')
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data.results || [],
+                            pagination: {
+                                more: data.more || false
+                            }
+                        };
+                    }
+                }
+            });
+            $field.next('.select2').addClass('problem-select2-container');
+            $field.on('select2:open', function () {
+                $('.select2-dropdown').addClass('problem-select2-dropdown');
+            });
+        }
+
+        function initProblemRow($row) {
+            initProblemSelect2($row.find('select[name$="-problem"]'));
+        }
+
+        function updateProblemOrder() {
+            $('#contest-problem-list .contest-problem-row:visible').each(function (index) {
+                $(this).find('.problem-order-index').text(index + 1);
+                $(this).find('input[name$="-order"]').val(index);
+            });
+        }
+
+        function initProblemSortable() {
+            const $list = $('#contest-problem-list');
+            if (!$list.length || $list.data('problem-sortable-ready') || !$.fn.sortable) return;
+            $list.sortable({
+                containerSelector: '#contest-problem-list',
+                itemSelector: '.contest-problem-row',
+                handle: '.problem-drag-handle',
+                nested: false,
+                distance: 0,
+                placeholder: '<div class="contest-problem-placeholder"></div>',
+                onDrop: function ($item, container, _super, event) {
+                    _super($item, container, event);
+                    updateProblemOrder();
+                }
+            });
+            $list.data('problem-sortable-ready', true);
+        }
+
+        initAjaxSelect2('#{{ form.authors.id_for_label }}', "{{ _('Type username authors...') }}", "{{ url('profile_select2') }}");
+        initAjaxSelect2('#{{ form.curators.id_for_label }}', "{{ _('Type username curators...') }}", "{{ url('profile_select2') }}");
+        initAjaxSelect2('#{{ form.testers.id_for_label }}', "{{ _('Type username testers...') }}", "{{ url('profile_select2') }}");
+        initAjaxSelect2('#{{ form.private_contestants.id_for_label }}', "{{ _('Type username contestants...') }}", "{{ url('profile_select2') }}");
+        initAjaxSelect2('#{{ form.view_contest_scoreboard.id_for_label }}', "{{ _('Type username scoreboard viewers...') }}", "{{ url('profile_select2') }}");
+        initAjaxSelect2('#{{ form.organizations.id_for_label }}', "{{ _('Type organization...') }}", "{{ url('organization_select2') }}");
+
+        $('.contest-problem-row').each(function () {
+            initProblemRow($(this));
+        });
+        initProblemSortable();
+        updateProblemOrder();
+
+        $('#add-problem-row').on('click', function () {
+            const $totalForms = $('#id_problem_formset-TOTAL_FORMS');
+            const total = parseInt($totalForms.val(), 10);
+            const template = $('#contest-problem-empty-form').html().replace(/__prefix__/g, total);
+            const $row = $(template);
+            const visibleCount = $('#contest-problem-list .contest-problem-row:visible').length;
+            $row.find('input[name$="-points"]').val(100);
+            $('#contest-problem-list').append($row);
+            $totalForms.val(total + 1);
+            initProblemRow($row);
+            updateProblemOrder();
+        });
+
+        $(document).on('click', '.remove-problem-row', function () {
+            const $row = $(this).closest('.contest-problem-row');
+            const $deleteInput = $row.find('input[type="checkbox"][name$="-DELETE"]');
+            if ($deleteInput.length) {
+                $deleteInput.prop('checked', true);
+                $row.hide();
+            } else {
+                $row.remove();
+            }
+            updateProblemOrder();
+        });
+    });
+</script>
+{% endblock %}
+
+{% block body %}
+<div class="mx-auto flex max-w-8xl flex-col gap-6">
+    <section class="relative overflow-hidden rounded-4xl border border-app-border/80 bg-[radial-gradient(circle_at_top_right,color-mix(in_srgb,var(--app-accent)_18%,transparent),transparent_34%),color-mix(in_srgb,var(--app-panel-elevated)_96%,white_4%)] p-6 shadow-[0_18px_40px_rgba(15,23,42,0.08)] dark:border-app-dark-border/80 dark:bg-[radial-gradient(circle_at_top_right,color-mix(in_srgb,var(--app-dark-accent)_18%,transparent),transparent_36%),color-mix(in_srgb,var(--app-dark-panel-elevated)_97%,black_3%)] dark:shadow-[0_20px_44px_rgba(2,6,23,0.34)]">
+        <div class="section-title">{{ _('Contest workspace') }}</div>
+        <div class="mt-3 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+            <div class="max-w-3xl">
+                <h1 class="text-3xl font-black tracking-tight text-app-text dark:text-app-dark-text">{{ page_heading|default(_('Create contest')) }}</h1>
+                <p class="mt-2 text-sm leading-6 text-app-text-secondary dark:text-app-dark-text-secondary">{{ _('Set up identity, schedule, access, and problems in one frontend form.') }}</p>
+            </div>
+            <div class="inline-flex items-center gap-2 rounded-full border border-app-border/70 bg-app-panel/85 px-4 py-2 text-xs font-bold uppercase tracking-[0.14em] text-app-text-muted dark:border-app-dark-border/70 dark:bg-app-dark-panel/85 dark:text-app-dark-text-muted">
+                {% if selected_organization %}{{ selected_organization.name }}{% else %}{{ _('Draft') }}{% endif %}
+            </div>
+        </div>
+    </section>
+
+    <form action="" method="post" class="contest-editor-form rounded-4xl border bg-app-panel/95 p-6 shadow-[0_16px_38px_rgba(15,23,42,0.06)] dark:border-app-dark-border/80 dark:bg-app-dark-panel/95 dark:shadow-[0_18px_40px_rgba(2,6,23,0.28)] {% if form.errors or problem_formset.non_form_errors() %}border-red-500/60{% else %}border-app-border/80{% endif %}">
+        {% csrf_token %}
+        {{ problem_formset.management_form }}
+
+        {% if form.non_field_errors() %}
+            {% for error in form.non_field_errors() %}
+                <div class="mb-4 rounded-2xl border border-red-300/70 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300">{{ error }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="flex flex-col gap-8">
+            <section class="flex flex-col gap-5">
+                <div class="border-b border-app-border/80 pb-3 text-[0.78rem] font-extrabold uppercase tracking-[0.12em] text-app-text-muted dark:border-app-dark-border/80 dark:text-app-dark-text-muted">{{ _('Identity') }}</div>
+                <div class="grid gap-5 lg:grid-cols-2">
+                    <div class="flex flex-col gap-2 rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90">
+                        <label for="{{ form.key.id_for_label }}" class="text-sm font-bold text-app-text dark:text-app-dark-text">{{ form.key.label }}{% if form.key.field.required %}<span class="required-mark"> *</span>{% endif %}</label>
+                        <input type="text" id="{{ form.key.id_for_label }}" name="{{ form.key.name }}" value="{{ form.key.value() or '' }}" class="min-h-[2.9rem] rounded-2xl border border-app-border/80 bg-app-panel px-4 py-3 text-sm text-app-text transition focus:border-app-accent focus:outline-none focus:ring-4 focus:ring-app-accent/15 dark:border-app-dark-border/80 dark:bg-app-dark-panel dark:text-app-dark-text dark:focus:border-app-dark-accent dark:focus:ring-app-dark-accent/20" placeholder="{{ _('example: spring2026') }}" required>
+                        {% if form.key.help_text %}<div class="text-xs text-app-text-muted dark:text-app-dark-text-muted">{{ form.key.help_text }}</div>{% endif %}
+                        {% if form.key.errors %}<div class="text-xs text-red-700 dark:text-red-500">{{ form.key.errors }}</div>{% endif %}
+                    </div>
+                    <div class="flex flex-col gap-2 rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90">
+                        <label for="{{ form.name.id_for_label }}" class="text-sm font-bold text-app-text dark:text-app-dark-text">{{ form.name.label }}{% if form.name.field.required %}<span class="required-mark"> *</span>{% endif %}</label>
+                        <input type="text" id="{{ form.name.id_for_label }}" name="{{ form.name.name }}" value="{{ form.name.value() or '' }}" class="min-h-[2.9rem] rounded-2xl border border-app-border/80 bg-app-panel px-4 py-3 text-sm text-app-text transition focus:border-app-accent focus:outline-none focus:ring-4 focus:ring-app-accent/15 dark:border-app-dark-border/80 dark:bg-app-dark-panel dark:text-app-dark-text dark:focus:border-app-dark-accent dark:focus:ring-app-dark-accent/20" placeholder="{{ _('Contest title') }}" required>
+                        {% if form.name.errors %}<div class="text-xs text-red-700 dark:text-red-500">{{ form.name.errors }}</div>{% endif %}
+                    </div>
+                    <div class="flex flex-col gap-2 rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90 lg:col-span-2">
+                        <label for="{{ form.topic.id_for_label }}" class="text-sm font-bold text-app-text dark:text-app-dark-text">{{ form.topic.label }}{% if form.topic.field.required %}<span class="required-mark"> *</span>{% endif %}</label>
+                        <input type="text" id="{{ form.topic.id_for_label }}" name="{{ form.topic.name }}" value="{{ form.topic.value() or '' }}" class="min-h-[2.9rem] rounded-2xl border border-app-border/80 bg-app-panel px-4 py-3 text-sm text-app-text transition focus:border-app-accent focus:outline-none focus:ring-4 focus:ring-app-accent/15 dark:border-app-dark-border/80 dark:bg-app-dark-panel dark:text-app-dark-text dark:focus:border-app-dark-accent dark:focus:ring-app-dark-accent/20" placeholder="{{ _('Theme, round, or internal note') }}">
+                        {% if form.topic.errors %}<div class="text-xs text-red-700 dark:text-red-500">{{ form.topic.errors }}</div>{% endif %}
+                    </div>
+                </div>
+            </section>
+
+            <section class="flex flex-col gap-5">
+                <div class="border-b border-app-border/80 pb-3 text-[0.78rem] font-extrabold uppercase tracking-[0.12em] text-app-text-muted dark:border-app-dark-border/80 dark:text-app-dark-text-muted">{{ _('People And Schedule') }}</div>
+                <div class="grid gap-5 lg:grid-cols-2">
+                    <div class="flex flex-col gap-2 rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90 lg:col-span-2">
+                        <label for="{{ form.authors.id_for_label }}" class="text-sm font-bold text-app-text dark:text-app-dark-text">{{ form.authors.label }}{% if form.authors.field.required %}<span class="required-mark"> *</span>{% endif %}</label>
+                        {{ form.authors }}
+                        <div class="text-xs text-app-text-muted dark:text-app-dark-text-muted">{{ _('Authors can fully edit the contest.') }}</div>
+                        {% if form.authors.errors %}<div class="text-xs text-red-700 dark:text-red-500">{{ form.authors.errors }}</div>{% endif %}
+                    </div>
+                    <div class="flex flex-col gap-2 rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90">
+                        <label for="{{ form.curators.id_for_label }}" class="text-sm font-bold text-app-text dark:text-app-dark-text">{{ form.curators.label }}{% if form.curators.field.required %}<span class="required-mark"> *</span>{% endif %}</label>
+                        {{ form.curators }}
+                        {% if form.curators.errors %}<div class="text-xs text-red-700 dark:text-red-500">{{ form.curators.errors }}</div>{% endif %}
+                    </div>
+                    <div class="flex flex-col gap-2 rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90">
+                        <label for="{{ form.testers.id_for_label }}" class="text-sm font-bold text-app-text dark:text-app-dark-text">{{ form.testers.label }}{% if form.testers.field.required %}<span class="required-mark"> *</span>{% endif %}</label>
+                        {{ form.testers }}
+                        {% if form.testers.errors %}<div class="text-xs text-red-700 dark:text-red-500">{{ form.testers.errors }}</div>{% endif %}
+                    </div>
+                    <div class="flex flex-col gap-2 rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90">
+                        <label for="{{ form.start_time.id_for_label }}" class="text-sm font-bold text-app-text dark:text-app-dark-text">{{ form.start_time.label }}{% if form.start_time.field.required %}<span class="required-mark"> *</span>{% endif %}</label>
+                        {{ form.start_time }}
+                        {% if form.start_time.errors %}<div class="text-xs text-red-700 dark:text-red-500">{{ form.start_time.errors }}</div>{% endif %}
+                    </div>
+                    <div class="flex flex-col gap-2 rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90">
+                        <label for="{{ form.end_time.id_for_label }}" class="text-sm font-bold text-app-text dark:text-app-dark-text">{{ form.end_time.label }}{% if form.end_time.field.required %}<span class="required-mark"> *</span>{% endif %}</label>
+                        {{ form.end_time }}
+                        {% if form.end_time.errors %}<div class="text-xs text-red-700 dark:text-red-500">{{ form.end_time.errors }}</div>{% endif %}
+                    </div>
+                </div>
+            </section>
+
+            <section class="flex flex-col gap-5">
+                <div class="border-b border-app-border/80 pb-3 text-[0.78rem] font-extrabold uppercase tracking-[0.12em] text-app-text-muted dark:border-app-dark-border/80 dark:text-app-dark-text-muted">{{ _('Access And Visibility') }}</div>
+                <div class="grid gap-5 lg:grid-cols-2">
+                    <label for="{{ form.is_visible.id_for_label }}" class="flex cursor-pointer items-start gap-3 rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 transition hover:border-app-accent/50 hover:bg-app-panel dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90 dark:hover:border-app-dark-accent/50 dark:hover:bg-app-dark-panel">
+                        <input id="{{ form.is_visible.id_for_label }}" name="{{ form.is_visible.name }}" type="checkbox" {% if form.is_visible.value() %}checked{% endif %} class="mt-1 h-4 w-4 rounded-md border-app-border/80 text-app-accent focus:ring-2 focus:ring-app-accent/20 dark:border-app-dark-border/80 dark:text-app-dark-accent dark:focus:ring-app-dark-accent/25">
+                        <span class="text-sm">
+                            <span class="block font-bold text-app-text dark:text-app-dark-text">{{ form.is_visible.label }}</span>
+                            <span class="block text-xs text-app-text-muted dark:text-app-dark-text-muted">{{ form.is_visible.help_text }}</span>
+                        </span>
+                    </label>
+                    <label for="{{ form.use_clarifications.id_for_label }}" class="flex cursor-pointer items-start gap-3 rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 transition hover:border-app-accent/50 hover:bg-app-panel dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90 dark:hover:border-app-dark-accent/50 dark:hover:bg-app-dark-panel">
+                        <input id="{{ form.use_clarifications.id_for_label }}" name="{{ form.use_clarifications.name }}" type="checkbox" {% if form.use_clarifications.value() %}checked{% endif %} class="mt-1 h-4 w-4 rounded-md border-app-border/80 text-app-accent focus:ring-2 focus:ring-app-accent/20 dark:border-app-dark-border/80 dark:text-app-dark-accent dark:focus:ring-app-dark-accent/25">
+                        <span class="text-sm">
+                            <span class="block font-bold text-app-text dark:text-app-dark-text">{{ form.use_clarifications.label }}</span>
+                            <span class="block text-xs text-app-text-muted dark:text-app-dark-text-muted">{{ form.use_clarifications.help_text }}</span>
+                        </span>
+                    </label>
+                    <label for="{{ form.is_private.id_for_label }}" class="flex cursor-pointer items-start gap-3 rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 transition hover:border-app-accent/50 hover:bg-app-panel dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90 dark:hover:border-app-dark-accent/50 dark:hover:bg-app-dark-panel">
+                        <input id="{{ form.is_private.id_for_label }}" name="{{ form.is_private.name }}" type="checkbox" {% if form.is_private.value() %}checked{% endif %} class="mt-1 h-4 w-4 rounded-md border-app-border/80 text-app-accent focus:ring-2 focus:ring-app-accent/20 dark:border-app-dark-border/80 dark:text-app-dark-accent dark:focus:ring-app-dark-accent/25">
+                        <span class="text-sm">
+                            <span class="block font-bold text-app-text dark:text-app-dark-text">{{ form.is_private.label }}</span>
+                            <span class="block text-xs text-app-text-muted dark:text-app-dark-text-muted">{{ _('Restrict contest access to selected contestants.') }}</span>
+                        </span>
+                    </label>
+                    <label for="{{ form.is_organization_private.id_for_label }}" class="flex cursor-pointer items-start gap-3 rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 transition hover:border-app-accent/50 hover:bg-app-panel dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90 dark:hover:border-app-dark-accent/50 dark:hover:bg-app-dark-panel">
+                        <input id="{{ form.is_organization_private.id_for_label }}" name="{{ form.is_organization_private.name }}" type="checkbox" {% if form.is_organization_private.value() %}checked{% endif %} class="mt-1 h-4 w-4 rounded-md border-app-border/80 text-app-accent focus:ring-2 focus:ring-app-accent/20 dark:border-app-dark-border/80 dark:text-app-dark-accent dark:focus:ring-app-dark-accent/25">
+                        <span class="text-sm">
+                            <span class="block font-bold text-app-text dark:text-app-dark-text">{{ form.is_organization_private.label }}</span>
+                            <span class="block text-xs text-app-text-muted dark:text-app-dark-text-muted">{{ _('Restrict contest access to selected organizations.') }}</span>
+                        </span>
+                    </label>
+                    <div class="flex flex-col gap-2 rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90">
+                        <label for="{{ form.scoreboard_visibility.id_for_label }}" class="text-sm font-bold text-app-text dark:text-app-dark-text">{{ form.scoreboard_visibility.label }}{% if form.scoreboard_visibility.field.required %}<span class="required-mark"> *</span>{% endif %}</label>
+                        <select id="{{ form.scoreboard_visibility.id_for_label }}" name="{{ form.scoreboard_visibility.name }}" class="min-h-[2.9rem] rounded-2xl border border-app-border/80 bg-app-panel px-4 py-3 text-sm text-app-text transition focus:border-app-accent focus:outline-none focus:ring-4 focus:ring-app-accent/15 dark:border-app-dark-border/80 dark:bg-app-dark-panel dark:text-app-dark-text dark:focus:border-app-dark-accent dark:focus:ring-app-dark-accent/20">
+                            {% for value, label in form.scoreboard_visibility.field.choices %}
+                                <option value="{{ value }}" {% if form.scoreboard_visibility.value() == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        {% if form.scoreboard_visibility.errors %}<div class="text-xs text-red-700 dark:text-red-500">{{ form.scoreboard_visibility.errors }}</div>{% endif %}
+                    </div>
+                    <div class="flex flex-col gap-2 rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90 lg:col-span-2">
+                        <label for="{{ form.private_contestants.id_for_label }}" class="text-sm font-bold text-app-text dark:text-app-dark-text">{{ form.private_contestants.label }}{% if form.private_contestants.field.required %}<span class="required-mark"> *</span>{% endif %}</label>
+                        {{ form.private_contestants }}
+                        {% if form.private_contestants.errors %}<div class="text-xs text-red-700 dark:text-red-500">{{ form.private_contestants.errors }}</div>{% endif %}
+                    </div>
+                    <div class="flex flex-col gap-2 rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90 lg:col-span-2">
+                        <label for="{{ form.organizations.id_for_label }}" class="text-sm font-bold text-app-text dark:text-app-dark-text">{{ form.organizations.label }}{% if form.organizations.field.required %}<span class="required-mark"> *</span>{% endif %}</label>
+                        {{ form.organizations }}
+                        {% if selected_organization %}<div class="text-xs text-app-text-muted dark:text-app-dark-text-muted">{{ _('Preselected from organization workspace.') }}</div>{% endif %}
+                        {% if form.organizations.errors %}<div class="text-xs text-red-700 dark:text-red-500">{{ form.organizations.errors }}</div>{% endif %}
+                    </div>
+                    <div class="flex flex-col gap-2 rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90 lg:col-span-2">
+                        <label for="{{ form.view_contest_scoreboard.id_for_label }}" class="text-sm font-bold text-app-text dark:text-app-dark-text">{{ form.view_contest_scoreboard.label }}{% if form.view_contest_scoreboard.field.required %}<span class="required-mark"> *</span>{% endif %}</label>
+                        {{ form.view_contest_scoreboard }}
+                        {% if form.view_contest_scoreboard.errors %}<div class="text-xs text-red-700 dark:text-red-500">{{ form.view_contest_scoreboard.errors }}</div>{% endif %}
+                    </div>
+                </div>
+            </section>
+
+            <section class="flex flex-col gap-5">
+                <div class="border-b border-app-border/80 pb-3 text-[0.78rem] font-extrabold uppercase tracking-[0.12em] text-app-text-muted dark:border-app-dark-border/80 dark:text-app-dark-text-muted">{{ _('Content') }}</div>
+                <div class="grid gap-5 lg:grid-cols-2">
+                    <div class="flex flex-col gap-2 rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90 lg:col-span-2">
+                        <label for="{{ form.summary.id_for_label }}" class="text-sm font-bold text-app-text dark:text-app-dark-text">{{ form.summary.label }}{% if form.summary.field.required %}<span class="required-mark"> *</span>{% endif %}</label>
+                        <textarea id="{{ form.summary.id_for_label }}" name="{{ form.summary.name }}" rows="3" class="rounded-2xl border border-app-border/80 bg-app-panel px-4 py-3 text-sm text-app-text transition focus:border-app-accent focus:outline-none focus:ring-4 focus:ring-app-accent/15 dark:border-app-dark-border/80 dark:bg-app-dark-panel dark:text-app-dark-text dark:focus:border-app-dark-accent dark:focus:ring-app-dark-accent/20">{{ form.summary.value() or '' }}</textarea>
+                        {% if form.summary.help_text %}<div class="text-xs text-app-text-muted dark:text-app-dark-text-muted">{{ form.summary.help_text }}</div>{% endif %}
+                        {% if form.summary.errors %}<div class="text-xs text-red-700 dark:text-red-500">{{ form.summary.errors }}</div>{% endif %}
+                    </div>
+                    <div class="flex flex-col gap-2 rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90 lg:col-span-2">
+                        <label for="{{ form.description.id_for_label }}" class="text-sm font-bold text-app-text dark:text-app-dark-text">{{ form.description.label }}{% if form.description.field.required %}<span class="required-mark"> *</span>{% endif %}</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}<div class="text-xs text-red-700 dark:text-red-500">{{ form.description.errors }}</div>{% endif %}
+                    </div>
+                </div>
+            </section>
+
+            <section class="flex flex-col gap-5">
+                <div class="border-b border-app-border/80 pb-3 text-[0.78rem] font-extrabold uppercase tracking-[0.12em] text-app-text-muted dark:border-app-dark-border/80 dark:text-app-dark-text-muted">{{ _('Problems') }}</div>
+                <div class="flex flex-col gap-4 rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90">
+                    <div class="flex items-center justify-between gap-3">
+                        <div>
+                            <div class="text-sm font-bold text-app-text dark:text-app-dark-text">{{ _('Problem stack') }}</div>
+                            <div class="text-xs text-app-text-muted dark:text-app-dark-text-muted">{{ _('Choose problems at the end of the form. Each row stays on one line on wide screens.') }}</div>
+                        </div>
+                        <button type="button" id="add-problem-row" class="inline-flex items-center justify-center rounded-2xl border border-app-border/80 px-4 py-2 text-sm font-semibold text-app-text transition hover:border-app-accent hover:text-app-accent dark:border-app-dark-border/80 dark:text-app-dark-text dark:hover:border-app-dark-accent dark:hover:text-app-dark-accent">{{ _('Add problem') }}</button>
+                    </div>
+
+                    {% if problem_formset.non_form_errors() %}
+                        {% for error in problem_formset.non_form_errors() %}
+                            <div class="rounded-2xl border border-red-300/70 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <div class="overflow-x-auto">
+                            <div class="min-w-6xl">
+                            <div class="grid grid-cols-[3.5rem_2.75rem_minmax(18rem,2.2fr)_6rem_8rem_7rem_7rem_7rem_12rem] gap-3 px-1 text-[0.72rem] font-extrabold uppercase tracking-[0.12em] text-app-text-muted dark:text-app-dark-text-muted">
+                                <div>{{ _('STT') }}</div>
+                                <div>{{ _('Move') }}</div>
+                                <div>{{ _('Problem') }}{% if problem_formset.empty_form.problem.field.required %}<span class="required-mark"> *</span>{% endif %}</div>
+                                <div>{{ _('Points') }}{% if problem_formset.empty_form.points.field.required %}<span class="required-mark"> *</span>{% endif %}</div>
+                                <div>{{ _('Max submissions') }}{% if problem_formset.empty_form.max_submissions.field.required %}<span class="required-mark"> *</span>{% endif %}</div>
+                                <div>{{ _('Limit problem') }}{% if problem_formset.empty_form.limit_problem.field.required %}<span class="required-mark"> *</span>{% endif %}</div>
+                                <div>{{ _('Partial') }}{% if problem_formset.empty_form.partial.field.required %}<span class="required-mark"> *</span>{% endif %}</div>
+                                <div>{{ _('Pretested') }}{% if problem_formset.empty_form.is_pretested.field.required %}<span class="required-mark"> *</span>{% endif %}</div>
+                                <div>{{ _('Action') }}</div>
+                            </div>
+
+                            <div id="contest-problem-list" class="mt-3 flex flex-col gap-2">
+                                {% for problem_form in problem_formset.forms %}
+                                    <div class="contest-problem-row rounded-2xl border border-app-border/70 bg-app-panel/90 p-2 dark:border-app-dark-border/70 dark:bg-app-dark-panel/90 {% if problem_form.DELETE.value() %}hidden{% endif %}">
+                                {% for hidden in problem_form.hidden_fields() %}{{ hidden }}{% endfor %}
+                                {{ problem_form.DELETE.as_widget(attrs={"class": "hidden"}) }}
+                                {{ problem_form.order.as_widget(attrs={"class": "hidden"}) }}
+                                <div class="grid grid-cols-[3.5rem_2.75rem_minmax(18rem,2.2fr)_6rem_8rem_7rem_7rem_7rem_12rem] items-center gap-3">
+                                    <div class="flex min-h-11 items-center justify-center rounded-2xl border border-app-border/70 bg-app-panel-elevated/90 px-3 text-sm font-bold text-app-text dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90 dark:text-app-dark-text">
+                                        <span class="problem-order-index">{{ loop.index }}</span>
+                                    </div>
+                                    <div class="flex items-center justify-center">
+                                        <button type="button" class="problem-drag-handle inline-flex min-h-11 min-w-11 items-center justify-center rounded-2xl border border-app-border/70 bg-app-panel-elevated/90 text-app-text-muted transition hover:border-app-accent/50 hover:text-app-accent dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90 dark:text-app-dark-text-muted dark:hover:border-app-dark-accent/50 dark:hover:text-app-dark-accent" aria-label="{{ _('Drag to reorder') }}">
+                                            <span class="problem-drag-dots" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span></span>
+                                        </button>
+                                    </div>
+                                    <div class="min-w-0">
+                                        {{ problem_form.problem }}
+                                        {% if problem_form.problem.errors %}<div class="text-xs text-red-700 dark:text-red-500">{{ problem_form.problem.errors }}</div>{% endif %}
+                                    </div>
+                                    <div class="min-w-0">
+                                        {{ problem_form.points.as_widget(attrs={"class": "min-h-11 w-full min-w-0 rounded-2xl border border-app-border/80 bg-app-panel px-3 py-2 text-sm text-app-text dark:border-app-dark-border/80 dark:bg-app-dark-panel dark:text-app-dark-text"}) }}
+                                        {% if problem_form.points.errors %}<div class="text-xs text-red-700 dark:text-red-500">{{ problem_form.points.errors }}</div>{% endif %}
+                                    </div>
+                                    <div class="min-w-0">
+                                        {{ problem_form.max_submissions.as_widget(attrs={"class": "min-h-11 w-full min-w-0 rounded-2xl border border-app-border/80 bg-app-panel px-3 py-2 text-sm text-app-text dark:border-app-dark-border/80 dark:bg-app-dark-panel dark:text-app-dark-text"}) }}
+                                        {% if problem_form.max_submissions.errors %}<div class="text-xs text-red-700 dark:text-red-500">{{ problem_form.max_submissions.errors }}</div>{% endif %}
+                                    </div>
+                                    <div class="min-w-0">
+                                        {{ problem_form.limit_problem.as_widget(attrs={"class": "min-h-11 w-full min-w-0 rounded-2xl border border-app-border/80 bg-app-panel px-3 py-2 text-sm text-app-text dark:border-app-dark-border/80 dark:bg-app-dark-panel dark:text-app-dark-text"}) }}
+                                        {% if problem_form.limit_problem.errors %}<div class="text-xs text-red-700 dark:text-red-500">{{ problem_form.limit_problem.errors }}</div>{% endif %}
+                                    </div>
+                                    <label for="{{ problem_form.partial.id_for_label }}" class="flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-app-border/70 bg-app-panel-elevated/90 px-3 py-2 text-sm font-semibold text-app-text dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90 dark:text-app-dark-text">
+                                        {{ problem_form.partial }}
+                                    </label>
+                                    <label for="{{ problem_form.is_pretested.id_for_label }}" class="flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-app-border/70 bg-app-panel-elevated/90 px-3 py-2 text-sm font-semibold text-app-text dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90 dark:text-app-dark-text">
+                                        {{ problem_form.is_pretested }}
+                                    </label>
+                                    <div class="flex items-center justify-center gap-2">
+                                        {% if object and problem_form.instance.pk and perms.judge.rejudge_submission %}
+                                            <button
+                                                type="submit"
+                                                formmethod="post"
+                                                formnovalidate
+                                                formaction="{{ url('contest_problem_rejudge', object.key, problem_form.instance.pk) }}"
+                                                onclick="return confirm('{{ _('Are you sure you want to rejudge ALL the submissions?')|escapejs }}');"
+                                                class="inline-flex min-h-11 items-center justify-center rounded-2xl border border-app-border/80 px-4 py-2 text-sm font-semibold text-app-text transition hover:border-app-accent hover:text-app-accent dark:border-app-dark-border/80 dark:text-app-dark-text dark:hover:border-app-dark-accent dark:hover:text-app-dark-accent"
+                                            >{{ _('Rejudge') }}</button>
+                                        {% endif %}
+                                        <button type="button" class="remove-problem-row inline-flex min-h-11 items-center justify-center rounded-2xl border border-red-300/70 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-50 dark:border-red-500/30 dark:text-red-300 dark:hover:bg-red-500/10">{{ _('Remove') }}</button>
+                                    </div>
+                                </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div class="mt-6 flex flex-col gap-3 border-t border-app-border/80 pt-5 dark:border-app-dark-border/80 sm:flex-row sm:justify-end">
+            <a href="{{ url('contest_list') }}" class="inline-flex items-center justify-center rounded-2xl border border-app-border/80 px-5 py-3 text-sm font-semibold text-app-text transition hover:border-app-accent hover:text-app-accent dark:border-app-dark-border/80 dark:text-app-dark-text dark:hover:border-app-dark-accent dark:hover:text-app-dark-accent">{{ _('Cancel') }}</a>
+            <button type="submit" class="inline-flex items-center justify-center rounded-2xl bg-app-accent px-5 py-3 text-sm font-bold text-white transition hover:brightness-110 dark:bg-app-dark-accent">{{ submit_label|default(_('Create contest')) }}</button>
+        </div>
+    </form>
+</div>
+
+<template id="contest-problem-empty-form">
+    <div class="contest-problem-row rounded-2xl border border-app-border/70 bg-app-panel/90 p-2 dark:border-app-dark-border/70 dark:bg-app-dark-panel/90">
+        {% for hidden in problem_formset.empty_form.hidden_fields() %}{{ hidden }}{% endfor %}
+        {{ problem_formset.empty_form.DELETE.as_widget(attrs={"class": "hidden"}) }}
+        {{ problem_formset.empty_form.order.as_widget(attrs={"class": "hidden"}) }}
+        <div class="grid grid-cols-[3.5rem_2.75rem_minmax(18rem,2.2fr)_6rem_8rem_7rem_7rem_7rem_12rem] items-center gap-3">
+            <div class="flex min-h-11 items-center justify-center rounded-2xl border border-app-border/70 bg-app-panel-elevated/90 px-3 text-sm font-bold text-app-text dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90 dark:text-app-dark-text">
+                <span class="problem-order-index">0</span>
+            </div>
+            <div class="flex items-center justify-center">
+                <button type="button" class="problem-drag-handle inline-flex min-h-11 min-w-11 items-center justify-center rounded-2xl border border-app-border/70 bg-app-panel-elevated/90 text-app-text-muted transition hover:border-app-accent/50 hover:text-app-accent dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90 dark:text-app-dark-text-muted dark:hover:border-app-dark-accent/50 dark:hover:text-app-dark-accent" aria-label="{{ _('Drag to reorder') }}">
+                    <span class="problem-drag-dots" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span></span>
+                </button>
+            </div>
+            <div class="min-w-0">
+                {{ problem_formset.empty_form.problem }}
+            </div>
+            <div class="min-w-0">
+                {{ problem_formset.empty_form.points.as_widget(attrs={"class": "min-h-11 w-full min-w-0 rounded-2xl border border-app-border/80 bg-app-panel px-3 py-2 text-sm text-app-text dark:border-app-dark-border/80 dark:bg-app-dark-panel dark:text-app-dark-text"}) }}
+            </div>
+            <div class="min-w-0">
+                {{ problem_formset.empty_form.max_submissions.as_widget(attrs={"class": "min-h-11 w-full min-w-0 rounded-2xl border border-app-border/80 bg-app-panel px-3 py-2 text-sm text-app-text dark:border-app-dark-border/80 dark:bg-app-dark-panel dark:text-app-dark-text"}) }}
+            </div>
+            <div class="min-w-0">
+                {{ problem_formset.empty_form.limit_problem.as_widget(attrs={"class": "min-h-11 w-full min-w-0 rounded-2xl border border-app-border/80 bg-app-panel px-3 py-2 text-sm text-app-text dark:border-app-dark-border/80 dark:bg-app-dark-panel dark:text-app-dark-text"}) }}
+            </div>
+            <label for="{{ problem_formset.empty_form.partial.id_for_label }}" class="flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-app-border/70 bg-app-panel-elevated/90 px-3 py-2 text-sm font-semibold text-app-text dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90 dark:text-app-dark-text">
+                {{ problem_formset.empty_form.partial }}
+            </label>
+            <label for="{{ problem_formset.empty_form.is_pretested.id_for_label }}" class="flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-app-border/70 bg-app-panel-elevated/90 px-3 py-2 text-sm font-semibold text-app-text dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90 dark:text-app-dark-text">
+                {{ problem_formset.empty_form.is_pretested }}
+            </label>
+            <div class="flex items-center justify-center">
+                <button type="button" class="remove-problem-row inline-flex min-h-11 items-center justify-center rounded-2xl border border-red-300/70 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-50 dark:border-red-500/30 dark:text-red-300 dark:hover:bg-red-500/10">{{ _('Remove') }}</button>
+            </div>
+        </div>
+    </div>
+</template>
+{% endblock %}
+
+{% block description_end %}{% endblock %}

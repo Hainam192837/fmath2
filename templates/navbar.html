@@ -1,0 +1,176 @@
+<div id="sidebar-backdrop" class="fixed inset-0 z-40 hidden bg-app-overlay dark:bg-app-dark-overlay lg:hidden" onclick="closeSidebar()"></div>
+
+<div id="sidebar" class="fixed top-16 left-0 z-50 h-full w-72 -translate-x-full overflow-y-auto border-r border-app-border dark:border-app-dark-border bg-app-panel-elevated dark:bg-app-dark-panel-elevated transition-transform duration-300 ease-in-out lg:hidden">
+    <div class="flex items-center justify-between border-b border-app-border dark:border-app-dark-border px-4 py-3">
+        <span class="section-title">Navigation</span>
+        <button onclick="closeSidebar()" class="btn-ghost rounded-lg px-2 py-2 lg:hidden" aria-label="Close sidebar">
+            <i class="fa fa-xmark text-lg"></i>
+        </button>
+    </div>
+    <ul class="flex flex-col gap-1 p-3">
+    {% for node in mptt_tree(nav_bar) recursive %}
+        {% if not node.is_admin or request.user.is_staff or request.user.is_superuser %}
+            {% if not node.is_leaf_node() %}
+            <li class="relative">
+                <a class="section-title block px-3 py-2 text-[0.72rem]" href="{{ node.path }}">
+                    {{ _(node.label) }}
+                </a>
+                <ul class="flex flex-col gap-1 pb-2">
+                    {% with children=node.get_children() %}
+                        {{ loop(children) }}
+                    {% endwith %}
+                </ul>
+            </li>
+            {% else %}
+            <li>
+                <a class="nav-link w-full justify-between" href="{{ node.path }}">
+                    <span>{{ _(node.label) }}</span>
+                    <i class="fa fa-angle-right text-xs opacity-60"></i>
+                </a>
+            </li>
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+    </ul>
+</div>
+
+<div class="sticky top-0 z-40 w-full border-b border-app-border dark:border-app-dark-border bg-app-panel/90 dark:bg-app-dark-panel/90 backdrop-blur-lg">
+    <div class="mx-auto max-w-8xl px-4 sm:px-6 md:px-8">
+        <div class="flex min-h-16 items-center gap-4 py-3">
+            <div class="size-px flex-1 flex items-center gap-3">
+                <button id="open_sidebar" aria-label="Open sidebar" onclick="openSidebar()" class="inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition focus:outline-none lg:hidden hover:bg-app-accent-soft dark:hover:bg-app-dark-accent-soft">
+                    <i class="fa-duotone fa-bars"></i>
+                </button>
+                <a class="flex items-center gap-3" href="{{ url('home') }}" aria-label="Home">
+                    <img src="{{ static('icons/logo.svg') }}" alt="" class="h-9 w-9">
+                    <span class="text-xl font-semibold tracking-[0.08em] text-app-text dark:text-app-dark-text">FMATH</span>
+                </a>
+            </div>
+
+            <div class="size-px flex-1 justify-center hidden items-center gap-2 lg:flex">
+                {% for tag, url, label in nav_tab %}
+                <a class="nav-link {% if nav_tag and nav_tag == tag %}nav-link-active{% endif %}" href="{{ url }}">{{ label }}</a>
+                {% endfor %}
+            </div>
+
+            <div class="size-px flex-1 justify-end flex items-center gap-2 md:gap-3">
+                <div class="relative group">
+                    <button aria-label="Change theme" class="btn-ghost rounded-xl px-3 py-2 text-app-text-secondary dark:text-app-dark-text-secondary" type="button">
+                        <span class="dark:hidden">
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+                                <path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" class="fill-sky-400/20 stroke-sky-500"></path>
+                                <path d="M12 4v1M17.66 6.344l-.828.828M20.005 12.004h-1M17.66 17.664l-.828-.828M12 20.01V19M6.34 17.664l.835-.836M3.995 12.004h1.01M6 6l.835.836" class="stroke-sky-500"></path>
+                            </svg>
+                        </span>
+                        <span class="hidden dark:inline">
+                            <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5">
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M17.715 15.15A6.5 6.5 0 0 1 9 6.035C6.106 6.922 4 9.645 4 12.867c0 3.94 3.153 7.136 7.042 7.136 3.101 0 5.734-2.032 6.673-4.853Z" class="fill-sky-400/20"></path>
+                                <path d="m17.715 15.15.95.316a1 1 0 0 0-1.445-1.185l.495.869ZM9 6.035l.846.534a1 1 0 0 0-1.14-1.49L9 6.035Zm8.221 8.246a5.47 5.47 0 0 1-2.72.718v2a7.47 7.47 0 0 0 3.71-.98l-.99-1.738Zm-2.72.718A5.5 5.5 0 0 1 9 9.5H7a7.5 7.5 0 0 0 7.5 7.5v-2ZM9 9.5c0-1.079.31-2.082.845-2.93L8.153 5.5A7.47 7.47 0 0 0 7 9.5h2Zm-4 3.368C5 10.089 6.815 7.75 9.292 6.99L8.706 5.08C5.397 6.094 3 9.201 3 12.867h2Zm6.042 6.136C7.718 19.003 5 16.268 5 12.867H3c0 4.48 3.588 8.136 8.042 8.136v-2Zm5.725-4.17c-.81 2.433-3.074 4.17-5.725 4.17v2c3.552 0 6.553-2.327 7.622-5.537l-1.897-.632Z" class="fill-sky-500"></path>
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M17 3a1 1 0 0 1 1 1 2 2 0 0 0 2 2 1 1 0 1 1 0 2 2 2 0 0 0-2 2 1 1 0 1 1-2 0 2 2 0 0 0-2-2 1 1 0 1 1 0-2 2 2 0 0 0 2-2 1 1 0 0 1 1-1Z" class="fill-sky-500"></path>
+                            </svg>
+                        </span>
+                    </button>
+                    <div id="menu_theme" class="panel-elevated absolute right-0 z-50 hidden min-w-36 flex-col gap-1 p-1 group-hover:flex">
+                        <button class="nav-link w-full justify-start" id="light_button" onclick="change_theme('light')" aria-label="Switch to light theme">
+                            <span>Light</span>
+                        </button>
+                        <button class="nav-link w-full justify-start" id="dark_button" onclick="change_theme('dark')" aria-label="Switch to dark theme">
+                            <span>Dark</span>
+                        </button>
+                        <button class="nav-link w-full justify-start" id="system_button" onclick="change_theme('system')" aria-label="Switch to system theme">
+                            <span>System</span>
+                        </button>
+                    </div>
+                </div>
+
+                {% if request.user.is_authenticated %}
+                <div class="relative group">
+                    <a href="{{ url('user_page') }}" class="flex items-center gap-2 rounded-xl border border-app-border dark:border-app-dark-border bg-app-panel-elevated dark:bg-app-dark-panel-elevated px-2 py-1.5">
+                        <img loading="lazy" src="{{ gravatar(request.user, 80) }}" alt="{{ request.user.username }}" class="h-9 w-9 rounded-full">
+                        <span class="hidden text-sm font-medium text-app-text dark:text-app-dark-text lg:inline">{{ request.user.username }}</span>
+                    </a>
+                    <ul class="panel-elevated absolute right-0 hidden min-w-52 flex-col overflow-hidden p-1 group-hover:flex">
+                        <li class="rounded-lg px-4 py-3 text-sm text-app-text-secondary dark:text-app-dark-text-secondary">
+                            {%- trans username=request.user.username -%}
+                                Hello, <b>{{ username }}</b>
+                            {%- endtrans %}
+                        </li>
+                        {% if request.user.is_staff or request.user.is_superuser %}
+                        <li><a href="{{ url('admin:index') }}" class="nav-link w-full justify-start">{{ _('Admin') }}</a></li>
+                        {% endif %}
+                        {% if request.user.is_superuser %}
+                        <li><a href="{{ url('list_module') }}" class="nav-link w-full justify-start">{{ _('Modules') }}</a></li>
+                        {% endif %}
+                        <li><a href="{{ url('user_edit_profile') }}" class="nav-link w-full justify-start">{{ _('Edit profile') }}</a></li>
+                        {% if request.user.is_impersonate %}
+                        <li><a href="{{ url('impersonate-stop') }}" class="nav-link w-full justify-start" aria-label="Stop impersonating">Stop impersonating</a></li>
+                        {% else %}
+                        <li><a href="{{ url('auth_logout') }}" class="nav-link w-full justify-start" aria-label="Logout">{{ _('Logout') }}</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                {% else %}
+                <a href="{{ url('auth_login') }}?next={{ LOGIN_RETURN_PATH|urlencode }}" class="btn-ghost" aria-label="Login">{{ _('Login') }}</a>
+                <a href="{{ url('registration_register') }}" class="btn-primary" aria-label="Register">{{ _('Register') }}</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var light_button = document.querySelector('#light_button');
+    var dark_button = document.querySelector('#dark_button');
+    var system_button = document.querySelector('#system_button');
+
+    if (localStorage.theme === 'dark') {
+        dark_button.classList.add('nav-link-active');
+    }
+    if (localStorage.theme === 'light') {
+        light_button.classList.add('nav-link-active');
+    }
+    if (!('theme' in localStorage)) {
+        system_button.classList.add('nav-link-active');
+    }
+
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark')
+    } else {
+        document.documentElement.classList.remove('dark')
+    }
+
+    function openSidebar() {
+        document.querySelector('#sidebar').classList.remove('-translate-x-full');
+        document.querySelector('#sidebar-backdrop').classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+    }
+    function closeSidebar() {
+        document.querySelector('#sidebar').classList.add('-translate-x-full');
+        document.querySelector('#sidebar-backdrop').classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+    }
+
+    function change_theme(s) {
+        light_button.classList.remove('nav-link-active');
+        dark_button.classList.remove('nav-link-active');
+        system_button.classList.remove('nav-link-active');
+        if (s === 'light') {
+            localStorage.theme = 'light';
+            light_button.classList.add('nav-link-active');
+        }
+        if (s === 'dark'){
+            localStorage.theme = 'dark';
+            dark_button.classList.add('nav-link-active');
+        }
+        if (s === 'system') {
+            localStorage.removeItem('theme');
+            system_button.classList.add('nav-link-active');
+        }
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark')
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+    }
+
+</script>

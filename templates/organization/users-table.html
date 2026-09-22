@@ -1,0 +1,37 @@
+{% extends "user/users-table.html" %}
+
+{% block after_rank_head %}
+    {% if request.user.is_superuser %}
+    <th class="header">{{ _('ID') }}</th>
+    {% endif %}
+    {{ super() }}
+{% endblock %}
+
+{% block after_rank %}
+    {% if request.user.is_superuser %}
+    <td class="font-semibold text-rose-500">
+        {{ user.id }}
+    </td>
+    {% endif %}
+    {{ super() }}
+{% endblock %}
+
+{% block before_point_head %}
+    {% if is_admin %}
+        <th class="header w-28 text-center">{{ _('Action') }}</th>
+    {% endif %}
+{% endblock %}
+
+{% block before_point %}
+    {% if is_admin %}
+        <td class="text-center">
+            {% if user.user.id != request.user.id %}
+            <form action="{{ kick_url }}" method="POST" class="kick-form inline-flex">
+                {% csrf_token %}
+                <input type="hidden" name="user" value="{{ user.id }}">
+                <a href="javascript:void(0)" class="kick-button rounded-lg bg-rose-600 px-3 py-2 text-xs font-bold uppercase tracking-[0.15em] text-white">{{ _('Kick') }}</a>
+            </form>
+            {% endif %}
+        </td>
+    {% endif %}
+{% endblock %}

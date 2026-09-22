@@ -1,0 +1,104 @@
+{% extends "common-content.html" %}
+
+{% block title_ruler %}{% endblock %}
+
+{% block title_row %}
+    {% set tab = 'moss' %}
+    {% set title = contest.name %}
+    {% include "contest/contest-tabs.html" %}
+{% endblock %}
+
+{% block content_js_media %}
+    <script type="text/javascript">
+        $(function () {
+            $('.contest-moss').click(function () {
+                return confirm('{{ _("Are you sure you want MOSS the contest?") }}');
+            });
+            $('.contest-moss-delete').click(function () {
+                return confirm('{{ _("Are you sure you want to delete the MOSS results?") }}');
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block body %}
+    <div class="space-y-6 py-4">
+
+        {# ── Results table ────────────────────────────────────────── #}
+        {% if has_results %}
+            <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg">
+                <table class="w-full text-sm text-left">
+                    <thead>
+                        <tr class="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 uppercase tracking-wide text-xs border-b border-gray-200 dark:border-gray-700">
+                            <th class="px-4 py-3 font-semibold">{{ _('Problem') }}</th>
+                            {% for lang in languages %}
+                                <th class="px-4 py-3 font-semibold text-center">{{ lang }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-700/60">
+                        {% for problem, results in moss_results %}
+                            <tr id="problem-{{ problem.code }}"
+                                class="{% if loop.index is odd %}bg-white dark:bg-gray-900{% else %}bg-gray-50 dark:bg-gray-900/50{% endif %} hover:bg-gray-100 dark:hover:bg-gray-800/70 transition-colors duration-150">
+                                <td class="px-4 py-3">
+                                    <a href="{{ url('problem_detail', problem.code) }}"
+                                       class="font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 transition-colors">
+                                        {{ problem.name }}
+                                    </a>
+                                </td>
+                                {% for result in results %}
+                                    <td class="px-4 py-3 text-center">
+                                        {% if result.submission_count %}
+                                            <a href="{{ result.url }}"
+                                               class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold
+                                                      bg-amber-100 dark:bg-amber-500/15 text-amber-700 dark:text-amber-400 hover:bg-amber-200 dark:hover:bg-amber-500/25 border border-amber-300 dark:border-amber-500/30
+                                                      transition-colors">
+                                                <i class="fa fa-file-code text-[10px]"></i>
+                                                {{ result.submission_count }} {{ _('submissions') }}
+                                            </a>
+                                        {% else %}
+                                            <span class="text-gray-400 dark:text-gray-500 text-xs">{{ _('No submissions') }}</span>
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="flex flex-col items-center justify-center gap-3 py-12 rounded-xl border border-dashed border-gray-300 dark:border-gray-700 text-gray-400 dark:text-gray-500">
+                <i class="fa fa-gavel text-4xl opacity-30"></i>
+                <p class="text-sm">{{ _('No MOSS results yet. Run MOSS to check for plagiarism.') }}</p>
+            </div>
+        {% endif %}
+
+        {# ── Action buttons ───────────────────────────────────────── #}
+        <div class="flex flex-wrap items-center gap-3">
+            <form method="post" action="{{ url('contest_moss', contest.key) }}">
+                {% csrf_token %}
+                <button type="submit"
+                        class="contest-moss inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-sm
+                               bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700
+                               text-white shadow-md shadow-indigo-500/20 transition-colors duration-150 cursor-pointer">
+                    <i class="fa fa-gavel"></i>
+                    {% if has_results %}{{ _('Re-MOSS contest') }}{% else %}{{ _('MOSS contest') }}{% endif %}
+                </button>
+            </form>
+
+            {% if has_results %}
+                <form method="post" action="{{ url('contest_moss_delete', contest.key) }}">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="contest-moss-delete inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-sm
+                                   bg-red-700/80 hover:bg-red-600 active:bg-red-800
+                                   text-white shadow-md shadow-red-500/20 transition-colors duration-150 cursor-pointer">
+                        <i class="fa fa-trash"></i>
+                        {{ _('Delete MOSS results') }}
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+
+    </div>
+{% endblock %}

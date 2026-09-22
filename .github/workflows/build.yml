@@ -1,0 +1,59 @@
+name: build
+on: [push, pull_request]
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.12'
+    - name: Install Ruff
+      run: pip install ruff
+    - name: Lint with Ruff
+      run: |
+        ruff --version
+        ruff check .
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.12'
+    - name: Cache pip
+      uses: actions/cache@v5
+      with:
+        path: ~/.cache/pip
+        key: pip-${{ runner.os }}-${{ secrets.CACHE_VERSION }}-${{ hashFiles('requirements.txt') }}
+    - name: Install unit test dependencies
+      run: |
+        pip install wheel
+        pip install -r requirements.txt
+        pip install mysqlclient coverage
+        cp .ci.settings.py tmath/local_settings.py
+    - name: Start MySQL
+      run: sudo systemctl start mysql.service
+    - name: Run unit tests
+      run: coverage run --source=. manage.py test judge
+    - name: Generate coverage report
+      run: coverage xml
+    - uses: codecov/codecov-action@v5
+  styles:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Set up Node 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - name: Install npm packages
+        run: | 
+          npm install tailwindcss @tailwindcss/cli
+          npm install -D @tailwindcss/forms
+          npm install -D @tailwindcss/typography
+
+      - name: Build style.css
+        run: npx @tailwindcss/cli -i resources/main.css -o resources/full_style.css

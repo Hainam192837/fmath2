@@ -1,0 +1,97 @@
+{% extends "user/base-users.html" %}
+
+{% block users_media %}
+    <style>
+        #search-form {
+            width: 100%;
+        }
+    </style>
+{% endblock %}
+
+{% block title_ruler %}{% endblock %}
+
+{% block title_row %}
+    {% set tab = 'list' %}
+    {% set title = 'Leaderboard' %}
+    {% include "user/user-list-tabs.html" %}
+{% endblock %}
+
+{% block before_body %}
+<section class="hidden lg:block">
+    <div class="mb-8 flex items-end justify-between gap-6">
+        <div>
+            <div class="section-title">{{ _('Leaderboard') }}</div>
+            <div class="section-heading mt-2">{{ _('Top Users') }}</div>
+        </div>
+        <div class="status-badge status-badge-info">
+            {{ _('Top performers by performance points') }}
+        </div>
+    </div>
+
+    <div class="grid grid-cols-3 gap-6 px-2 xl:px-4">
+        <div class="panel p-5">
+            <div class="metric-muted">{{ _('Rank #2') }}</div>
+            <div class="metric mt-3 text-3xl">{{ silver.performance_points|floatformat(0) }}p</div>
+            <div class="mt-6 flex items-center gap-4">
+                <img loading="lazy" src="{{ gravatar(silver.user, 200) }}" class="h-16 w-16 rounded-full" alt="">
+                <div>
+                    <div class="text-xl font-semibold text-app-text dark:text-app-dark-text">{% if silver.name %}{{ silver.name }}{% else %}{{ silver.username }}{% endif %}</div>
+                    <div class="text-sm text-app-text-muted dark:text-app-dark-text-muted">@{{ silver.username }}</div>
+                </div>
+            </div>
+            <div class="mt-5 flex items-center justify-between gap-4 border-t border-app-border dark:border-app-dark-border pt-4">
+                <div class="text-2xl font-bold"><span class="rating {{ rating_class(silver) }}">{{ silver.rating or '' }}</span></div>
+                <a href="{{ url('user_page', silver.username) }}" class="btn-secondary">{{ _('View profile') }}</a>
+            </div>
+        </div>
+
+        <div class="panel-elevated border border-app-border-interactive dark:border-app-dark-border-interactive p-5">
+            <div class="status-badge status-badge-ac">{{ _('Rank #1') }}</div>
+            <div class="metric mt-3 text-3xl">{{ gold.performance_points|floatformat(0) }}p</div>
+            <div class="mt-6 flex items-center gap-4">
+                <img loading="lazy" src="{{ gravatar(gold.user, 200) }}" class="h-18 w-18 rounded-full border border-app-border-interactive dark:border-app-dark-border-interactive" alt="">
+                <div>
+                    <div class="text-2xl font-semibold text-app-text dark:text-app-dark-text">{% if gold.name %}{{ gold.name }}{% else %}{{ gold.username }}{% endif %}</div>
+                    <div class="text-sm text-app-text-muted dark:text-app-dark-text-muted">@{{ gold.username }}</div>
+                </div>
+            </div>
+            <div class="mt-5 flex items-center justify-between gap-4 border-t border-app-border dark:border-app-dark-border pt-4">
+                <div class="text-2xl font-bold"><span class="rating {{ rating_class(gold) }}">{{ gold.rating or '' }}</span></div>
+                <a href="{{ url('user_page', gold.username) }}" class="btn-primary">{{ _('View profile') }}</a>
+            </div>
+        </div>
+
+        <div class="panel p-5">
+            <div class="metric-muted">{{ _('Rank #3') }}</div>
+            <div class="metric mt-3 text-3xl">{{ bronze.performance_points|floatformat(0) }}p</div>
+            <div class="mt-6 flex items-center gap-4">
+                <img loading="lazy" src="{{ gravatar(bronze.user, 200) }}" class="h-16 w-16 rounded-full" alt="">
+                <div>
+                    <div class="text-xl font-semibold text-app-text dark:text-app-dark-text">{% if bronze.name %}{{ bronze.name }}{% else %}{{ bronze.username }}{% endif %}</div>
+                    <div class="text-sm text-app-text-muted dark:text-app-dark-text-muted">@{{ bronze.username }}</div>
+                </div>
+            </div>
+            <div class="mt-5 flex items-center justify-between gap-4 border-t border-app-border dark:border-app-dark-border pt-4">
+                <div class="text-2xl font-bold"><span class="rating {{ rating_class(bronze) }}">{{ bronze.rating or '' }}</span></div>
+                <a href="{{ url('user_page', bronze.username) }}" class="btn-secondary">{{ _('View profile') }}</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<nav class="panel mb-4 mt-10 hidden items-center gap-6 px-6 py-5 lg:flex">
+    <div class="min-w-0 flex-[1.4]">
+        <div class="section-title">{{ _('Directory') }}</div>
+        <div class="mt-1 text-3xl font-bold text-app-text dark:text-app-dark-text">{{ _('All Users') }}</div>
+    </div>
+    <div class="flex-1">
+        <form id="search-form" name="form" action="{{ url('user_ranking_redirect') }}" method="get" class="w-full">
+            <input type="search" id="search-handle" name="search" placeholder="{{ _('Search by handle...') }}" class="input-base w-full">
+        </form>
+    </div>
+</nav>
+{% endblock before_body %}
+
+{% block users_table %}
+    {% include "user/users-table.html" %}
+{% endblock %}

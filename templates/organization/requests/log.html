@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block body %}
+    {% include "organization/requests/tabs.html" %}
+
+    <div class="panel p-4 md:p-5">
+        {% if requests %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full table-fixed overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700">
+                    <thead class="bg-slate-900 text-white">
+                        <tr class="divide-x divide-slate-700 *:p-3 *:text-left *:text-sm *:font-semibold">
+                            <th>{{ _('User') }}</th>
+                            <th>{{ _('Admin') }}</th>
+                            <th>{{ _('Time') }}</th>
+                            <th>{{ _('State') }}</th>
+                            <th class="w-1/2">{{ _('Reason') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 bg-white dark:divide-slate-700 dark:bg-zinc-900">
+                        {% for r in requests %}
+                            <tr id="request-{{ r.id }}" class="divide-x divide-slate-200 dark:divide-slate-700">
+                                <td class="p-3 align-top">{{ link_user(r.user) }}</td>
+                                <td class="p-3 align-top">{% if r.admin %}{{ link_user(r.admin) }}{% endif %}</td>
+                                <td class="p-3 align-top">
+                                    <a class="font-medium text-sky-600 hover:text-sky-700 dark:text-sky-300 dark:hover:text-sky-200"
+                                       href="{{ url('request_organization_detail', object.id, object.slug, r.id) }}">
+                                        {{- r.time|date(_("N j, Y, H:i")) -}}
+                                    </a>
+                                </td>
+                                <td class="p-3 align-top">{{ r.state }}</td>
+                                <td class="p-3 align-top text-sm text-slate-600 dark:text-slate-300">{{ r.reason|truncatechars(100) }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-12 text-center text-slate-500 dark:border-slate-700 dark:bg-zinc-900 dark:text-slate-400">
+                {{ _('There are no requests to approve.') }}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

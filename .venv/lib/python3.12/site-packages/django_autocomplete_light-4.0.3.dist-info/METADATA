@@ -1,0 +1,120 @@
+Metadata-Version: 2.4
+Name: django-autocomplete-light
+Version: 4.0.3
+Summary: Fresh autocompletes for Django
+Author-email: James Pic <jamespic@gmail.com>
+License: MIT
+Project-URL: Homepage, http://django-autocomplete-light.rtfd.org
+Project-URL: Source, https://github.com/yourlabs/django-autocomplete-light
+Keywords: django,autocomplete
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Django
+Classifier: Framework :: Django :: 4.2
+Classifier: Framework :: Django :: 5.2
+Classifier: Framework :: Django :: 6.0
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Programming Language :: Python :: 3.14
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires-Python: >=3.11
+Description-Content-Type: text/x-rst
+License-File: LICENSE
+License-File: AUTHORS
+Requires-Dist: django>=4.2
+Provides-Extra: nested
+Requires-Dist: django-nested-admin>=3.0.21; extra == "nested"
+Provides-Extra: tags
+Requires-Dist: django-taggit; extra == "tags"
+Provides-Extra: gfk
+Requires-Dist: django-querysetsequence>=0.11; extra == "gfk"
+Dynamic: license-file
+
+.. image:: https://img.shields.io/pypi/dm/django-autocomplete-light.svg
+   :target: https://pypi.python.org/pypi/django-autocomplete-light
+.. image:: https://badge.fury.io/py/django-autocomplete-light.png
+   :target: http://badge.fury.io/py/django-autocomplete-light
+.. image:: https://codecov.io/github/yourlabs/django-autocomplete-light/coverage.svg?branch=master
+    :target: https://codecov.io/github/yourlabs/django-autocomplete-light?branch=master
+
+Features
+--------
+
+- **Python 3.11–3.14 and Django 4.2–6.0+ support**
+- Django (multiple) choice support,
+- Django (multiple) model choice support,
+- Django generic foreign key support (through django-querysetsequence),
+- Multiple widget support: select2.js, easy to add more.
+- Creating choices that don't exist in the autocomplete,
+- Offering choices that depend on other fields in the form, in an elegant and
+  innovative way,
+- Dynamic widget creation (ie. inlines), supports YOUR custom scripts too,
+- Provides a test API for your awesome autocompletes, to support YOUR custom
+  use cases too,
+- A documented automatically tested example for each use case in test_project.
+
+Upgrade from 3.12.1 to 4.0.0
+----------------------------
+
+DAL 4.0.0 is a breaking release focused on modern supported runtimes and
+removing unmaintained integration packages.
+
+Before upgrading, make sure your application runs on Python 3.11 or newer and
+Django 4.2 or newer. Then upgrade the package::
+
+    pip install -U "django-autocomplete-light<5"
+
+If you use optional integrations, install the matching extra explicitly::
+
+    pip install -U "django-autocomplete-light[gfk]<5"     # GenericForeignKey support
+    pip install -U "django-autocomplete-light[tags]<5"    # django-taggit support
+    pip install -U "django-autocomplete-light[nested]<5"  # django-nested-admin support
+
+Remove the following packages from ``INSTALLED_APPS`` and imports; they are no
+longer shipped in DAL 4.0.0:
+
+- ``dal_genericm2m``
+- ``dal_genericm2m_queryset_sequence``
+- ``dal_gm2m``
+- ``dal_gm2m_queryset_sequence``
+- ``dal_select2_tagging``
+- ``dal_legacy_static``
+
+The ``genericm2m`` extra was removed. Generic foreign key support remains
+available through ``django-autocomplete-light[gfk]`` and
+``dal_queryset_sequence``. django-taggit support remains available through
+``django-autocomplete-light[tags]`` and ``dal_select2_taggit``.
+
+If your deployment or packaging scripts build DAL from source, switch from
+``setup.py`` entry points to the PEP 517 build backend::
+
+    python -m build
+
+After upgrading, test forms that render existing Select2 values, multiple
+Select2 submissions, clearable placeholders, HTMX swaps, and any custom
+``attrs=None`` widget construction. These areas changed between 3.12.1 and
+4.0.0.
+
+Resources
+---------
+
+- `**Documentation** graciously hosted
+  <http://django-autocomplete-light.rtfd.org>`_ by `RTFD
+  <http://rtfd.org>`_
+- `Mailing list graciously hosted
+  <http://groups.google.com/group/yourlabs>`_ by `Google
+  <http://groups.google.com>`_
+- For **Security** issues, please contact security@<our github group name>.org
+- `Git graciously hosted
+  <https://github.com/yourlabs/django-autocomplete-light/>`_ by `GitHub
+  <http://github.com>`_,
+- `Package graciously hosted
+  <http://pypi.python.org/pypi/django-autocomplete-light/>`_ by `PyPi
+  <http://pypi.python.org/pypi>`_,

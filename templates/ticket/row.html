@@ -1,0 +1,23 @@
+<tr id="ticket-{{ ticket.id }}">
+    <td>
+        {% if ticket.is_open %}
+            <span class="status-badge status-badge-wa">
+                <i class="fa fa-circle-exclamation text-[0.65rem]"></i>
+                {{ _('Open') }}
+            </span>
+        {% else %}
+            <span class="status-badge status-badge-ac">
+                <i class="fa fa-circle-check text-[0.65rem]"></i>
+                {{ _('Closed') }}
+            </span>
+        {% endif %}
+    </td>
+    <td class="metric">#{{ ticket.id }}</td>
+    <td class="min-w-64">
+        <a href="{{ url('ticket', ticket.id) }}" class="font-semibold text-app-accent hover:text-app-accent-strong dark:text-app-dark-accent dark:hover:text-app-dark-accent-strong">
+            {{ ticket.title }}
+        </a>
+    </td>
+    <td class="hidden text-app-text-secondary dark:text-app-dark-text-secondary md:table-cell">{{ link_user(ticket.user) }}</td>
+    <td class="hidden text-app-text-secondary dark:text-app-dark-text-secondary lg:table-cell">{{ link_users(ticket.assignees.all()) }}</td>
+</tr>

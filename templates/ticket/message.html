@@ -1,0 +1,29 @@
+<section id="message-{{ message.id }}" class="flex gap-4">
+    {# Avatar / username #}
+    <div class="shrink-0 flex flex-col items-center gap-1 w-16">
+        <a href="{{ url('user_page', message.user.user.username) }}">
+            <img loading="lazy" src="{{ gravatar(message.user, 80) }}"
+                 class="w-12 h-12 rounded-full ring-2 ring-gray-200 dark:ring-gray-700">
+        </a>
+        <span class="text-xs font-medium {{ message.user.css_class }} truncate max-w-full text-center">
+            {{ message.user.user.username }}
+        </span>
+    </div>
+    {# Bubble #}
+    <div class="flex-1 min-w-0 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div class="flex items-center justify-between px-4 py-2
+                    bg-gray-50 dark:bg-gray-800
+                    border-b border-gray-200 dark:border-gray-700
+                    text-xs text-gray-500 dark:text-gray-400">
+            <span class="relative-time"></span>
+            <span class="flex items-center gap-1">
+                <i class="fa fa-clock text-[10px]"></i>
+                <span class="message-date">{{ message.time|date('DATE_FORMAT') }}</span>
+                <span class="message-time">{{ message.time|time('TIME_FORMAT') }}</span>
+            </span>
+        </div>
+        <div class="px-4 py-3 text-sm text-gray-800 dark:text-gray-200 content-description prose prose-sm dark:prose-invert max-w-none">
+            {{ message.body|markdown('ticket', MATH_ENGINE)|reference|str|safe }}
+        </div>
+    </div>
+</section>

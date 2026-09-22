@@ -1,0 +1,71 @@
+{% extends "common-content.html" %}
+
+{% block content_js_media %}
+    {% include "comments/media-js.html" %}
+{% endblock %}
+
+{% block content_media %}
+    {% include "comments/media-css.html" %}
+{% endblock %}
+
+{% block header %}
+    {% if problem.is_editable_by(request.user) %}
+        <div class="flex items-center">
+            <a href="{{ url('problem_editorial_edit', problem.code) }}" class="btn-secondary">{{ _('Edit editorial') }}</a>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block body %}
+    <div class="mt-6 flex flex-col gap-6">
+        <div class="panel panel-elevated flex flex-col gap-5 p-5 md:p-6">
+            <div class="flex flex-col gap-2 border-b border-app-border pb-4 dark:border-app-dark-border">
+                <div class="section-title text-app-accent dark:text-app-dark-accent">{{ _('Editorial') }}</div>
+                <div class="text-sm text-app-text-secondary dark:text-app-dark-text-secondary">
+                    {{ _('Read the intended approach and key ideas behind this problem.') }}
+                </div>
+            </div>
+
+        {% if not has_solved_problem %}
+            <div class="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-200">
+                {{ _('Remember to use this editorial <b>only</b> when stuck, and <b>not to copy-paste code from it</b>. Please be respectful to the problem author and editorialist. <br><br> <b>Submitting an official solution before solving the problem yourself is a bannable offence.</b>') }}
+            </div>
+        {% endif %}
+
+        {% with authors=solution.authors.all() %}
+            {% if authors %}
+                <div class="rounded-2xl border border-app-border bg-app-panel/60 px-4 py-3 text-sm dark:border-app-dark-border dark:bg-app-dark-panel/60">
+                    <span class="font-semibold text-app-text dark:text-app-dark-text">
+                        {% trans trimmed count=authors|length %}
+                            Author:
+                        {% pluralize %}
+                            Authors:
+                        {% endtrans %}
+                    </span>
+                    <span class="text-app-text-secondary dark:text-app-dark-text-secondary">
+                        {{ link_users(authors) }}
+                    </span>
+                </div>
+            {% endif %}
+        {% endwith %}
+
+            <div class="rounded-2xl border border-app-border bg-white p-5 transition-colors dark:border-app-dark-border dark:bg-dark-content md:p-6">
+                <div class="custom-typography prose-td:font-roboto text-app-text dark:text-app-dark-text">
+                    {{ solution.content|markdown(solution.markdown_style, MATH_ENGINE)|reference|str|safe }}
+                </div>
+            </div>
+        </div>
+
+        <hr class="border-app-border dark:border-app-dark-border">
+
+        {% include "comments/list.html" %}
+    </div>
+{% endblock %}
+
+{% block bodyend %}
+    {% if REQUIRE_JAX %}
+        {% include "mathjax-load.html" %}
+    {% endif %}
+    {% include "comments/math.html" %}
+    {% include "copybuttonload.html" %}
+{% endblock %}

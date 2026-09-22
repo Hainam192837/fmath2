@@ -1,0 +1,151 @@
+{% extends "user/base-contest-rank-table.html" %}
+
+{% macro problem_cell_classes(has_data) -%}
+    {%- if not has_data -%}
+        border-slate-200 bg-slate-50/40 text-slate-400 dark:border-slate-800 dark:bg-slate-900/30 dark:text-slate-600
+    {%- else -%}
+        border-slate-200 bg-white text-slate-700 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200
+    {%- endif -%}
+{%- endmacro %}
+
+{% macro problem_score_pill_classes(state, has_data) -%}
+    {%- if not has_data -%}
+        border-dashed border-current/20 bg-transparent text-slate-400 dark:text-slate-600
+    {%- elif state == 'full-score' -%}
+        bg-emerald-200 text-emerald-900 dark:bg-emerald-900/80 dark:text-emerald-200
+    {%- elif state == 'partial-score' -%}
+        bg-amber-200 text-amber-900 dark:bg-amber-900/80 dark:text-amber-200
+    {%- elif state == 'failed-score' -%}
+        bg-rose-200 text-rose-900 dark:bg-rose-900/80 dark:text-rose-200
+    {%- elif state == 'pretest-full-score' -%}
+        bg-sky-200 text-sky-900 dark:bg-sky-900/80 dark:text-sky-200
+    {%- elif state == 'pretest-partial-score' -%}
+        bg-indigo-200 text-indigo-900 dark:bg-indigo-900/80 dark:text-indigo-200
+    {%- elif state == 'pretest-failed-score' -%}
+        bg-fuchsia-200 text-fuchsia-900 dark:bg-fuchsia-900/80 dark:text-fuchsia-200
+    {%- else -%}
+        bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-100
+    {%- endif -%}
+{%- endmacro %}
+
+{% macro render_problem_cell(cell) -%}
+    {% set state = cell.state or 'unsubmitted' %}
+    <td
+        class="size-px border-r relative px-0.5 py-0.5 text-center align-middle {{ problem_cell_classes(cell.has_data) }}"
+        data-problem="{{ cell.problem if cell.has_data else '' }}"
+        data-state="{{ state }}"
+        data-time="{{ cell.time if cell.has_data else '' }}"
+    >
+        {% if cell.has_data %}
+            <a href="{{ cell.url }}" class="flex min-h-[2.15rem] flex-col items-center justify-center gap-0.5 rounded-md px-0.5 py-0.5 transition hover:bg-slate-100/80 dark:hover:bg-white/5">
+                <div data-score-pill class="flex h-8 w-12 items-center justify-center rounded-full px-0.5 {{ problem_score_pill_classes(state, cell.has_data) }}">
+                    <span class="text-sm font-extrabold leading-none">{{ cell.points }}</span>
+                    {% if cell.bonus %}
+                        <span class="rounded-full bg-white/70 px-1 py-0.5 text-[0.58rem] font-bold leading-none text-emerald-700 dark:bg-white/10 dark:text-emerald-300">
+                            +{{ cell.bonus }}
+                        </span>
+                    {% endif %}
+                </div>
+                {% if cell.time or cell.penalty != -1 %}
+                    <div class="flex items-center gap-1 text-[0.58rem] font-semibold leading-none tracking-[0.04em]">
+                        {% if cell.time %}
+                            <span class="solving-time text-slate-500 dark:text-slate-400">{{ cell.time }}</span>
+                        {% endif %}
+                        {% if cell.penalty != -1 %}
+                            <span class="text-rose-500 dark:text-rose-300">({{ cell.penalty }})</span>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </a>
+        {% else %}
+            <div class="flex min-h-[2.15rem] flex-col items-center justify-center gap-0.5 rounded-md px-0.5 py-0.5">
+                <div class="flex h-8 w-12 items-center justify-center rounded-md border text-[0.55rem] font-semibold uppercase tracking-[0.08em] {{ problem_score_pill_classes(state, cell.has_data) }}">
+                    -
+                </div>
+            </div>
+        {% endif %}
+    </td>
+{%- endmacro %}
+
+{% block after_rank_head %}
+    {% if has_rating %}
+        <th class="size-px border-b border-slate-200 bg-slate-50/95 px-2 py-2.5 text-center font-bold dark:border-slate-800 dark:bg-slate-900/95 rating-column">{{ _('Rating') }}</th>
+    {% endif %}
+    <th class="hidden size-px border-b border-slate-200 bg-slate-50/95 px-2 py-2.5 text-center font-bold dark:border-slate-800 dark:bg-slate-900/95 organization-column">{{ _('Organization') }}</th>
+{% endblock %}
+
+{% block after_rank %}
+    {% if has_rating %}
+        <td class="border-r border-slate-200 bg-white/95 px-2 py-2 text-center align-middle text-sm font-semibold text-slate-700 dark:border-slate-800 dark:bg-slate-950/95 dark:text-slate-200 rating-column">
+            {% if user.participation_rating %}{{ rating_number(user.participation_rating) }}{% endif %}
+        </td>
+    {% endif %}
+    <td class="organization-column hidden size-px border-r border-slate-200 bg-white/95 px-2 py-2 text-center align-middle dark:border-slate-800 dark:bg-slate-950/95">
+        {% if user.organization %}
+            <a href="{{ user.organization.get_absolute_url() }}" class="inline-flex max-w-full truncate rounded-full bg-slate-100 px-2 py-1 text-[0.65rem] font-semibold text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
+                {{ user.organization.short_name }}
+            </a>
+        {% endif %}
+    </td>
+{% endblock %}
+
+{% block user_name_meta %}
+    {% if not contest.ended %}
+        {% if not user.participation.ended %}
+            <div class="pointer-events-none absolute left-0 top-full z-60 mt-1 hidden max-w-[min(26rem,70vw)] rounded-lg border border-slate-300/70 bg-white/95 px-2.5 py-2 text-[0.72rem] font-semibold leading-[1.35] text-slate-900 shadow-lg group-hover:block dark:border-slate-700/80 dark:bg-slate-950/95 dark:text-slate-100">
+                {{ relative_time(user.participation.start, abs=_('Started on {time}'), rel=_('Started {time}')) }}
+            </div>
+        {% else %}
+            <div class="pointer-events-none absolute left-0 top-full z-60 mt-1 hidden max-w-[min(26rem,70vw)] rounded-lg border border-slate-300/70 bg-white/95 px-2.5 py-2 text-[0.72rem] font-semibold leading-[1.35] text-slate-900 shadow-lg group-hover:block dark:border-slate-700/80 dark:bg-slate-950/95 dark:text-slate-100">{{ _('Participation ended.') }}</div>
+        {% endif %}
+    {% endif %}
+{% endblock %}
+
+{% block user_data %}
+    {% if can_edit %}
+        <span class="flex shrink-0 items-center gap-1.5">
+            <form action="{{ url('contest_participation_disqualify', contest.key) }}" method="post" class="inline-flex">
+                {% csrf_token %}
+                <input type="hidden" name="participation" value="{{ user.participation.id }}">
+                {% if user.participation.is_disqualified %}
+                    <a href="#" title="{{ _('Un-Disqualify') }}"
+                       class="un-disqualify-participation inline-flex h-6 w-6 items-center justify-center rounded-md border border-emerald-200 bg-emerald-50/70 text-[0.72rem] text-emerald-700 transition hover:bg-emerald-100 dark:border-emerald-900/60 dark:bg-emerald-950/30 dark:text-emerald-300 dark:hover:bg-emerald-950/50"><i class="fa fa-undo fa-fw"></i></a>
+                {% else %}
+                    <a href="#" title="{{ _('Disqualify') }}"
+                       class="disqualify-participation inline-flex h-6 w-6 items-center justify-center rounded-md border border-rose-200 bg-rose-50/70 text-[0.72rem] text-rose-700 transition hover:bg-rose-100 dark:border-rose-900/60 dark:bg-rose-950/30 dark:text-rose-300 dark:hover:bg-rose-950/50"><i class="fa fa-trash fa-fw"></i></a>
+                {% endif %}
+            </form>
+            {% if perms.judge.change_contestparticipation %}
+                <a href="{{ url('admin:judge_contestparticipation_change', user.participation.id) }}"
+                   title="{{ _('Admin') }}" class="edit-participation inline-flex h-6 w-6 items-center justify-center rounded-md border border-slate-200 bg-slate-50/70 text-[0.72rem] text-slate-600 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300 dark:hover:bg-slate-700"><i class="fa fa-cog fa-fw"></i></a>
+            {% endif %}
+        </span>
+    {% endif %}
+{% endblock %}
+
+{% block before_point_head %}
+    {% for problem in problems %}
+        <th data-problem="{{ problem.order }}" class="size-px border-b border-slate-200 bg-slate-50/95 px-0.5 py-2 text-center font-bold dark:border-slate-800 dark:bg-slate-900/95">
+            <a href="{{ url('contest_problem_submissions', contest.key, problem.order) }}" class="flex flex-col items-center gap-1 text-slate-700 hover:text-blue-600 dark:text-slate-200 dark:hover:text-blue-300">
+                <span class="text-sm font-extrabold leading-none">{{ contest.get_label_for_problem(loop.index0) }}</span>
+                <span class="rounded-full border border-slate-200 bg-white px-1 py-0.5 text-[0.5rem] font-semibold uppercase tracking-[0.04em] text-slate-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-400">{{ problem.points }}</span>
+            </a>
+        </th>
+    {% endfor %}
+{% endblock %}
+
+{% block row_extra %}
+    {% if user.participation.is_disqualified %}
+        disqualified
+    {% endif %}
+{% endblock %}
+
+{% block before_point %}
+    {% for cell in user.problem_cells %}
+        {{ render_problem_cell(cell) }}
+    {% endfor %}
+{% endblock %}
+
+{% block point %}
+    {{ user.result_cell }}
+{% endblock %}

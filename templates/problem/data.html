@@ -1,0 +1,763 @@
+{% extends "base.html" %}
+
+{% block js_media %}
+    <script type="text/javascript">
+        window.valid_files = {{valid_files_json}};
+        window.full_path = "{{ data_form.zipfile.value()|safe }}";
+    </script>
+    <script type="text/javascript" src="{{ static('libs/featherlight/featherlight.min.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            function styleEnhancedSelect($select) {
+                var $container = $select.next('.select2');
+                if (!$container.length)
+                    return;
+                $container.addClass('!box-border !w-full !min-w-0 !max-w-full overflow-hidden text-left align-middle');
+                $container.find('.select2-selection').addClass('!box-border !min-h-[42px] !w-full !min-w-0 !max-w-full overflow-hidden !rounded-2xl !border !border-app-border !bg-app-panel-elevated/90 dark:!border-app-dark-border dark:!bg-app-dark-panel-elevated/90');
+                $container.find('.select2-selection__arrow').addClass('hidden');
+                $container.find('.select2-selection__rendered').addClass('!box-border !block !max-w-full truncate !px-4 !leading-10 text-app-text dark:text-app-dark-text');
+                $container.find('.select2-search__field').addClass('!box-border !w-full !max-w-full');
+            }
+
+            function stylePlainFields($scope) {
+                $scope.find('input[type="text"], input[type="number"], textarea, select:not(.select2-hidden-accessible)').addClass('!box-border w-full min-w-0 max-w-full rounded-2xl border border-app-border bg-app-panel-elevated/90 px-4 py-3 text-app-text outline-none transition focus:border-app-border-interactive focus:ring-4 focus:ring-sky-400/10 dark:border-app-dark-border dark:bg-app-dark-panel-elevated/90 dark:text-app-dark-text dark:focus:border-app-dark-border-interactive');
+                $scope.find('input[type="number"]').removeClass('min-w-0').addClass('min-w-[6rem]');
+                $scope.find('textarea').addClass('min-h-32 resize-y font-mono');
+                $scope.find('input[type="checkbox"]').addClass('h-4 w-4');
+                $scope.find('.bad-file').find('input, select').addClass('!border-red-500');
+                $scope.find('.bad-file').find('.select2-selection').addClass('!border-red-500');
+            }
+
+            function autofill_if_exists($select, file) {
+                if (!$select.val() && ~window.valid_files.indexOf(file))
+                    $select.val(file).trigger('change');
+            }
+            function fill_selections($select, file) {
+                if (!$select.val() && ~window.valid_files.indexOf(file))
+                    $select.val(file).trigger('change');
+            }
+
+            var $table = $('#case-table');
+            $table.on('add-row', function (e, $tr) {
+                $tr.find('input').filter('[id$=file]').each(function () {
+                    var $select, val = $(this).replaceWith($select = $('<select>').attr({
+                        id: $(this).attr('id'),
+                        name: $(this).attr('name')
+                    }).addClass('w-full')).val();
+                    $select.select2({
+                        data: window.valid_files,
+                        allowClear: true,
+                        placeholder: '',
+                        width: '100%'
+                    }).val(val).trigger('change').on('change', function () {
+                        var val = $select.val();
+                        if (val) {
+                            if ($select.attr('id').endsWith('input_file'))
+                                autofill_if_exists($tr.find('select[id$=output_file]'), val.replace(/in(?!.*?in)/, 'out'));
+                            else
+                                autofill_if_exists($tr.find('select[id$=input_file]'), val.replace(/out(?!.*?out)/, 'in'));
+                        }
+                    });
+                    styleEnhancedSelect($select);
+                });
+                stylePlainFields($tr);
+            });
+
+            var order = 0;
+
+            function handle_table_reorder() {
+                var in_batch = false;
+                $table.find('tbody:first tr').each(function () {
+                    switch ($(this).attr('data-type')) {
+                        case 'C':
+                            $(this).find('input[id$=points], input[id$=pretest]').toggle(!in_batch);
+                            break;
+                        case 'S':
+                            in_batch = true;
+                            break;
+                        case 'E':
+                            in_batch = false;
+                    }
+                });
+            }
+
+            function try_parse_json(json) {
+                try {
+                    return JSON.parse(json);
+                } catch (e) {
+                    return {};
+                }
+            }
+
+            var $checker = $('#id_problem-data-checker');
+            var $args = $('#id_problem-data-checker_args');
+            var $custom_checker_file = $('#id_problem-data-custom_validator');
+            var $tr_custom_checker_file = $custom_checker_file.closest('.space-y-2');
+            var init = true;
+
+            function setHidden($elem, hidden) {
+                $elem.toggleClass('hidden', hidden);
+            }
+
+            function basename(path) {
+                if (!path)
+                    return '';
+                return String(path).split(/[\\/]/).pop();
+            }
+
+            function bindMinimalFileInput($input) {
+                var $root = $input.closest('.minimal-file-input');
+                if (!$root.length)
+                    return;
+                var placeholder = $root.attr('data-placeholder') || '';
+                var initialName = $root.attr('data-current-name') || '';
+                var $text = $root.find('.minimal-file-input-name');
+
+                function render(name) {
+                    var displayName = basename(name);
+                    $text.text(displayName || placeholder);
+                    $root.toggleClass('has-file', !!displayName);
+                }
+
+                render(initialName);
+                $input.on('change', function () {
+                    var name = this.files && this.files.length ? this.files[0].name : initialName;
+                    render(name);
+                });
+            }
+
+            function bindClearToggle($checkbox) {
+                var $group = $checkbox.closest('.file-action-group');
+                if (!$group.length)
+                    return;
+                var $button = $group.find('.file-clear-toggle');
+
+                function render() {
+                    var active = $checkbox.is(':checked');
+                    $button.text(active ? "{{ _('Will delete') }}" : "{{ _('Delete old file') }}");
+                    $button.toggleClass('border-red-400/25 bg-red-100 text-red-600 dark:border-red-400/25 dark:bg-red-400/10 dark:text-red-300', !active);
+                    $button.toggleClass('border-transparent bg-red-600 text-white dark:bg-red-500 dark:text-slate-950', active);
+                }
+
+                $button.on('click', function (e) {
+                    e.preventDefault();
+                    $checkbox.prop('checked', !$checkbox.is(':checked')).trigger('change');
+                });
+
+                $checkbox.on('change', render);
+                render();
+            }
+
+            (function checker_args_auto_fill() {
+                // auto fill for float checker
+                var $precisionSlot = $('.checker-precision-slot');
+                var $precision = $('<input>', {
+                    type: 'number',
+                    value: try_parse_json($args.val()).precision || 6,
+                    title: 'precision (decimal digits)',
+                    min: 0
+                }).change(function () {
+                    if ($checker.val().startsWith('floats'))
+                        $args.val(JSON.stringify({precision: parseInt($(this).val())}));
+                }).addClass('box-border h-[42px] w-24 min-w-24 rounded-2xl border border-app-border bg-app-panel-elevated/90 px-4 text-center text-app-text outline-none transition focus:border-app-border-interactive focus:ring-4 focus:ring-sky-400/10 dark:border-app-dark-border dark:bg-app-dark-panel-elevated/90 dark:text-app-dark-text dark:focus:border-app-dark-border-interactive').appendTo($precisionSlot);
+
+                // auto fill for custom checker
+                $custom_checker_file.change(function () {
+                    if ($checker.val() === 'bridged' && !init) {
+                        $file_name = $custom_checker_file.val().split('\\').pop();
+                        if ($file_name == '')
+                            $file_name = $custom_checker_file.closest('.minimal-file-input').attr('data-current-name') || '';
+                        if (!($file_name == '')) {
+                            $file_name = $file_name.split('/').pop()
+                            $file_ext = $file_name.split('.').pop()
+                            if (!(['cpp', 'py'].includes($file_ext))) {
+                                alert("{{ _('Expected checker\'s extension must be in [cpp, py], found ') }}'" + $file_ext + "'");
+                            }
+                            else {
+                                $lang = $file_ext.toUpperCase();
+                                if ($lang == "CPP") $lang = "CPP17";
+                                $args.val(JSON.stringify({
+                                    files: $file_name, 
+                                    lang: $lang,
+                                    type: 'testlib'
+                                }));
+                                if ($lang == "PY")
+                                    $args.val('');
+                            }
+                        }
+                    }
+                });
+
+                $checker.change(function () {
+                    $custom_checker_file.toggle($checker.val() === 'bridged').change();
+                    setHidden($tr_custom_checker_file, $checker.val() !== 'bridged');
+                    setHidden($precisionSlot, !$checker.val().startsWith('floats'));
+                    $precision.toggle($checker.val().startsWith('floats')).change();
+                    if (!($checker.val() === 'bridged' || $checker.val().startsWith('floats')))
+                        $args.val('');
+                    init = false;
+                }).change();
+            })();
+
+            function swap_row($a, $b) {
+                var $a_order = $a.find('input[id$=order]'), $b_order = $b.find('input[id$=order]');
+                var order = $a_order.val();
+                $a_order.val($b_order.val());
+                $b_order.val(order);
+                $b.after($a);
+                $a.find('span.order').text($a_order.val());
+                $b.find('span.order').text($b_order.val());
+                handle_table_reorder();
+            }
+
+            (function toggle_custom() {
+                var $sample = $("<a/>",{
+                    text: "{{_('Instruction')}}",
+                    class: "hidden text-sm font-semibold text-app-accent hover:text-app-accent-strong dark:text-app-dark-accent dark:hover:text-app-dark-accent-strong",
+                    target: "_blank",
+                    href: "/checker"
+                }).appendTo($('.checker-instruction-slot'));
+
+                $checker.change(function () {
+                    setHidden($tr_custom_checker_file, $checker.val() != 'bridged');
+                    $sample.toggleClass('hidden', !$checker.val().startsWith('bridged'));
+                }).change();
+            })();
+
+            bindMinimalFileInput($('#{{ data_form.zipfile.id_for_label }}'));
+            bindMinimalFileInput($custom_checker_file);
+            bindClearToggle($('#{{ data_form.zipfile.html_name }}-clear'));
+            bindClearToggle($('#{{ data_form.custom_validator.html_name }}-clear'));
+            stylePlainFields($('.testcase-form'));
+
+            $table.on('add-row', function (e, $tr) {
+                var $order = $tr.find('input').filter('[id$=order]').attr('type', 'hidden').val(++order);
+                $order.after($('<span>', {'class': 'order pr-1.5 font-bold'}).text($order.val()))
+                    .after($('<i>', {'class': 'fa fa-fw fa-lg fa-ellipsis-v text-app-text-muted dark:text-app-dark-text-muted'}));
+
+                var $opts = $tr.find('input').slice(2, 6);
+                var $files = $tr.find('select').slice(1, 3);
+                var $download = $tr.find('div.down-testcase');
+                var $checker = $files.end().last();
+                $tr.find('select[id$=type]').change(function () {
+                    var $this = $(this), val = $this.val(), disabled;
+                    switch (val) {
+                        case 'S':
+                        case 'E':
+                            disabled = val == 'S';
+                            $opts.toggle(val == 'S');
+                            $files.siblings('.select2').hide();
+                            $download.hide();
+                            $checker.toggle(val == 'S');
+                            break;
+                        default:
+                            $opts.toggle(val == 'C');
+                            $files.siblings('.select2').toggle(val == 'C');
+                            $download.show();
+                            $checker.toggle(val == 'C');
+                            var $prevs = $tr.prevAll('tr[data-type=S], tr[data-type=E]');
+                            disabled = $prevs.length && $prevs.get(0).getAttribute('data-type') == 'S';
+                            $tr.find('input[id$=points], input[id$=pretest]').toggle(val == 'C' && !disabled);
+                    }
+                    $tr.attr('data-type', val).nextUntil('tr[data-type=S], tr[data-type=E], tr[data-type=""]')
+                        .find('input[id$=points], input[id$=pretest]').toggle(!disabled);
+                }).change();
+
+                var tooltip_classes = 'tooltipped tooltipped-s';
+                $tr.find('a.edit-generator-args').mouseover(function () {
+                    switch ($tr.attr('data-type')) {
+                        case 'C':
+                        case 'S':
+                            var $this = $(this).addClass(tooltip_classes);
+                            $this.attr('aria-label', $this.prev().val() || '(none)');
+                    }
+                }).mouseout(function () {
+                    $(this).removeClass(tooltip_classes).removeAttr('aria-label');
+                }).featherlight($('.generator-args-editor'), {
+                    beforeOpen: function () {
+                        switch ($tr.attr('data-type')) {
+                            case 'C':
+                            case 'S':
+                                return true;
+                            default:
+                                return false;
+                        }
+                    },
+                    afterOpen: function () {
+                        var $input = this.$currentTarget.prev();
+                        this.$instance.find('.generator-args-editor')
+                            .find('textarea').val($input.val()).end()
+                            .find('.button').click(function () {
+                            $input.val($(this).prev().val());
+                            $.featherlight.current().close();
+                        }).end()
+                            .show();
+                    }
+                });
+                $tr.find('.handle').addClass('cursor-move');
+                $tr.find('.edit-generator-args').addClass('relative');
+            }).find('tbody:first').find('tr').each(function () {
+                $table.trigger('add-row', [$(this)]);
+            });
+
+            $('form').submit(function () {
+                $table.find('tbody:first').find('tr').each(function () {
+                    var filled = false;
+                    $(this).find('input, select').each(function () {
+                        var $this = $(this);
+                        if (!$this.attr('name'))
+                            return;
+                        if ($this.attr('type') === 'checkbox')
+                            filled |= $this.is(':checked');
+                        else if (!$this.attr('name').endsWith('order'))
+                            filled |= !!$this.val();
+                    });
+                    if (!filled)
+                        $(this).find('input[id$=order]').val('');
+                });
+            });
+
+            var $total = $('#id_cases-TOTAL_FORMS');
+
+            $('a#add-case-row').click(function () {
+                var $tr;
+                $table.find('tbody:first').append($tr = $($table.find('.extra-row-body').html()
+                    .replace(/__prefix__/g, $total.val())));
+                $tr.find('.type-column select option[value="C"]').attr('selected', true);
+                $total.val(parseInt($total.val()) + 1);
+                $table.trigger('add-row', [$tr]);
+                window.scrollBy(0, $tr.height());
+                return false;
+            });
+            $('a#auto-fill').click(function () {
+                var files_in_folder = [];   // Nhóm 1: File nằm trong thư mục 'in/' hoặc 'inp/', yêu cầu trùng tên với file output
+                var files_with_suffix = []; // Nhóm 2: File kết thúc bằng .in hoặc .inp
+            
+                // Lặp qua tất cả các file hợp lệ
+                for (i = 0; i < valid_files.length; i++) {
+                    var file = valid_files[i];
+            
+                    // Nhóm 1: Các file nằm trong thư mục 'in/' hoặc 'inp/'
+                    if ((file.includes('in/') || file.includes('inp/')) && !file.endsWith('/')) {
+                        files_in_folder.push(file);
+                    }
+            
+                    // Nhóm 2: Các file có đuôi .in hoặc .inp
+                    if (file.endsWith('.in') || file.endsWith('.inp')) {
+                        files_with_suffix.push(file);
+                    }
+                }
+
+                // Tính tổng số trường hợp test (cả nhóm 1 và nhóm 2)
+                var total_cases = files_in_folder.length + files_with_suffix.length;
+
+                // Đảm bảo số hàng trong bảng lớn hơn hoặc bằng tổng số trường hợp test
+                while ($total.val() < total_cases) {
+                    $('a#add-case-row').click(); // Thêm hàng nếu chưa đủ
+                }
+            
+                // Kiểm tra nếu không có file hợp lệ nào trong cả 2 nhóm
+                if (files_in_folder.length == 0 && files_with_suffix.length == 0) {
+                    alert("No valid files found. Ensure files are in 'in/' or 'inp/' directories, or have '.in' or '.inp' suffix.");
+                    return false;
+                }
+            
+                // Thao tác tiếp theo cho Nhóm 1 (file trong thư mục in/ hoặc inp/)
+                // Ví dụ: Điền các trường cho nhóm này
+                for (i = 0; i < files_in_folder.length; i++) {
+                    // Logic để xử lý nhóm 1
+                    fill_selections($('select#id_cases-' + i + '-input_file'), files_in_folder[i]);
+                    var output_file = files_in_folder[i].replace('in/', 'out/').replace('inp/', 'out/');
+                    fill_selections($('select#id_cases-' + i + '-output_file'), output_file);
+                    $('input[id=id_cases-' + i + '-points]').val(1);
+                }
+            
+                // Thao tác tiếp theo cho Nhóm 2 (file kết thúc bằng .in hoặc .inp)
+                // Ví dụ: Điền các trường cho nhóm này bắt đầu từ vị trí tiếp theo
+                var startIndex = files_in_folder.length;
+                for (i = 0; i < files_with_suffix.length; i++) {
+                    fill_selections($('select#id_cases-' + (startIndex + i) + '-input_file'), files_with_suffix[i]);
+                    var output_file = files_with_suffix[i].replace(/\.inp?$/, '.out');
+                    fill_selections($('select#id_cases-' + (startIndex + i) + '-output_file'), output_file);
+                    $('input[id=id_cases-' + (startIndex + i) + '-points]').val(1);
+                }
+            
+                return false;
+            });
+            
+            $('#delete_all').on('click',function(){
+                if(this.checked) {
+                    for (i = 0;i < $total.val(); i++){
+                        $('input[id=id_cases-' + i + '-DELETE]').prop('checked', true);
+                    }
+                }
+                else {
+                    for (i = 0;i < $total.val(); i++){
+                        $('input[id=id_cases-' + i + '-DELETE]').prop('checked', false);
+                    }
+                }
+            });
+            var oldIndex;
+            var el = document.getElementById('test_cases')
+            var sortable = new Sortable(el, {
+                animation: 150,
+                ghostClass: 'bg-blue-300',
+                handle: '.handle',
+                onEnd: function(evt) {
+                    var i = 1
+                    $table.find('tbody:first').find('tr').each(function() {
+                        $(this).find('.order').html(i)
+                        $(this).find('input[id$=order]').val(i++)
+                    })
+                    handle_table_reorder()
+                }
+            })
+
+            var $io_method = $('#id_problem-data-io_method');
+            var $io_input_file = $('#id_problem-data-io_input_file');
+            var $io_output_file = $('#id_problem-data-io_output_file');
+            var $grader_args = $('#id_problem-data-grader_args');
+
+            var $tr_io_method = $io_method.closest('.space-y-2');
+            var $tr_io_input_file = $('.io-input-field');
+            var $tr_io_output_file = $('.io-output-field');
+
+            $('#id_problem-data-checker').select2({ width: '100%' });
+            styleEnhancedSelect($('#id_problem-data-checker'));
+
+            function clean_io_method() {
+                var old_args = try_parse_json($grader_args.val());
+                delete old_args.io_method;
+                delete old_args.io_input_file;
+                delete old_args.io_output_file;
+                $grader_args.val(JSON.stringify(old_args));
+            }
+
+            function ioUsesFiles() {
+                var value = ($io_method.val() || '').toLowerCase();
+                return value && value !== 'standard';
+            }
+
+            var standard_grader = true;
+            setHidden($tr_io_method, !standard_grader);
+            setHidden($tr_io_input_file, !ioUsesFiles());
+            setHidden($tr_io_output_file, !ioUsesFiles());
+
+            $io_method.change(function () {
+                var usesFiles = ioUsesFiles();
+                setHidden($tr_io_input_file, !usesFiles);
+                setHidden($tr_io_output_file, !usesFiles);
+                
+                if (!usesFiles) {
+                    clean_io_method();
+                } else {
+                    var old_args = try_parse_json($grader_args.val());
+                    old_args['io_method'] = $io_method.val();
+                    $grader_args.val(JSON.stringify(old_args));
+                }
+            });
+
+            $io_input_file.change(function () {
+                var old_args = try_parse_json($grader_args.val());
+                old_args['io_input_file'] = $io_input_file.val();
+                $grader_args.val(JSON.stringify(old_args));
+            });
+
+            $io_output_file.change(function () {
+                var old_args = try_parse_json($grader_args.val());
+                old_args['io_output_file'] = $io_output_file.val();
+                $grader_args.val(JSON.stringify(old_args));
+            });
+            
+            $io_method.val(try_parse_json($grader_args.val()).io_method || 'standard').change();
+            if (ioUsesFiles()) {
+                $io_input_file.val(try_parse_json($grader_args.val()).io_input_file || '').change();
+                $io_output_file.val(try_parse_json($grader_args.val()).io_output_file || '').change();
+            }
+
+            var $controls = $('#column-visible');
+            var problem = $controls.attr('data-problem');
+            $controls.find('input').change(function () {
+                var $this = $(this), suffix = $this.attr('data-suffix'), checked = $this.is(':checked');
+                $table.find('.' + suffix.replace(/_/g, '-')).toggle(checked);
+                localStorage.setItem('data-visible:' + problem + ':' + suffix, checked ? '1' : '0')
+            }).each(function () {
+                var $this = $(this), suffix = $this.attr('data-suffix'), filled = false;
+                filled = localStorage.getItem('data-visible:' + problem + ':' + suffix);
+                if (filled !== null)
+                    filled = filled == '1';
+                else {
+                    filled = false;
+                    $table.find('[id$=' + suffix + ']').each(function () {
+                        filled |= !!$(this).val();
+                    });
+                }
+                $this.prop('checked', filled).trigger('change');
+            });
+        });
+        
+    </script>
+    
+{% endblock %}
+
+{% block media %}{% endblock %}
+
+{% block content_title %}
+    <div class="space-y-2">
+        <p class="section-title">{{ _('Problem operations') }}</p>
+        <div class="flex flex-wrap items-end justify-between gap-3">
+            <div class="space-y-1">
+                <h1 class="section-heading">{{ _('Manage testcases') }}</h1>
+                <p class="max-w-3xl text-sm text-app-text-secondary dark:text-app-dark-text-secondary">
+                    {{ _('Configure archive settings, checker options, and testcase ordering for this problem.') }}
+                </p>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="metric-muted">{{ problem.code }}</div>
+                {% if data_form.instance.has_yml %}
+                    <a href="{{ url('problem_data_init', problem.code) }}" class="btn-ghost">
+                        <i class="fa fa-file-code text-xs"></i>
+                        {{ _('View YAML') }}
+                    </a>
+                {% endif %}
+                <a href="{{ url('problem_detail', problem.code) }}" class="btn-secondary">
+                    <i class="fa fa-arrow-left text-xs"></i>
+                    {{ _('Back to problem') }}
+                </a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block body %}
+    {% if data_form.instance.feedback %}
+        <ul class="rounded-2xl border border-red-300 bg-red-50 px-4 py-4 text-red-700 dark:border-red-400/35 dark:bg-red-950/20 dark:text-red-200">
+            <li>{{ data_form.instance.feedback }}</li>
+        </ul>
+    {% endif %}
+    <form action="" method="POST" enctype="multipart/form-data" class="testcase-form space-y-6">
+        {% csrf_token %}
+        {{ cases_formset.management_form }}
+        <section class="panel-elevated overflow-hidden">
+            <div class="border-b border-app-border px-5 py-4 dark:border-app-dark-border md:px-6">
+                <p class="section-title">{{ _('Archive configuration') }}</p>
+                <h2 class="section-heading text-2xl!">{{ _('Dataset and checker settings') }}</h2>
+            </div>
+            <div class="p-5 md:p-6">
+                <div class="grid gap-5">
+                    <div class="space-y-3 rounded-[1.1rem] border border-app-border bg-app-panel-strong/70 p-4 dark:border-app-dark-border dark:bg-app-dark-panel-strong/40">
+                        <div class="space-y-1">
+                            <div class="section-title text-[0.72rem]!">{{ data_form.zipfile.label }}</div>
+                            <div class="text-sm text-app-text-secondary dark:text-app-dark-text-secondary">
+                                {{ _('Upload a testcase archive or replace the current dataset file.') }}
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap items-baseline gap-2 text-sm text-app-text-secondary dark:text-app-dark-text-secondary">
+                            <span class="metric-muted text-[0.68rem]!">{{ _('Current file') }}</span>
+                            <span>{{ data_form.zipfile.value() or _('No archive uploaded yet') }}</span>
+                        </div>
+                        {% if data_form.instance.zipfile %}
+                            <div class="file-action-group flex flex-wrap items-center gap-3">
+                                <a href="{{ data_form.instance.zipfile.url }}" class="inline-flex min-h-9 items-center justify-center rounded-full bg-app-accent-soft px-4 text-xs font-bold text-app-accent dark:bg-app-dark-accent-soft dark:text-app-dark-accent" target="_blank">
+                                    {{ _('Download old file') }}
+                                </a>
+                                <input type="checkbox" name="{{ data_form.zipfile.html_name }}-clear" id="{{ data_form.zipfile.html_name }}-clear" class="hidden">
+                                <button type="button" class="file-clear-toggle inline-flex min-h-9 items-center justify-center rounded-full border border-red-400/25 bg-red-100 px-4 text-xs font-bold text-red-600 transition dark:border-red-400/25 dark:bg-red-400/10 dark:text-red-300">{{ _('Delete old file') }}</button>
+                            </div>
+                        {% endif %}
+                        <div class="space-y-2">
+                            <label class="section-title text-[0.72rem]!">{{ _('Change archive') }}</label>
+                            <div class="minimal-file-input flex min-h-[3.35rem] w-full items-stretch overflow-hidden rounded-2xl border border-slate-400/20 bg-slate-800" data-placeholder="{{ _('No file selected') }}" data-current-name="{{ data_form.zipfile.value() or '' }}">
+                                <label class="minimal-file-input-label inline-flex shrink-0 cursor-pointer items-center justify-center self-stretch border-r border-slate-400/15 bg-slate-600 px-5 text-[0.95rem] font-bold leading-none text-slate-200" for="{{ data_form.zipfile.id_for_label }}">{{ _('Choose file') }}</label>
+                                <span class="minimal-file-input-name flex min-w-0 flex-1 items-center truncate px-5 text-[0.95rem] font-semibold leading-none text-slate-100"></span>
+                                <input type="file" name="{{ data_form.zipfile.html_name }}" id="{{ data_form.zipfile.id_for_label }}" class="sr-only">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4 rounded-[1.1rem] border border-app-border bg-app-panel-elevated/95 p-4 dark:border-app-dark-border dark:bg-app-dark-panel-elevated/95">
+                        <div class="grid gap-4 lg:grid-cols-2">
+                            <div class="space-y-2">
+                                <div class="relative flex min-h-5 items-center gap-3 pr-24">
+                                    <label class="section-title text-[0.72rem]! mb-0">{{ data_form.checker.label }}</label>
+                                    <span class="checker-instruction-slot absolute right-0 top-1/2 inline-flex -translate-y-1/2 items-center"></span>
+                                </div>
+                                <div class="checker-field-row flex items-center gap-3">
+                                    <div class="min-w-0 flex-1">
+                                        {{ data_form.checker }}
+                                    </div>
+                                    <span class="checker-precision-slot hidden shrink-0"></span>
+                                </div>
+                            </div>
+
+                            <div class="space-y-2">
+                                <div class="flex min-h-5 items-center gap-3">
+                                    <label class="section-title text-[0.72rem]! mb-0">{{ data_form.io_method.label }}</label>
+                                </div>
+                                {{ data_form.io_method }}
+                            </div>
+
+                            <div class="io-input-field hidden space-y-2">
+                                <label class="section-title text-[0.72rem]!">{{ data_form.io_input_file.label }}</label>
+                                <input type="text" name="{{ data_form.io_input_file.html_name }}" id="{{ data_form.io_input_file.id_for_label }}">
+                            </div>
+
+                            <div class="io-output-field hidden space-y-2">
+                                <label class="section-title text-[0.72rem]!">{{ data_form.io_output_file.label }}</label>
+                                <input type="text" name="{{ data_form.io_output_file.html_name }}" id="{{ data_form.io_output_file.id_for_label }}">
+                            </div>
+                        </div>
+
+                        <div class="hidden space-y-2">
+                            <label class="section-title text-[0.72rem]!">{{ data_form.custom_validator.label }}</label>
+                            {% if data_form.instance.custom_validator %}
+                                <div class="file-action-group flex flex-wrap items-center gap-3">
+                                    <a href="{{ data_form.instance.custom_validator.url }}" class="inline-flex min-h-9 items-center justify-center rounded-full bg-app-accent-soft px-4 text-xs font-bold text-app-accent dark:bg-app-dark-accent-soft dark:text-app-dark-accent" target="_blank">
+                                        {{ _('Download old file') }}
+                                    </a>
+                                    <input type="checkbox" name="{{ data_form.custom_validator.html_name }}-clear" id="{{ data_form.custom_validator.html_name }}-clear" class="hidden">
+                                    <button type="button" class="file-clear-toggle inline-flex min-h-9 items-center justify-center rounded-full border border-red-400/25 bg-red-100 px-4 text-xs font-bold text-red-600 transition dark:border-red-400/25 dark:bg-red-400/10 dark:text-red-300">{{ _('Delete old file') }}</button>
+                                </div>
+                            {% endif %}
+                            <div class="minimal-file-input flex min-h-[3.35rem] w-full items-stretch overflow-hidden rounded-2xl border border-slate-400/20 bg-slate-800" data-placeholder="{{ _('No file selected') }}" data-current-name="{{ data_form.custom_validator.value() or '' }}">
+                                <label class="minimal-file-input-label inline-flex shrink-0 cursor-pointer items-center justify-center self-stretch border-r border-slate-400/15 bg-slate-600 px-5 text-[0.95rem] font-bold leading-none text-slate-200" for="{{ data_form.custom_validator.id_for_label }}">{{ _('Choose file') }}</label>
+                                <span class="minimal-file-input-name flex min-w-0 flex-1 items-center truncate px-5 text-[0.95rem] font-semibold leading-none text-slate-100"></span>
+                                <input type="file" name="{{ data_form.custom_validator.html_name }}" id="{{ data_form.custom_validator.id_for_label }}" class="sr-only">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hidden">
+                    {{ data_form.grader_args }}
+                    {{ data_form.checker_args }}
+                </div>
+
+            </div>
+        </section>
+
+        <section class="panel-elevated overflow-hidden">
+            <div class="border-b border-app-border px-5 py-4 dark:border-app-dark-border md:px-6">
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                        <p class="section-title">{{ _('Testcase table') }}</p>
+                        <h2 class="section-heading text-2xl!">{{ _('Cases and ordering') }}</h2>
+                    </div>
+                    <div id="column-visible" class="flex flex-wrap items-center gap-4" data-problem="{{ problem.code }}">
+                        <span class="metric-muted">{{ _('Show columns') }}</span>
+                        <label class="inline-flex items-center gap-2 text-sm text-app-text dark:text-app-dark-text">
+                            <input type="checkbox" class="checkbox-base" data-suffix="checker">
+                            <span>{{ _('Checker') }}</span>
+                        </label>
+                        <a id="auto-fill" class="btn-ghost" href="#">
+                            <i class="fa fa-wand-magic-sparkles text-xs"></i>
+                            {{ _('Auto fill') }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-5 p-5 md:p-6">
+                <div class="overflow-x-auto">
+                    <table class="table-base min-w-336 border-separate [border-spacing:1rem_0.85rem]" id="case-table">
+                        <thead>
+                            <tr>
+                                <th class="w-20"></th>
+                                <th class="min-w-44">{{ _('Type') }}</th>
+                                <th class="min-w-[18rem]">{{ _('Input file') }}</th>
+                                <th class="min-w-[18rem]">{{ _('Output file') }}</th>
+                                <th class="min-w-34">{{ _('Points') }}</th>
+                                <th class="w-28">{{ _('Pretest?') }}</th>
+                                <th class="w-32">{{ _('Download') }}</th>
+                                <th class="hidden checker">{{ _('Checker')}}</th>
+                                <th class="w-40">
+                                    <div class="flex items-center justify-center gap-3">
+                                        <span>{{ _('Delete?') }}</span>
+                                        <input class="checkbox-base" type="checkbox" name="delete_all" id="delete_all" />
+                                    </div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="test_cases">
+                            {% for form in all_case_forms %}
+                                {% if form.non_field_errors() %}
+                                    <tr>
+                                        <td colspan="{{ 9 + cases_formset.can_delete }}">{{ form.non_field_errors() }}</td>
+                                    </tr>
+                                {% endif %}
+                                {% if form.prefix and '__prefix__' in form.prefix %}
+                                    </tbody>
+                                    <tbody class="hidden extra-row-body">
+                                {% endif %}
+                                <tr data-type="{{ form['type'].value() }}">
+                                    <td class="handle whitespace-nowrap px-3 py-2 align-middle">
+                                        {{ form.id }}{{ form.order.errors }}{{ form.order }}
+                                    </td>
+                                    <td class="type-column px-4 py-2 align-middle">
+                                        {{ form.type.errors }}
+                                        {{ form.type }}
+                                    </td>
+                                    <td class="min-w-[18rem] whitespace-nowrap px-4 py-2 align-middle{% if not (form.empty_permitted or form['type'].value() != 'C' or
+                                                  form['input_file'].value() in valid_files) %} bad-file{% endif %}">
+                                        {{ form.input_file.errors }}{{ form.input_file }}
+                                    </td>
+                                    <td class="min-w-[18rem] whitespace-nowrap px-4 py-2 align-middle{% if not (form.empty_permitted or form['type'].value() != 'C' or
+                                                  form['output_file'].value() in valid_files) %} bad-file{% endif %}">
+                                        {{ form.output_file.errors }}{{ form.output_file }}
+                                    </td>
+                                    <td class="min-w-34 whitespace-nowrap px-4 py-2 align-middle">
+                                        {{ form.points.errors }}
+                                        {{ form.points }}
+                                    </td>
+                                    <td class="whitespace-nowrap px-4 py-2 align-middle text-center">{{ form.is_pretest.errors }}{{ form.is_pretest }}</td>
+                                    <td class="checker whitespace-nowrap px-4 py-2 align-middle text-center">
+                                        {{ form.checker.errors }}{{ form.checker }}{{ form.checker_args.errors }}{{ form.checker_args }}
+                                    </td>
+                                    <td class="whitespace-nowrap px-4 py-2 align-middle text-center">
+                                        <div class="down-testcase text-center">
+                                            {% if not(form.prefix and '__prefix__' in form.prefix) %}
+                                            {% if (form.empty_permitted or form['type'].value() != 'C' or
+                                                      form['input_file'].value() in valid_files) %}
+                                                <a href="javascript:void(0)" class="download-testcase font-semibold text-app-accent hover:text-app-accent-strong dark:text-app-dark-accent dark:hover:text-app-dark-accent-strong" data-order="{{ form.order.value() }}">{{ _('Download') }}</a>
+                                            {% endif %}
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    {% if cases_formset.can_delete %}
+                                        <td class="whitespace-nowrap px-4 py-2 align-middle text-center">{{ form.DELETE }}</td>
+                                    {% endif %}
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <a id="add-case-row" class="btn-secondary" href="javascript:void(0)">
+                        <i class="fa fa-plus text-xs"></i>
+                        {{ _('Add new case') }}
+                    </a>
+                    <input type="submit" value="{{ _('Save testcase setup') }}" class="btn-primary cursor-pointer">
+                </div>
+            </div>
+        </section>
+        <script>
+            function download_testcase() {
+                if (window.full_path == '') {
+                    alert("{{ _('Please upload the test data first!') }}");
+                    return;
+                }
+                // Remove the first string "problem" in the path
+                var problem = window.full_path.split('/')[0];
+                var data = window.full_path.split('/')[1];
+                var order = $(this).attr('data-order');
+
+                var url = '/problem/' + problem + '/data/' + data + '/' + order;
+                window.open(url, '_blank');
+            }
+            // many download buttons
+            $('.download-testcase').on('click', download_testcase);
+        </script>
+    </form>
+{% endblock %}

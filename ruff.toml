@@ -1,0 +1,22 @@
+line-length = 120
+exclude = [
+    ".ci.settings.py",
+    "emath",
+    "tmath/local_settings.py",
+    "venv",
+]
+
+[lint]
+select = ["E", "F", "W", "I", "G"]
+
+[lint.isort]
+known-first-party = ["django_ace", "judge", "tmath", "typeracer", "websocket"]
+
+[lint.per-file-ignores]
+"*/__init__.py" = ["F401", "F403"]
+"*/migrations/*.py" = ["E501"]
+"judge/management/commands/runmoss.py" = ["F403", "F405"]
+"judge/widgets/pagedown.py" = ["E303"]
+
+[tool.ruff]
+exclude = [".venv", "venv", ".git", "__pycache__", "*.egg-info"]

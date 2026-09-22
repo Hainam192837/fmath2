@@ -1,0 +1,129 @@
+{% extends "user/user-base.html" %}
+
+{% block user_js_media %}
+    <script type="text/javascript">
+        window.show_pp_base = 1;
+        window.currently_requesting_pp = false;
+        window.load_more_pp = function () {
+            if (window.currently_requesting_pp) return;
+            window.currently_requesting_pp = true;
+
+            $.get('{{ url('user_pp_ajax', user.user.username) }}', {
+                start: window.show_pp_base * 10,
+                end: (window.show_pp_base + 1) * 10
+            }).done(function (data) {
+                var results = $(data['results']);
+                $('.pp-table').append(results);
+                register_time(results.find('.time-with-rel'));
+                window.show_pp_base++;
+                if (!data['has_more']) {
+                    $("#pp-load-link-wrapper").hide();
+                }
+                window.currently_requesting_pp = false;
+            });
+        };
+    </script>
+{% endblock %}
+
+{% block title_ruler %}{% endblock %}
+
+{% block title_row %}
+    {% set tab = 'problems' %}
+    {% include "user/user-tabs.html" %}
+{% endblock %}
+
+{% block user_content %}
+    <div class="rounded-[1.25rem] border border-slate-300/50 bg-gradient-to-b from-white to-slate-50 p-4 shadow-[0_18px_42px_rgba(15,23,42,0.06)] sm:p-6">
+        <div class="grid gap-6">
+    {% if pp_breakdown %}
+        <section class="rounded-[1.15rem] border border-slate-300/40 bg-white/90 p-4 sm:p-6">
+            <h3 class="mb-4 text-2xl font-bold leading-tight text-slate-900">{{ _('Points breakdown') }}</h3>
+            <div id="submissions-table" class="table w-full overflow-hidden rounded-2xl border border-slate-300/50 bg-black/5 pp-table">
+                {% include "user/pp-table-body.html" %}
+            </div>
+            {% if pp_has_more %}
+                <div class="mt-3 rounded-xl border text-center" id="pp-load-link-wrapper">
+                    <a class="block py-3 font-bold cursor-pointer hover:bg-black/10" href="javascript:load_more_pp()">{{ _('Load more...') }}</a>
+                </div>
+            {% endif %}
+        </section>
+    {% else %}
+        <div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-4 text-slate-500"><i>{{ _('This user has not yet solved any problems.') }}</i></div>
+    {% endif %}
+
+    {% if authored %}
+        <details class="block rounded-[1.15rem] border border-slate-300/40 bg-white/90 p-4 transition-all ease-in-out sm:p-6">
+            <summary class="border-none font-bold relative block min-h-4 cursor-pointer text-xl">
+                {{ _('Authored problems') }} ({{ authored|length }})
+            </summary>
+            <div class="pt-4 font-bold">
+                <table class="w-full border border-collapse border-black">
+                    <thead>
+                    <tr class="*:text-center *:bg-black *:text-white *:py-3 divide-x divide-white">
+                        <th>{{ _('Problem') }}</th>
+                        <th>{{ _('Category') }}</th>
+                        <th>{{ _('Points') }}</th>
+                    </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-300">
+                    {% for problem in authored %}
+                        <tr class="divide-x divide-slate-300">
+                            <td class="p-2 text-indigo-500 hover:text-indigo-700">
+                                <a href="{{ url('problem_detail', problem.code) }}">{{ problem.name }}</a>
+                            </td>
+                            <td class="p-2">{{ problem.group.full_name }}</td>
+                            <td class="p-2 text-center text-indigo-500 hover:text-indigo-700"><a href="{{ url('ranked_submissions', problem.code) }}">
+                                {{ problem.points|floatformat }}{% if problem.partial %}p{% endif %}
+                            </a></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </details>
+    {% endif %}
+
+    {% if request.user.is_authenticated and request.user != user.user %}
+        <div class="hide-solved-problems"><span>
+            <form name="form" action="" method="get" class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-3">
+                <input id="hide_solved" style="vertical-align:middle" onclick="form.submit()" type="checkbox"
+                       name="hide_solved"{% if hide_solved %} checked{% endif %} value="1">
+                <label style="vertical-align:middle" for="hide_solved">{{ _("Hide problems I've solved") }}</label>
+            </form>
+        </span></div>
+    {% else %}
+        <hr>
+    {% endif %}
+
+    {% for group in best_submissions %}
+        <div class="overflow-hidden rounded-2xl border border-slate-300/40 bg-white/95 shadow-[0_12px_30px_rgba(15,23,42,0.04)]">
+            <h3 class="unselectable toggle closed m-0 bg-gradient-to-b from-slate-50 to-slate-100 px-4 py-4 text-[1.05rem] font-bold sm:px-[1.15rem]"><span class="fa fa-chevron-right fa-fw"></span>
+                {{ group.name }} ({{ _('%(points).1f points', points=group.points) }})
+            </h3>
+            <table style="display: none" class="table toggled m-0 w-full bg-white">
+                <thead>
+                <tr>
+                    <th>{{ _('Problem') }}</th>
+                    <th>{{ _('Score') }}</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for entry in group.problems %}
+                    <tr>
+                        <td class="problem-name">
+                            <a href="{{ url('problem_detail', entry.code) }}">{{ entry.name }}</a>
+                        </td>
+                        <td class="problem-score">
+                            <a href="{{ url('user_submissions', entry.code, user.user.username) }}">
+                                {{ _('%(points)s / %(total)s', points=entry.points, total=entry.total) }}
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endfor %}
+        </div>
+    </div>
+{% endblock %}

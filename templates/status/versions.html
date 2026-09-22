@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block media %}
+    {% include "status/media-css.html" %}
+{% endblock %}
+
+{% block title_ruler %}{% endblock %}
+
+{% block title_row %}
+    {% set tab = 'matrix' %}
+    {% include "status/status-tabs.html" %}
+{% endblock %}
+
+{% block body %}
+    <section class="grid gap-5">
+        <div class="overflow-hidden rounded-[1.75rem] border border-app-border/80 bg-[radial-gradient(circle_at_top_right,color-mix(in_srgb,var(--app-accent)_12%,transparent),transparent_34%),color-mix(in_srgb,var(--app-panel-elevated)_96%,white_4%)] shadow-[0_18px_40px_rgba(15,23,42,0.08)] dark:border-app-dark-border/80 dark:bg-[radial-gradient(circle_at_top_right,color-mix(in_srgb,var(--app-dark-accent)_18%,transparent),transparent_36%),color-mix(in_srgb,var(--app-dark-panel-elevated)_97%,black_3%)] dark:shadow-[0_20px_44px_rgba(2,6,23,0.34)]">
+            <div class="flex flex-wrap items-start justify-between gap-4 px-5 pt-5 max-md:px-4 max-md:pt-4">
+                <div>
+                    <div class="mb-2 inline-flex items-center gap-2 text-[0.72rem] font-bold uppercase tracking-[0.14em] text-app-text-muted dark:text-app-dark-text-muted">
+                        <i class="fa-duotone fa-table"></i>
+                        {{ _('Compatibility map') }}
+                    </div>
+                    <h1 class="m-0 text-[clamp(1.3rem,1.05rem+0.9vw,1.9rem)] font-extrabold leading-[1.15] text-app-text dark:text-app-dark-text">{{ _('Judge-by-judge version comparison') }}</h1>
+                    <p class="mt-2 max-w-184 text-[0.95rem] leading-[1.65] text-app-text-muted dark:text-app-dark-text-muted">
+                        {{ _('Spot missing runtimes and version drift quickly across every language supported by the judge fleet.') }}
+                    </p>
+                </div>
+                <div class="inline-flex items-center gap-2 rounded-full border border-app-border/70 bg-app-panel/90 px-4 py-3 text-[0.8rem] font-bold text-app-text-muted dark:border-app-dark-border/70 dark:bg-app-dark-panel/90 dark:text-app-dark-text-muted max-md:w-full max-md:justify-center">
+                    <i class="fa-duotone fa-layer-group"></i>
+                    {{ _('Green matches latest, red indicates drift') }}
+                </div>
+            </div>
+
+            <div class="overflow-auto p-5 scrollbar max-md:p-4">
+                <table id="judge-versions" class="w-full min-w-max border-separate border-spacing-0 text-app-text dark:text-app-dark-text">
+                    <thead>
+                        <tr>
+                            <th class="sticky top-0 z-2 border-b border-app-border/80 bg-app-panel-strong/90 px-4 py-4 text-center text-[0.78rem] font-extrabold uppercase tracking-widest text-app-text-muted dark:border-app-dark-border/80 dark:bg-app-dark-panel-strong/90 dark:text-app-dark-text-muted">{{ _('Language') }}</th>
+                            {% for judge in judges %}
+                                <th class="sticky top-0 z-1 border-b border-app-border/80 bg-app-panel-strong/90 px-4 py-4 text-center text-[0.78rem] font-extrabold uppercase tracking-widest text-app-text-muted dark:border-app-dark-border/80 dark:bg-app-dark-panel-strong/90 dark:text-app-dark-text-muted">{{ judge }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for language in languages %}
+                            <tr>
+                                <td class="sticky left-0 z-1 border-b border-app-border/60 bg-app-panel-strong/95 px-4 py-4 text-center font-extrabold dark:border-app-dark-border/60 dark:bg-app-dark-panel-strong/95">{{ language.name }}</td>
+                                {% for judge in judges %}
+                                    {% set versions = matrix[judge][language.id] %}
+                                    <td class="min-w-44 border-b border-app-border/60 px-4 py-4 text-center text-[0.88rem] font-bold leading-6 dark:border-app-dark-border/60 {% if not versions -%}bg-app-panel/70 text-app-text-muted dark:bg-app-dark-panel/85 dark:text-app-dark-text-muted{% elif versions.is_latest -%}bg-green-500/14 text-green-800 dark:text-green-300{% else -%}bg-red-500/14 text-red-800 dark:text-red-300{% endif %}">
+                                        {%- for version in versions -%}
+                                            {{ version.name }}{% if version.version %}&nbsp;{{ version.version }}{% endif %}
+                                            {% if not loop.last %}<br>{% endif %}
+                                        {%- else -%}
+                                            &mdash;
+                                        {%- endfor -%}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+{% endblock %}

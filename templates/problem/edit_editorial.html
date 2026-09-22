@@ -1,0 +1,208 @@
+{% extends "common-content.html" %}
+
+{% block media %}
+{{ form.content.field.widget.media.css }}
+<style>
+    .editorial-form input[type="text"],
+    .editorial-form input[type="datetime-local"],
+    .editorial-form select,
+    .editorial-form textarea {
+        width: 100%;
+        border-radius: 1rem;
+        border: 1px solid color-mix(in srgb, var(--app-border) 88%, transparent);
+        background: color-mix(in srgb, var(--app-panel) 92%, white 8%);
+        padding: 0.8rem 1rem;
+        color: var(--app-text);
+    }
+
+    .editorial-form .martor-field,
+    .editorial-form .martor-preview {
+        min-height: 28rem;
+    }
+
+    .editorial-form .select2-container {
+        width: 100% !important;
+    }
+
+    .editorial-form .select2-selection--multiple {
+        min-height: 3.2rem;
+        border-radius: 1rem !important;
+        border-color: color-mix(in srgb, var(--app-border) 88%, transparent) !important;
+        background: color-mix(in srgb, var(--app-panel) 92%, white 8%) !important;
+        padding: 0.35rem 0.55rem !important;
+    }
+</style>
+{% endblock %}
+
+{% block js_media %}
+{% if REQUIRE_JAX %}
+{% include "mathjax-load.html" %}
+{% endif %}
+{{ form.content.field.widget.media.js }}
+<script>
+    $(function () {
+        $('#{{ form.authors.id_for_label }}').select2({
+            placeholder: "{{ _('Type username authors...') }}",
+            ajax: {
+                url: "{{ url('problem_author_select2_ajax') }}"
+            },
+            minimumInputLength: 1,
+            multiple: 'multiple'
+        });
+    });
+</script>
+{% endblock %}
+
+{% block body %}
+<div class="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-4 sm:px-6">
+    <section class="relative overflow-hidden rounded-4xl border border-app-border/80 bg-[radial-gradient(circle_at_top_right,color-mix(in_srgb,var(--app-accent)_16%,transparent),transparent_34%),color-mix(in_srgb,var(--app-panel-elevated)_96%,white_4%)] p-6 shadow-[0_18px_40px_rgba(15,23,42,0.08)] dark:border-app-dark-border/80 dark:bg-[radial-gradient(circle_at_top_right,color-mix(in_srgb,var(--app-dark-accent)_18%,transparent),transparent_36%),color-mix(in_srgb,var(--app-dark-panel-elevated)_97%,black_3%)] dark:shadow-[0_20px_44px_rgba(2,6,23,0.34)]">
+        <div class="section-title">{{ _('Editorial editor') }}</div>
+        <div class="mt-3 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+            <div class="max-w-3xl">
+                <h1 class="text-3xl font-black tracking-tight text-app-text dark:text-app-dark-text">
+                    {% if editorial.pk %}
+                        {{ _('Update official editorial') }}
+                    {% else %}
+                        {{ _('Create official editorial') }}
+                    {% endif %}
+                </h1>
+                <p class="mt-2 text-sm leading-6 text-app-text-secondary dark:text-app-dark-text-secondary">
+                    {{ _('This editorial is attached directly to the problem and appears on the problem editorial tab when visible.') }}
+                </p>
+            </div>
+            <div class="inline-flex items-center gap-2 rounded-full border border-app-border/70 bg-app-panel/85 px-4 py-2 text-xs font-bold uppercase tracking-[0.14em] text-app-text-muted dark:border-app-dark-border/70 dark:bg-app-dark-panel/85 dark:text-app-dark-text-muted">
+                {{ problem.code }}
+            </div>
+        </div>
+    </section>
+
+    <div class="flex flex-col gap-6">
+        <form action="" method="post" class="editorial-form rounded-4xl border border-app-border/80 bg-app-panel/95 p-6 shadow-[0_16px_38px_rgba(15,23,42,0.06)] dark:border-app-dark-border/80 dark:bg-app-dark-panel/95 dark:shadow-[0_18px_40px_rgba(2,6,23,0.28)]">
+            {% csrf_token %}
+
+            {% if form.non_field_errors() %}
+                {% for error in form.non_field_errors() %}
+                <div class="mb-4 rounded-2xl border border-red-300/70 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-400">
+                    {{ error }}
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            <div class="flex flex-col gap-4">
+                <label for="{{ form.is_public.id_for_label }}" class="flex w-full cursor-pointer items-start gap-3 rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 transition hover:border-app-accent/50 hover:bg-app-panel dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90 dark:hover:border-app-dark-accent/50 dark:hover:bg-app-dark-panel">
+                    <div class="flex min-h-6 flex-none items-center pt-0.5">
+                        <input id="{{ form.is_public.id_for_label }}" {% if form.is_public.value() %} checked {% endif %} name="{{ form.is_public.name }}" aria-describedby="{{ form.is_public.id_for_label }}-helper-checkbox-text" type="checkbox" value="" class="h-4 w-4 rounded-md border-app-border/80 text-app-accent focus:ring-2 focus:ring-app-accent/20 dark:border-app-dark-border/80 dark:text-app-dark-accent dark:focus:ring-app-dark-accent/25">
+                    </div>
+                    <div class="flex min-w-0 flex-1 flex-col gap-1 text-sm">
+                        <div class="font-bold text-app-text dark:text-app-dark-text">{{ form.is_public.label }}</div>
+                        <p id="{{ form.is_public.id_for_label }}-helper-checkbox-text" class="text-xs font-normal text-app-text-muted dark:text-app-dark-text-muted">
+                            {{ _('Allow users to access this editorial after the publish time is reached.') }}
+                        </p>
+                    </div>
+                    {% if form.is_public.errors %}
+                    <div class="mt-2 text-sm text-red-700 dark:text-red-500">{{ form.is_public.errors }}</div>
+                    {% endif %}
+                </label>
+
+                <div class="rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90">
+                    <label for="{{ form.publish_on.id_for_label }}" class="mb-3 block text-sm font-bold text-app-text dark:text-app-dark-text">{{ form.publish_on.label }}</label>
+                    {{ form.publish_on }}
+                    {% if form.publish_on.errors %}
+                    <div class="mt-2 text-sm text-red-700 dark:text-red-500">{{ form.publish_on.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90">
+                    <label for="{{ form.authors.id_for_label }}" class="mb-3 block text-sm font-bold text-app-text dark:text-app-dark-text">{{ form.authors.label }}</label>
+                    {{ form.authors }}
+                    {% if form.authors.errors %}
+                    <div class="mt-2 text-sm text-red-700 dark:text-red-500">{{ form.authors.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <label for="{{ form.is_full_markup.id_for_label }}" class="flex w-full cursor-pointer items-start gap-3 rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 transition hover:border-app-accent/50 hover:bg-app-panel dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90 dark:hover:border-app-dark-accent/50 dark:hover:bg-app-dark-panel {% if form.is_full_markup.field.disabled %}cursor-not-allowed opacity-70{% endif %}">
+                    <div class="flex min-h-6 flex-none items-center pt-0.5">
+                        <input id="{{ form.is_full_markup.id_for_label }}" {% if form.is_full_markup.value() %} checked {% endif %} {% if form.is_full_markup.field.disabled %}disabled{% endif %} name="{{ form.is_full_markup.name }}" aria-describedby="{{ form.is_full_markup.id_for_label }}-helper-checkbox-text" type="checkbox" value="" class="h-4 w-4 rounded-md border-app-border/80 text-app-accent focus:ring-2 focus:ring-app-accent/20 dark:border-app-dark-border/80 dark:text-app-dark-accent dark:focus:ring-app-dark-accent/25">
+                    </div>
+                    <div class="flex min-w-0 flex-1 flex-col gap-1 text-sm">
+                        <div class="font-bold text-app-text dark:text-app-dark-text">{{ form.is_full_markup.label }}</div>
+                        <p id="{{ form.is_full_markup.id_for_label }}-helper-checkbox-text" class="text-xs font-normal text-app-text-muted dark:text-app-dark-text-muted">
+                            {% if can_use_full_markup %}
+                            {{ _('Enable full markdown features for this editorial.') }}
+                            {% else %}
+                            {{ _('Full markup requires the corresponding permission. This editorial will be saved with standard solution markdown.') }}
+                            {% endif %}
+                        </p>
+                    </div>
+                    {% if form.is_full_markup.errors %}
+                    <div class="mt-2 text-sm text-red-700 dark:text-red-500">{{ form.is_full_markup.errors }}</div>
+                    {% endif %}
+                </label>
+
+                <div class="rounded-3xl border border-app-border/70 bg-app-panel-elevated/90 p-4 dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/90">
+                    <label for="{{ form.content.id_for_label }}" class="mb-3 block text-sm font-bold text-app-text dark:text-app-dark-text">{{ form.content.label }}</label>
+                    {{ form.content }}
+                    {% if form.content.errors %}
+                    <div class="mt-2 text-sm text-red-700 dark:text-red-500">{{ form.content.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="mt-5 flex flex-col gap-3 border-t border-app-border pt-5 dark:border-app-dark-border sm:flex-row sm:items-center sm:justify-between">
+                <p class="text-sm text-app-text-secondary dark:text-app-dark-text-secondary">
+                    {{ _('Preview is built into the editor and uses the solution markdown renderer.') }}
+                </p>
+                <div class="flex gap-3">
+                    <a href="{{ url('problem_detail', problem.code) }}" class="btn-secondary">{{ _('Back to problem') }}</a>
+                    {% if editorial.pk %}
+                    <a href="{{ url('problem_editorial', problem.code) }}" class="btn-secondary">{{ _('View editorial') }}</a>
+                    {% endif %}
+                    <button type="submit" class="btn-primary">
+                        {% if editorial.pk %}
+                            {{ _('Save editorial') }}
+                        {% else %}
+                            {{ _('Create editorial') }}
+                        {% endif %}
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <aside class="flex flex-col gap-4">
+            <div class="panel flex flex-col gap-4 p-5">
+                <div>
+                    <div class="section-title">{{ _('Problem') }}</div>
+                    <div class="mt-1 text-lg font-semibold text-app-text dark:text-app-dark-text">{{ problem.name }}</div>
+                    <div class="mt-1 text-sm text-app-text-secondary dark:text-app-dark-text-secondary">{{ problem.code }}</div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="info-card">
+                        <div class="metric-muted">{{ _('Points') }}</div>
+                        <div class="metric mt-2 text-lg">{{ problem.points|floatformat }}</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="metric-muted">{{ _('Visibility') }}</div>
+                        <div class="metric mt-2 text-sm">
+                            {% if editorial.is_public %}
+                                {{ _('Public') }}
+                            {% else %}
+                                {{ _('Private') }}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <a href="{{ url('problem_detail', problem.code) }}" class="btn-secondary justify-start!">{{ _('Open problem statement') }}</a>
+            </div>
+
+            <div class="panel flex flex-col gap-3 p-5">
+                <div class="section-title">{{ _('Writing guide') }}</div>
+                <div class="space-y-2 text-sm leading-6 text-app-text-secondary dark:text-app-dark-text-secondary">
+                    <p>{{ _('Start with the key observation, then prove why it works, then describe implementation details.') }}</p>
+                    <p>{{ _('Use headings, formulas, and short code blocks where they improve comprehension.') }}</p>
+                    <p>{{ _('Keep the editorial aligned with the actual intended solution path of the problem.') }}</p>
+                </div>
+            </div>
+        </aside>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block js_media %}
+    <script type="text/javascript">
+        $(function () {
+            $('#id_reason').keydown(function (e) {
+                if (e.ctrlKey && (e.keyCode === 13 || e.keyCode === 10)) {
+                    $(this).closest('form').submit();
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block media %}
+    <style>
+        .organization-request-form textarea {
+            min-height: 220px;
+            width: 100%;
+            border-radius: 1rem;
+            border: 1px solid rgb(203 213 225);
+            background: white;
+            padding: 1rem 1.1rem;
+        }
+
+        .dark .organization-request-form textarea {
+            border-color: rgb(63 63 70);
+            background: rgb(24 24 27);
+            color: rgb(244 244 245);
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="mx-auto max-w-3xl">
+        <form action="" method="post" class="organization-request-form rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-zinc-900 md:p-8">
+            {% csrf_token %}
+            <div class="mb-6 flex flex-col gap-3 border-b border-slate-200 pb-6 dark:border-slate-700">
+                <div class="inline-flex w-fit items-center gap-2 rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-sky-700 dark:bg-sky-950/70 dark:text-sky-300">
+                    <i class="fa-duotone fa-user-plus"></i>
+                    <span>{{ _('Membership request') }}</span>
+                </div>
+                <h1 class="text-3xl font-black tracking-tight text-slate-900 dark:text-white">{{ _('Request to join') }}</h1>
+                <p class="text-sm text-slate-500 dark:text-slate-400">{{ _('Tell the organization admins why you want to join. Press Ctrl+Enter to submit quickly.') }}</p>
+            </div>
+
+            <label for="{{ form.reason.id_for_label }}" class="mb-3 block text-sm font-bold text-slate-800 dark:text-slate-100">
+                {{ _('Your reason for joining:') }}
+            </label>
+            {{ form.reason }}
+
+            <div class="mt-6 flex justify-end border-t border-slate-200 pt-6 dark:border-slate-700">
+                <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-sky-600 px-6 py-3 text-sm font-bold text-white transition hover:bg-sky-700">
+                    {{ _('Request') }}
+                </button>
+            </div>
+        </form>
+    </div>
+{% endblock %}

@@ -1,0 +1,6 @@
+{% extends "errors/base.html" %}
+
+{% set error_code = 404 %}
+{% set error_label = _('Page not found') %}
+{% set error_title = _('The page you requested does not exist') %}
+{% set error_message = _('FMATH could not find %(path)s. The link may be outdated or the page may have been moved.', path=request.path) %}

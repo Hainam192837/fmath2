@@ -1,0 +1,47 @@
+<div class="inline-flex max-w-full items-center gap-1 rounded-[1.4rem] border border-app-border/70 bg-app-panel-elevated/85 p-1.5 shadow-sm dark:border-app-dark-border/70 dark:bg-app-dark-panel-elevated/85">
+    {% if page_obj.has_previous() %}
+        {% if page_obj.previous_page_number() == 1 and first_page_href != None %}
+            <a rel="prev" class="inline-flex h-10 min-w-10 items-center justify-center rounded-xl border border-transparent px-3 text-sm font-semibold text-app-text-secondary transition hover:border-app-border hover:bg-app-panel hover:text-app-text dark:text-app-dark-text-secondary dark:hover:border-app-dark-border dark:hover:bg-app-dark-panel dark:hover:text-app-dark-text sm:h-11 sm:min-w-11" href="{{ first_page_href }}" aria-label="{{ _('Previous page') }}">
+                <i class="fa-duotone fa-circle-chevron-left"></i>
+            </a>
+        {% else %}
+            <a rel="prev" class="inline-flex h-10 min-w-10 items-center justify-center rounded-xl border border-transparent px-3 text-sm font-semibold text-app-text-secondary transition hover:border-app-border hover:bg-app-panel hover:text-app-text dark:text-app-dark-text-secondary dark:hover:border-app-dark-border dark:hover:bg-app-dark-panel dark:hover:text-app-dark-text sm:h-11 sm:min-w-11" href="{{ page_prefix or '' }}{{ page_obj.previous_page_number() }}{{ page_suffix or '' }}" aria-label="{{ _('Previous page') }}">
+                <i class="fa-duotone fa-circle-chevron-left"></i>
+            </a>
+        {% endif %}
+    {% else %}
+        <span aria-disabled="true" class="inline-flex h-10 min-w-10 cursor-not-allowed items-center justify-center rounded-xl px-3 text-sm font-semibold text-app-text-muted/70 dark:text-app-dark-text-muted/70 sm:h-11 sm:min-w-11" aria-hidden="true">
+            <i class="fa-duotone fa-circle-chevron-left"></i>
+        </span>
+    {% endif %}
+
+    {% for page in page_obj.page_range %}
+        {% if not page %}
+            <span class="inline-flex h-10 min-w-8 items-center justify-center px-1 text-sm font-semibold text-app-text-muted dark:text-app-dark-text-muted sm:h-11 sm:min-w-10" aria-hidden="true">
+                <i class="fa-duotone fa-ellipsis"></i>
+            </span>
+        {% else %}
+            <a
+                class="{% if page == page_obj.number %}inline-flex h-10 min-w-10 items-center justify-center rounded-xl bg-app-accent px-3 text-sm font-semibold text-white shadow-sm shadow-app-accent/25 transition dark:bg-app-dark-accent sm:h-11 sm:min-w-11{% else %}inline-flex h-10 min-w-10 items-center justify-center rounded-xl border border-transparent px-3 text-sm font-semibold text-app-text-secondary transition hover:border-app-border hover:bg-app-panel hover:text-app-text dark:text-app-dark-text-secondary dark:hover:border-app-dark-border dark:hover:bg-app-dark-panel dark:hover:text-app-dark-text sm:h-11 sm:min-w-11{% endif %}"
+                href="
+                    {%- if page == 1 and first_page_href != None -%}
+                        {{ first_page_href }}
+                    {%- else -%}
+                        {{ page_prefix or '' }}{{ page }}{{ page_suffix or '' }}
+                    {%- endif -%}
+                "
+                {% if page == page_obj.number %}aria-current="page"{% endif %}
+            >{{ page }}</a>
+        {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next() %}
+        <a rel="next" class="inline-flex h-10 min-w-10 items-center justify-center rounded-xl border border-transparent px-3 text-sm font-semibold text-app-text-secondary transition hover:border-app-border hover:bg-app-panel hover:text-app-text dark:text-app-dark-text-secondary dark:hover:border-app-dark-border dark:hover:bg-app-dark-panel dark:hover:text-app-dark-text sm:h-11 sm:min-w-11" href="{{ page_prefix or '' }}{{ page_obj.next_page_number() }}{{ page_suffix or '' }}" aria-label="{{ _('Next page') }}">
+            <i class="fa-duotone fa-circle-chevron-right"></i>
+        </a>
+    {% else %}
+        <span aria-disabled="true" class="inline-flex h-10 min-w-10 cursor-not-allowed items-center justify-center rounded-xl px-3 text-sm font-semibold text-app-text-muted/70 dark:text-app-dark-text-muted/70 sm:h-11 sm:min-w-11" aria-hidden="true">
+            <i class="fa-duotone fa-circle-chevron-right"></i>
+        </span>
+    {% endif %}
+</div>

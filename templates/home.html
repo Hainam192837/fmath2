@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+
+{% block meta %}
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "url": "{{ DMOJ_SCHEME }}://{{ site.domain }}/",
+            "potentialAction": {
+                "@type": "SearchAction",
+                "target": "{{ DMOJ_SCHEME }}://{{ site.domain }}/problems/?search={search_term_string}",
+                "query-input": "required name=search_term_string"
+            }
+        }
+    </script>
+{% endblock %}
+
+{% block js_media %}
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.time-remaining').each(function () {
+                count_down($(this));
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block title_row %}{% endblock %}
+{% block body %}
+    <section class="relative overflow-hidden rounded-4xl border border-app-border bg-app-panel-elevated/90 px-6 py-8 dark:border-app-dark-border dark:bg-app-dark-panel-elevated/90 sm:px-8 sm:py-10 lg:px-12">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,184,0,0.18),transparent_38%),radial-gradient(circle_at_bottom_right,rgba(14,165,233,0.16),transparent_34%)]"></div>
+        <div class="relative grid gap-10 lg:grid-cols-[minmax(0,1.5fr)_minmax(18rem,0.95fr)] lg:items-center">
+            <div class="space-y-6">
+                <div class="inline-flex w-fit items-center gap-3 text-app-text dark:text-app-dark-text">
+                    <img src="{{ static('icons/logo.svg') }}" alt="" class="h-8 w-8">
+                    <div class="leading-none">
+                        <div class="text-sm font-semibold uppercase tracking-[0.24em]">FMATH</div>
+                        <div class="mt-1 text-xs font-medium text-app-text-secondary dark:text-app-dark-text-secondary">Online Judge Platform</div>
+                    </div>
+                </div>
+                <div class="max-w-3xl space-y-4">
+                    <h1 class="text-4xl font-semibold leading-tight text-app-text dark:text-app-dark-text sm:text-5xl">
+                        Nền tảng luyện thi lập trình competitive programming.
+                    </h1>
+                    <p class="max-w-2xl text-base leading-7 text-app-text-muted dark:text-app-dark-text-muted sm:text-lg">
+                        Fuck-Math là hệ thống online judge dành cho học sinh THCS, THPT và sinh viên luyện tập thuật toán, cấu trúc dữ liệu và chuẩn bị cho các kỳ thi học sinh giỏi tin học...
+                    </p>
+                </div>
+                <div class="flex flex-col gap-3 sm:flex-row">
+                    <a href="{{ url('problem_list') }}" class="btn-primary rounded-2xl px-5 py-3 text-center">{{ _('Explore problems') }}</a>
+                    <a href="{{ url('contest_list') }}" class="btn-secondary rounded-2xl px-5 py-3 text-center">{{ _('View contests') }}</a>
+                    <a href="{{ url('blog_post_list') }}" class="btn-ghost rounded-2xl px-5 py-3 text-center">{{ _('Go to blog') }}</a>
+                </div>
+            </div>
+
+            <div class="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+                <div class="rounded-2xl border border-app-border bg-app-panel/80 p-5 dark:border-app-dark-border dark:bg-app-dark-panel/80">
+                    <div class="text-xs font-semibold uppercase tracking-[0.16em] text-app-text-secondary dark:text-app-dark-text-secondary">{{ _('Problems') }}</div>
+                    <div class="mt-3 text-3xl font-semibold text-app-text dark:text-app-dark-text">{{ problem_count() }}</div>
+                    <div class="mt-2 text-sm text-app-text-muted dark:text-app-dark-text-muted">{{ _('Public tasks ready to solve') }}</div>
+                </div>
+                <div class="rounded-2xl border border-app-border bg-app-panel/80 p-5 dark:border-app-dark-border dark:bg-app-dark-panel/80">
+                    <div class="text-xs font-semibold uppercase tracking-[0.16em] text-app-text-secondary dark:text-app-dark-text-secondary">{{ _('Submissions') }}</div>
+                    <div class="mt-3 text-3xl font-semibold text-app-text dark:text-app-dark-text">{{ submission_count() }}</div>
+                    <div class="mt-2 text-sm text-app-text-muted dark:text-app-dark-text-muted">{{ _('Attempts recorded on the platform') }}</div>
+                </div>
+                <div class="rounded-2xl border border-app-border bg-app-panel/80 p-5 dark:border-app-dark-border dark:bg-app-dark-panel/80">
+                    <div class="text-xs font-semibold uppercase tracking-[0.16em] text-app-text-secondary dark:text-app-dark-text-secondary">{{ _('Languages') }}</div>
+                    <div class="mt-3 text-3xl font-semibold text-app-text dark:text-app-dark-text">{{ language_count() }}</div>
+                    <div class="mt-2 text-sm text-app-text-muted dark:text-app-dark-text-muted">{{ _('Compilers and runtimes available') }}</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="mt-8 grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(19rem,0.95fr)]">
+        <div class="space-y-6">
+            <div class="rounded-[1.75rem] border border-app-border bg-app-panel px-5 py-5 dark:border-app-dark-border dark:bg-app-dark-panel sm:px-6">
+                <div class="flex items-center justify-between gap-4">
+                    <div>
+                        <div class="text-2xl font-semibold text-app-text dark:text-app-dark-text">{{ _('Latest posts') }}</div>
+                        <p class="mt-1 text-sm text-app-text-muted dark:text-app-dark-text-muted">
+                            {{ _('Only a quick overview here. Open each article to read the full content.') }}
+                        </p>
+                    </div>
+                    <a href="{{ url('blog_post_list') }}" class="btn-ghost rounded-xl px-4 py-2">{{ _('All posts') }}</a>
+                </div>
+
+                <div class="mt-5 grid gap-4">
+                    {% for post in posts[:3] %}
+                        <article class="rounded-2xl border border-app-border/80 bg-app-panel-elevated/70 p-5 transition hover:-translate-y-0.5 hover:border-app-accent/60 dark:border-app-dark-border/80 dark:bg-app-dark-panel-elevated/70 dark:hover:border-app-dark-accent/60">
+                            <div class="flex flex-wrap items-center gap-3 text-sm text-app-text-muted dark:text-app-dark-text-muted">
+                                {% with authors=post.authors.all() %}
+                                    {% if authors %}
+                                        <span>{{ link_users(authors) }}</span>
+                                    {% endif %}
+                                {% endwith %}
+                                <span>{{ relative_time(post.publish_on, abs=_('posted on {time}'), rel=_('posted {time}')) }}</span>
+                                <span class="inline-flex items-center gap-1">
+                                    <i class="fa-duotone fa-comments"></i>
+                                    {{ post_comment_counts[post.id] or 0 }}
+                                </span>
+                            </div>
+                            <h2 class="mt-3 text-2xl font-semibold leading-snug text-app-text dark:text-app-dark-text">
+                                <a href="{{ url('blog_post', post.id, post.slug) }}">{{ post.title }}</a>
+                            </h2>
+                            <div class="mt-4">
+                                <a href="{{ url('blog_post', post.id, post.slug) }}" class="btn-secondary rounded-xl px-4 py-2">{{ _('Read article') }}</a>
+                            </div>
+                        </article>
+                    {% else %}
+                        <div class="rounded-2xl border border-dashed border-app-border p-5 text-sm text-app-text-muted dark:border-app-dark-border dark:text-app-dark-text-muted">
+                            {{ _('No posts have been published yet.') }}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="rounded-[1.75rem] border border-app-border bg-app-panel px-5 py-5 dark:border-app-dark-border dark:bg-app-dark-panel sm:px-6">
+                <div class="flex items-center justify-between gap-4">
+                    <div>
+                        <div class="text-2xl font-semibold text-app-text dark:text-app-dark-text">{{ _('New problems') }}</div>
+                        <p class="mt-1 text-sm text-app-text-muted dark:text-app-dark-text-muted">
+                            {{ _('Fresh additions to continue practicing right away.') }}
+                        </p>
+                    </div>
+                    <a href="{{ url('problem_list') }}" class="btn-ghost rounded-xl px-4 py-2">{{ _('Problemset') }}</a>
+                </div>
+
+                <div class="mt-5 grid gap-3 sm:grid-cols-2">
+                    {% for problem in new_problems[:6] %}
+                        <a href="{{ url('problem_detail', problem.code) }}" class="rounded-2xl border border-app-border/80 bg-app-panel-elevated/70 p-4 transition hover:-translate-y-0.5 hover:border-app-accent/60 dark:border-app-dark-border/80 dark:bg-app-dark-panel-elevated/70 dark:hover:border-app-dark-accent/60">
+                            <div class="text-xs font-semibold uppercase tracking-[0.14em] text-app-text-secondary dark:text-app-dark-text-secondary">{{ problem.code }}</div>
+                            <div class="mt-2 text-lg font-semibold text-app-text dark:text-app-dark-text">{{ problem.name }}</div>
+                        </a>
+                    {% else %}
+                        <div class="rounded-2xl border border-dashed border-app-border p-5 text-sm text-app-text-muted dark:border-app-dark-border dark:text-app-dark-text-muted">
+                            {{ _('No public problems available yet.') }}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <aside class="space-y-6">
+            {% if current_contests or future_contests %}
+                <section class="rounded-[1.75rem] border border-app-border bg-app-panel px-5 py-5 dark:border-app-dark-border dark:bg-app-dark-panel sm:px-6">
+                    <div class="flex items-center justify-between gap-4">
+                        <div class="text-2xl font-semibold text-app-text dark:text-app-dark-text">{{ _('Contests') }}</div>
+                        <a href="{{ url('contest_list') }}" class="btn-ghost rounded-xl px-4 py-2">{{ _('Open list') }}</a>
+                    </div>
+
+                    {% if current_contests %}
+                        <div class="mt-5">
+                            <div class="mb-3 inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
+                                <i class="fa-duotone fa-play"></i>
+                                {{ _('Ongoing contests') }}
+                            </div>
+                            <div class="space-y-3">
+                                {% for contest in current_contests[:3] %}
+                                    <a href="{{ url('contest_view', contest.key) }}" class="block rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 transition hover:border-emerald-400 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:hover:border-emerald-400">
+                                        <div class="text-lg font-semibold text-app-text dark:text-app-dark-text">
+                                            {% if contest.is_joinable_by(request.user) %}
+                                                {{ contest.full_name }}
+                                            {% else %}
+                                                {{ contest.name }}
+                                            {% endif %}
+                                        </div>
+                                        <div class="mt-2 text-sm font-medium text-emerald-700 dark:text-emerald-300">
+                                            {{ _('Ends in %(countdown)s.', countdown=contest.time_before_end|as_countdown) }}
+                                        </div>
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if future_contests %}
+                        <div class="{% if current_contests %}mt-6 border-t border-app-border pt-6 dark:border-app-dark-border{% else %}mt-5{% endif %}">
+                            <div class="mb-3 inline-flex items-center gap-2 rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-sky-700 dark:bg-sky-500/15 dark:text-sky-300">
+                                <i class="fa-duotone fa-calendar-clock"></i>
+                                {{ _('Upcoming contests') }}
+                            </div>
+                            <div class="space-y-3">
+                                {% for contest in future_contests[:3] %}
+                                    <a href="{{ url('contest_view', contest.key) }}" class="block rounded-2xl border border-sky-200 bg-sky-50/70 p-4 transition hover:border-sky-400 dark:border-sky-500/30 dark:bg-sky-500/10 dark:hover:border-sky-400">
+                                        <div class="text-lg font-semibold text-app-text dark:text-app-dark-text">
+                                            {% if contest.is_joinable_by(request.user) %}
+                                                {{ contest.full_name }}
+                                            {% else %}
+                                                {{ contest.name }}
+                                            {% endif %}
+                                        </div>
+                                        <div class="mt-2 text-sm font-medium text-sky-700 dark:text-sky-300">
+                                            {{ _('Starting in %(countdown)s.', countdown=contest.time_before_start|as_countdown) }}
+                                        </div>
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                </section>
+            {% endif %}
+
+            <section class="rounded-[1.75rem] border border-app-border bg-app-panel px-5 py-5 dark:border-app-dark-border dark:bg-app-dark-panel sm:px-6">
+                <div class="flex items-center justify-between gap-4">
+                    <div class="text-2xl font-semibold text-app-text dark:text-app-dark-text">{{ _('Recent comments') }}</div>
+                    <a href="{{ url('comment_rss') }}" class="btn-ghost rounded-xl px-4 py-2">RSS</a>
+                </div>
+                <div class="mt-5 space-y-4">
+                    {% for comment in comments[:5] %}
+                        <article class="rounded-2xl border border-app-border/80 bg-app-panel-elevated/70 p-4 transition hover:border-app-accent/60 dark:border-app-dark-border/80 dark:bg-app-dark-panel-elevated/70 dark:hover:border-app-dark-accent/60">
+                            <div class="flex items-start gap-3">
+                            <img loading="lazy" class="h-10 w-10 rounded-full" src="{{ gravatar(comment.author.user, 80)}}" alt="{{ comment.author.user.username }}">
+                            <div class="min-w-0 flex-1">
+                                <a href="{{ comment.link }}#comment-{{ comment.id }}" class="line-clamp-1 text-base font-semibold text-app-text transition hover:text-app-accent dark:text-app-dark-text dark:hover:text-app-dark-accent">
+                                    {{ comment.page_title }}
+                                </a>
+                                <div class="mt-1 text-sm text-app-text-muted dark:text-app-dark-text-muted">{{ link_user(comment.author) }}</div>
+                            </div>
+                            </div>
+                        </article>
+                    {% else %}
+                        <div class="rounded-2xl border border-dashed border-app-border p-5 text-sm text-app-text-muted dark:border-app-dark-border dark:text-app-dark-text-muted">
+                            {{ _('No recent comments.') }}
+                        </div>
+                    {% endfor %}
+                </div>
+            </section>
+        </aside>
+    </section>
+{% endblock %}

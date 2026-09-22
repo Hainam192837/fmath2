@@ -1,0 +1,546 @@
+{% extends "base.html" %}
+
+{% block js_media %}
+    <script type="text/javascript" src="{{ ACE_URL }}/ace.js"></script>
+    {{ form.media.js }}
+    {% compress js %}
+        <script type="text/javascript">
+            $(function () {
+                function format(state) {
+                    if (!state.id) return state.text; // optgroup
+                    return state.text;
+                }
+
+                window.previous_template = '';
+
+                function update_language_template() {
+                    var source = $('textarea#id_source');
+                    if (source.val() == window.previous_template.replace(/\r/g, '') || source.val() == '') {
+                        var lang_id = $('#id_language').val();
+                        var code = localStorage.getItem('submit:' + $('#id_language').val());
+
+                        function update_submit_area(code) {
+                            window.previous_template = code;
+                            source.val(code);
+                            window.ace_source.getSession().setValue(code);
+                        }
+
+                        if (code != null) {
+                            update_submit_area(code);
+                        } else {
+                            $.get('{{ url('language_template_ajax') }}', {
+                                id: lang_id
+                            }).done(function (template) {
+                                update_submit_area(template);
+                            });
+                        }
+                    }
+                }
+
+                function makeDisplayData(data) {
+                    var site_data = data.attr('data-info');
+                    var judge_data = data.attr('data-judge-info');
+                    var display_data = site_data || judge_data;
+                    return display_data;
+                }
+
+                function formatSelection(state) {
+                    if (!state.id) return state.text; // optgroup
+                    var data = makeDisplayData($("option[data-id=" + state.id + "]"));
+                    return $('<span>').append($('<b>').text(state.text), ' (', data, ')');
+                }
+
+                $("#id_language").select2({
+                    templateResult: format,
+                    templateSelection: formatSelection,
+                    dropdownParent: $('#language-select')
+                });
+
+                if ($('#id_judge').is('select')) {
+                    $("#id_judge").select2({
+                        dropdownParent: $('#judge-select')
+                    });
+                }
+
+                $('#id_language').on('select2:open', function (evt) {
+                    var dropdown = $('.select2-dropdown');
+                    if (!$('#result-version-info').length)
+                        dropdown.append($("<span id=\"result-version-info\">"));
+                    dropdown.attr('id', 'language-select2');
+                });
+
+                if ($('#id_judge').is('select')) {
+                    $('#id_judge').on('select2:open', function (evt) {
+                        var dropdown = $('.select2-dropdown');
+                        $('#result-version-info').remove();
+                        dropdown.attr('id', 'judge-select2');
+                    });
+                }
+
+                $('#id_language').change(function () {
+                    var lang = $("#id_language").find("option:selected").attr('data-ace');
+                    window.ace_source.getSession().setMode("ace/mode/" + lang);
+                    update_language_template();
+                });
+
+                $('#ace_source').on('ace_load', function (e, editor) {
+                    update_language_template();
+                    editor.commands.addCommand({
+                        name: 'save',
+                        bindKey: {win: 'Ctrl-S', mac: 'Command-S'},
+                        exec: function () {
+                            localStorage.setItem('submit:' + $('#id_language').val(), editor.getSession().getValue());
+                        }
+                    });
+                    /*
+                    editor.commands.addCommand({
+                        name: 'open',
+                        bindKey: {win: 'Ctrl-O', mac: 'Command-O'},
+                        exec: function () {
+                            $('#file_select').click();
+                        }
+                    });
+                    */
+                    editor.getSession().setUseWrapMode(true);
+                    editor.setFontSize(14);
+                    editor.setPrintMarginColumn(100);
+                    editor.focus();
+                    /*
+                    $(editor.container).on('dragover', function (e) {
+                        var types = e.originalEvent.dataTransfer.types;
+                        if (types && Array.prototype.indexOf.call(types, 'Files') !== -1) {
+                            e.stopPropagation();
+                            e.preventDefault();
+                        }
+                    });
+
+                    $(editor.container).on('drop', function (e) {
+                        e.preventDefault();
+                        $('#file_select').prop('files', e.originalEvent.dataTransfer.files);
+                        handleFileSelect();
+                    });
+                    */
+                });
+
+                $(window).resize(function () {
+                    $('#ace_source').height(Math.max($(window).height() - 353, 100));
+                }).resize();
+
+                $('.problem_submit').submit(function (event) {
+                    if ($('#id_source').val().length > 65536) {
+                        alert("{{ _('Your source code must contain at most 65536 characters.') }}");
+                        event.preventDefault();
+                        $('.problem_submit').find(':submit').attr('disabled', false);
+                    }
+                });
+
+                function on_language_change() {
+                    obj = document.getElementById('id_language');
+                    fileonly = obj.options[obj.selectedIndex].getAttribute('data-fileonly');
+                    if (fileonly == 'True') {
+                        if (!$('#editor').hasClass('hidden')) {
+                            $('#editor').addClass('hidden');
+                        }
+                        if ($('#file-submit').hasClass('hidden')) {
+                            $('#file-submit').removeClass('hidden');
+                        }
+
+                        file_ext = '.' + obj.options[obj.selectedIndex].getAttribute('data-ext');
+                        file_size_limit = obj.options[obj.selectedIndex].getAttribute('data-file-size');
+                        $('#file_upload').val('');
+                        $('#file_upload').attr({accept: file_ext});
+                        $('#file_drag').html(
+                            '<b>' + {{ _("'Click to select a file or drag a file into this box'") }} + '</b><br>' +
+                            {{ _('`Only accept "${file_ext}". Maximum file size is ${file_size_limit}MB.`') }}
+                        );
+                    } else {
+                        if ($('#editor').hasClass('hidden')) {
+                            $('#editor').removeClass('hidden');
+                        }
+                        if (!$('#file-submit').hasClass('hidden')) {
+                            $('#file-submit').addClass('hidden');
+                        }
+                    }
+                };
+
+                $("#id_language").change( function() {
+                    on_language_change();
+                });
+
+                on_language_change();
+
+                function fileDragHover(e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+
+                    if (e.type === 'dragover') {
+                        $('#file_drag').addClass('hover');
+                    } else {
+                        $('#file_drag').removeClass('hover');
+                    }
+                }
+
+                function fileDropHandler(e) {
+                    fileDragHover(e);
+                    $('#file_upload').prop('files', e.originalEvent.dataTransfer.files);
+                    handleFileChange()
+                }
+
+                $('#file_drag').on('dragover', fileDragHover);
+                $('#file_drag').on('dragleave', fileDragHover);
+                $('#file_drag').on('drop', fileDropHandler);
+            });
+
+            function handleFileSelect() {
+                var file = $('#file_select')[0].files[0];
+                if (file && window.FileReader) {
+                    var reader = new FileReader();
+                    reader.onload = function () {
+                        ace_source.session.setValue(reader.result);
+
+                        if (file.name.search('.') != -1) {
+                            var ext = file.name.split('.').pop();
+                            var languages = $('#id_language')[0].options;
+                            for (var i = languages.length - 1; i >= 0; i--) {
+                                if (languages[i].getAttribute('data-fileonly') === 'False' && languages[i].getAttribute('data-ext') === ext) {
+                                    $('#id_language').val(languages[i].value).change();
+                                    break;
+                                }
+                            }
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            }
+
+            function handleFileChange() {
+                var file = $('#file_upload')[0].files[0];
+                if (file) {
+                    $('#file_drag').html(
+                        '<b>' + {{ _("'File name'") }} + ':</b> ' + file.name + '<br>' +
+                        '<b>' + {{ _("'File size'") }} + ':</b> ' + (file.size / (1024 * 1024)).toFixed(2) + ' MB'
+                    );
+                }
+            }
+        </script>
+    {% endcompress %}
+{% endblock %}
+
+{% block media %}
+    {{ form.media.css }}
+    {% compress css %}
+        <style media="screen">
+            #id_language {
+                width: 100%;
+            }
+
+            #file_drag {
+                border: 2px dashed rgba(148, 163, 184, 0.65);
+                border-radius: 1rem;
+                color: rgb(100 116 139);
+                cursor: pointer;
+                display: block;
+                padding: 1.5rem;
+                text-align: center;
+                transition: background 0.25s, color 0.25s, border-color 0.25s, box-shadow 0.25s;
+                background: rgba(248, 250, 252, 0.95);
+            }
+
+            #file_drag:hover, #file_drag.hover {
+                background: rgb(239 246 255);
+                border-color: rgb(59 130 246);
+                box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+            }
+
+            #result-version-info {
+                border-bottom: 1px solid rgb(148, 148, 148);
+                margin: 0px 1em;
+                color: #757575;
+                font-weight: 600;
+                padding: 0.2em 0;
+                text-align: right;
+            }
+
+            #language-select2 .select2-results__message {
+                white-space: nowrap
+            }
+
+            #language-select2.select2-dropdown--above {
+                display: flex;
+                flex-direction: column-reverse;
+            }
+
+            #language-select2 .select2-results__option {
+                color: #757575 !important;
+                background: white !important;
+            }
+
+            #language-select2 .select2-results__option--highlighted {
+                text-decoration: underline;
+            }
+
+            #language-select2 .select2-results__option[aria-selected=true] {
+                font-weight: bold;
+                color: black !important;
+            }
+
+            #language-select2 .select2-results__option {
+                padding: 4px 0px;
+            }
+
+            #language-select2 .select2-results__options {
+                overflow-y: visible !important;
+            }
+
+            #language-select2 .select2-results__option {
+                break-inside: avoid-column;
+            }
+
+            #language-select2 .select2-results {
+                -webkit-columns: 10 7em;
+                -moz-columns: 10 7em;
+                columns: 10 7em;
+                padding-left: 1.5em;
+                padding-top: 0.5em;
+            }
+
+            .helptext {
+                font-size: 13px;
+                color: #999;
+                border-width: 0 0 1px 0;
+            }
+            .helptext::before {
+                font-family: FontAwesome;
+                font-style: normal;
+                font-weight: normal;
+                line-height: 1;
+                content: "\f05a";
+                padding-right: 5px;
+                font-size: 14px;
+            }
+            .errorlist {
+                background: rgba(255, 0, 0, 0.3);
+                border: 3px dashed red;
+                border-right: none;
+                border-left: solid red;
+                padding: 0 1em 0.1em 2em;
+                margin: 0.3em 0 0.5em 0;
+            }
+            .errornote {
+                border: 3px dashed #ffc000;
+                border-left: solid #ffc000;
+                padding: 0.7em 2em;
+                margin: 0 0 8px;
+                font-size: 13px !important;
+                font-weight: 400;
+            }
+            .required th::after {
+                content: "*";
+                color: red;
+            }
+
+            .submit-shell {
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .submit-card {
+                border: 1px solid rgba(148, 163, 184, 0.18);
+                border-radius: 1.25rem;
+                background: rgba(255, 255, 255, 0.96);
+                box-shadow: 0 16px 40px rgba(15, 23, 42, 0.06);
+            }
+
+            .submit-form-grid {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr);
+                gap: 1rem;
+            }
+
+            .submit-field {
+                display: flex;
+                flex-direction: column;
+                gap: 0.45rem;
+            }
+
+            .submit-field > label,
+            .submit-field > span {
+                font-size: 0.9rem;
+                font-weight: 700;
+                color: rgb(30 41 59);
+            }
+
+            .submit-note {
+                border: 1px solid rgba(251, 191, 36, 0.35);
+                border-radius: 1rem;
+                padding: 0.9rem 1rem;
+                background: rgba(255, 251, 235, 0.95);
+                color: rgb(146 64 14);
+            }
+
+            .submit-danger {
+                border: 1px solid rgba(239, 68, 68, 0.18);
+                border-radius: 1rem;
+                padding: 0.9rem 1rem;
+                background: rgba(254, 242, 242, 0.95);
+                color: rgb(185 28 28);
+                font-weight: 600;
+            }
+
+            .submit-actions {
+                display: flex;
+                justify-content: flex-end;
+            }
+
+            .submit-primary {
+                width: 100%;
+                border: 0;
+                border-radius: 1rem;
+                padding: 0.95rem 1.25rem;
+                font-size: 1rem;
+                font-weight: 800;
+                color: white;
+                cursor: pointer;
+                background: linear-gradient(135deg, #2563eb, #1d4ed8);
+                box-shadow: 0 14px 28px rgba(37, 99, 235, 0.25);
+            }
+
+            .submit-primary:hover {
+                filter: brightness(1.05);
+            }
+
+            .submit-primary:disabled {
+                cursor: not-allowed;
+                opacity: 0.55;
+                box-shadow: none;
+            }
+
+            .dark .submit-card {
+                border-color: rgba(148, 163, 184, 0.12);
+                background: rgba(15, 23, 42, 0.92);
+                box-shadow: 0 20px 55px rgba(2, 6, 23, 0.32);
+            }
+
+            .dark .submit-field > label,
+            .dark .submit-field > span {
+                color: rgb(241 245 249);
+            }
+
+            .dark #file_drag {
+                background: rgba(15, 23, 42, 0.88);
+                color: rgb(148 163 184);
+                border-color: rgba(100, 116, 139, 0.7);
+            }
+
+            .dark #file_drag:hover,
+            .dark #file_drag.hover {
+                background: rgba(30, 41, 59, 0.95);
+                border-color: rgb(96 165 250);
+                box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.12);
+            }
+
+            .dark .submit-note {
+                background: rgba(120, 53, 15, 0.18);
+                border-color: rgba(251, 191, 36, 0.2);
+                color: rgb(253 230 138);
+            }
+
+            .dark .submit-danger {
+                background: rgba(127, 29, 29, 0.18);
+                border-color: rgba(248, 113, 113, 0.2);
+                color: rgb(252 165 165);
+            }
+
+            @media (min-width: 900px) {
+                .submit-form-grid {
+                    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+                }
+            }
+        </style>
+    {% endcompress %}
+{% endblock %}
+
+{% block body %}
+    <div class="submit-shell">
+        {% if not no_judges and default_lang not in form.fields.language.queryset %}
+            <div class="submit-note">
+                {% trans trimmed default_language=default_lang.name %}
+                    <b>Warning!</b> Your default language, <b>{{ default_language }}</b>,
+                    is unavailable for this problem and has been deselected.
+                {% endtrans %}
+            </div>
+        {% endif %}
+
+        {% if not no_judges and request.in_contest and submission_limit %}
+            <div class="submit-note">
+                {% if submissions_left > 0 %}
+                    {% trans left=submissions_left -%}
+                        You have {{ left }} submission left
+                        {%- pluralize -%}
+                        You have {{ left }} submissions left
+                    {%- endtrans %}
+                {% else %}
+                    {{ _('You have 0 submissions left') }}
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <form action="" method="post" class="tmath problem_submit submit-card p-5 md:p-6" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.non_field_errors() }}
+
+            <div class="mb-5 flex flex-col gap-2 border-b border-app-border pb-4 dark:border-app-dark-border">
+                <div class="section-title text-app-accent dark:text-app-dark-accent">{{ _('Submission') }}</div>
+                <div class="text-lg font-semibold text-app-text dark:text-app-dark-text">{{ _('Send your solution') }}</div>
+            </div>
+
+            <div class="submit-form-grid">
+                <div id="language-select" class="submit-field">
+                    {{ form.language.errors }}
+                    <label for="id_language">{{ form.language.label }}</label>
+                    <select id="id_language" name="language">
+                        {% for lang in form.fields.language.queryset %}
+                            <option value="{{ lang.id }}" data-id="{{ lang.id }}" data-name="{{ lang.name }}"
+                                    data-info="{{ lang.info }}" data-ace="{{ lang.ace }}" data-fileonly="{{ lang.file_only }}"
+                                    data-ext="{{ lang.extension }}" data-file-size="{{ lang.file_size_limit }}"
+                                    data-judge-info="{{ runtime_versions(lang.runtime_versions()) }}"
+                                    {% if lang.id == default_lang.id %}selected{% endif %}>{{ lang.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% if not form.judge.is_hidden %}
+                    <label id="judge-select" class="submit-field" for="{{ form.judge.id_for_label }}">
+                        <span>{{ form.judge.label }}</span>
+                        {{ form.judge }}
+                    </label>
+                {% else %}
+                    {{ form.judge }}
+                {% endif %}
+            </div>
+
+            <div id="editor" class="field mt-5">
+                {{ form.source.errors }}
+                {{ form.source }}
+            </div>
+
+            <div id="file-submit" class="hidden field mt-5">
+                <div class="submit-note mb-4">
+                    {{ _('You can only submit file for this language.')}}
+                </div>
+                {{ form.submission_file.errors }}
+                <input id="file_upload" type="file" name="submission_file" style="display: none;" onchange="handleFileChange()">
+                <label for="file_upload" id="file_drag"></label>
+            </div>
+
+            {% if no_judges %}
+                <div class="submit-danger mt-5">{{ _('No judge is available for this problem.') }}</div>
+            {% else %}
+                <div class="submit-actions mt-5">
+                    <input type="submit" value="{{ _('Submit!') }}" class="submit-primary"
+                    {% if request.in_contest and submission_limit and not submissions_left %}disabled{% endif %}>
+                </div>
+            {% endif %}
+        </form>
+    </div>
+{% endblock %}

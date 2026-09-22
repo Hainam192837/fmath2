@@ -1,0 +1,36 @@
+{% macro make_tab(name, fa, url, text) %}
+    <li class="whitespace-nowrap">
+        {%- if url %}<a href="{{ url }}">{% else %}<span>{% endif -%}
+        <span class="tab-link {% if tab == name %}tab-link-active{% endif %}">
+            {% if fa %}<i class="fa-duotone {{ fa }}"></i>{% endif %}
+            <span class="hidden md:inline">{{ text }}</span>
+        </span>
+        {%- if url %}</a>{% else %}</span>{% endif -%}
+    </li>
+{% endmacro %}
+
+<div class="panel mb-4 flex w-full flex-col items-stretch gap-4 p-4 lg:flex-row lg:items-center lg:justify-between">
+    {% block tab_title %}
+    <div class="flex min-w-0 flex-1 flex-col justify-center lg:max-w-[40%]">
+        <span class="section-title">Workspace</span>
+        <h1 class="line-clamp-1 text-3xl font-bold text-app-text dark:text-app-dark-text">{{ content_title or title }}</h1>
+    </div>
+    {% endblock %}
+    {% block post_tab_spacer %}{% endblock %}
+    <div class="contest-tabs-scroll min-w-0 flex-1 overflow-x-auto overflow-y-hidden lg:overflow-x-visible">
+        <ul class="flex min-w-max items-baseline gap-2 lg:min-w-0 lg:flex-wrap lg:justify-end">
+            {% block tabs %}{% endblock %}
+        </ul>
+    </div>
+</div>
+
+<style>
+    .contest-tabs-scroll {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .contest-tabs-scroll::-webkit-scrollbar {
+        display: none;
+    }
+</style>

@@ -1,0 +1,34 @@
+<div class="panel mb-4 flex w-full flex-col gap-4 p-4 lg:flex-row lg:items-center lg:justify-between">
+    <div class="min-w-0">
+        <div class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">{{ _('Membership') }}</div>
+        <h1 class="mt-1 text-2xl font-black tracking-tight text-slate-900 dark:text-white">{{ object.name }}</h1>
+    </div>
+    <div class="overflow-x-auto">
+        <ul class="flex min-w-max items-center gap-2">
+            <li>
+                <a href="{{ url('organization_requests_pending', object.id, object.slug) }}"
+                   class="tab-link {% if tab == 'pending' %}tab-link-active{% endif %}">
+                    {{ _('Pending') }}
+                </a>
+            </li>
+            <li>
+                <a href="{{ url('organization_requests_log', object.id, object.slug) }}"
+                   class="tab-link {% if tab == 'log' %}tab-link-active{% endif %}">
+                    {{ _('Log') }}
+                </a>
+            </li>
+            <li>
+                <a href="{{ url('organization_requests_approved', object.id, object.slug) }}"
+                   class="tab-link {% if tab == 'approved' %}tab-link-active{% endif %}">
+                    {{ _('Approved') }}
+                </a>
+            </li>
+            <li>
+                <a href="{{ url('organization_requests_rejected', object.id, object.slug) }}"
+                   class="tab-link {% if tab == 'rejected' %}tab-link-active{% endif %}">
+                    {{ _('Rejected') }}
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>

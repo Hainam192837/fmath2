@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block media %}
+    {{ form.media.css }}
+    <style>
+        #ticket-form #id_title {
+            width: 100%;
+            border-radius: 0.95rem;
+            border: 1px solid var(--app-border);
+            background: color-mix(in srgb, var(--app-panel-elevated) 88%, transparent);
+            color: var(--app-text);
+            padding: 0.85rem 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .dark #ticket-form #id_title {
+            border-color: var(--app-dark-border);
+            background: color-mix(in srgb, var(--app-dark-panel-elevated) 88%, transparent);
+            color: var(--app-dark-text);
+        }
+
+        #ticket-form #id_title:focus {
+            border-color: var(--app-border-interactive);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.12);
+        }
+
+        .dark #ticket-form #id_title:focus {
+            border-color: var(--app-dark-border-interactive);
+        }
+    </style>
+{% endblock %}
+
+{% block js_media %}{{ form.media.js }}{% endblock %}
+
+{% block body %}
+    <section class="mx-auto max-w-4xl space-y-5">
+        <div class="space-y-2">
+            <p class="section-title">{{ _('Support') }}</p>
+            <h1 class="section-heading">{{ _('Open a ticket') }}</h1>
+            <p class="max-w-2xl text-sm text-app-text-secondary dark:text-app-dark-text-secondary">
+                {{ _('Describe the issue clearly so reviewers can reproduce it and respond quickly.') }}
+            </p>
+        </div>
+
+        {% block guideline_message %}{% endblock %}
+
+        <form id="ticket-form" action="" method="POST" class="panel-elevated form-area space-y-5 p-5 md:p-6">
+            {% csrf_token %}
+            {% if form.errors %}
+                <div class="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300">
+                    {{ form.non_field_errors() }}
+                    {{ form.title.errors }}
+                    {{ form.body.errors }}
+                </div>
+            {% endif %}
+
+            <div class="space-y-2">
+                <label for="id_title" class="section-title text-[0.72rem]!">{{ _('Title') }}</label>
+                <div class="title-block{% if form.title.errors %} error{% endif %}">
+                    {{ form.title }}
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <label for="id_body" class="section-title text-[0.72rem]!">{{ _('Message') }}</label>
+                <div class="body-block">{{ form.body }}</div>
+            </div>
+
+            <div class="flex justify-end">
+                <button type="submit" class="btn-primary">{{ _('Create') }}</button>
+            </div>
+        </form>
+    </section>
+{% endblock %}
